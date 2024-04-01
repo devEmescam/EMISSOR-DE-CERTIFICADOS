@@ -76,7 +76,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         [HttpPost]  
         public IActionResult LoginParticipante(LoginModel loginModel) 
         {
-            // Retornar para a view de login, onde as mensagens de erro serão exibidas
+            // Retornar para a view de LoginParticipante, onde as mensagens de erro serão exibidas
             return View("~/Views/Login_Participante/Login_participante.cshtml", loginModel);
         }
     }
