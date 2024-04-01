@@ -1,0 +1,37 @@
+﻿@{
+    ViewBag.Title = "Login Organizador";
+}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>login</title>
+</head>
+<body>
+    <div>
+        <div>
+            <h2>Login <br><span style="font-size:15px;">ORGANIZADOR</span></h2>
+
+            <!-- Exibir mensagens de erro -->
+            <div asp-validation-summary="All" class="text-danger"></div>
+
+           <form method="post" asp-action="Login" asp-controller="Login">
+                <div class="textbox">
+                    <input type="text" placeholder="Usuário" name="Login" required>
+                </div>
+
+                <div class="textbox">
+                    <input type="password" placeholder="Senha" name="Senha" required>
+                </div>
+
+                <input type="submit" class="btn" value="Entrar">
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+<style>
+
+</style>
