@@ -64,7 +64,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                         ModelState.AddModelError(string.Empty, "Usuário não localilzado.");
                     }
                 }
-                // Retornar para a view de login, onde as mensagens de erro serão exibidas
+                // Retornar para a view de LoginOrganizador, onde as mensagens de erro serão exibidas
                 return View("~/Views/Login_Organizador/Login_organizador.cshtml", loginModel);
             }
             catch (Exception ex)
