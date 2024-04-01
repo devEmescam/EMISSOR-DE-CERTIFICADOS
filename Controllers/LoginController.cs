@@ -31,7 +31,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         }
 
         [HttpPost]
-        public IActionResult Login(LoginModel loginModel)
+        public IActionResult LoginOrganizador(LoginModel loginModel)
         {
             try
             {
@@ -65,12 +65,19 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                     }
                 }
                 // Retornar para a view de login, onde as mensagens de erro serão exibidas
-                return View("~/Views/Home/Login.cshtml", loginModel);
+                return View("~/Views/Login_Organizador/Login_organizador.cshtml", loginModel);
             }
             catch (Exception ex)
             {
                 throw new Exception($"Ocorreu um erro em LoginController.Login. Erro: {ex.Message}");
             }
+        }
+
+        [HttpPost]  
+        public IActionResult LoginParticipante(LoginModel loginModel) 
+        {
+            // Retornar para a view de login, onde as mensagens de erro serão exibidas
+            return View("~/Views/Login_Participante/Login_participante.cshtml", loginModel);
         }
     }
 }

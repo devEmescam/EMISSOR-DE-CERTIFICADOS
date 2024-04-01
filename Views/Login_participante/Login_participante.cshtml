@@ -12,8 +12,12 @@
 <body>
     <div>
         <div>
-            <h2>Login <br><span style="font-size:15px;">ORGANIZADOR</span></h2>
-            <form>
+            <h2>Login <br><span style="font-size:15px;">PARTICIPANTE</span></h2>
+
+             <!-- Exibir mensagens de erro -->
+            <div asp-validation-summary="All" class="text-danger"></div>
+
+            <form method="post" asp-action="LoginParticipante" asp-controller="Login">
                 <div>
                     <input type="text" class="form-control" placeholder="Usuário" name="Usuário" required>
                 </div>
