@@ -5,11 +5,13 @@ namespace EMISSOR_DE_CERTIFICADOS.DBConnections
 {
     public class DBHelpers
     {
-        private readonly Dictionary<string, string> _connectionStrings;
+        private readonly Dictionary<string, string> _connectionStrings;        
+
         public DBHelpers(Dictionary<string, string> connectionStrings)
         {
             _connectionStrings = connectionStrings ?? throw new ArgumentNullException(nameof(connectionStrings), "O dicionário de cadeias de conexão não pode ser nulo.");
         }
+      
         public IDbConnection GetConnection(string connectionName = "CertificadoConnection")
         {
             if (!_connectionStrings.TryGetValue(connectionName, out var connectionString))

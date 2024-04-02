@@ -6,7 +6,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
     {
         public IActionResult Login()
         {
-            return View("~/Views/Login_participante/Login_participante.cshtml");
+            return View("~/Views/Login_Participante/Login_participante.cshtml");
         }
 
     }

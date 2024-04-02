@@ -2,6 +2,7 @@
 using EMISSOR_DE_CERTIFICADOS.Models;
 using EMISSOR_DE_CERTIFICADOS.DBConnections;
 using EMISSOR_DE_CERTIFICADOS.Helpers;
+using EMISSOR_DE_CERTIFICADOS.Repositories;
 using System.Data;
 
 namespace EMISSOR_DE_CERTIFICADOS.Controllers
@@ -11,12 +12,14 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         private readonly DBHelpers _dbHelper;
         private readonly ISessao _sessao;
         private readonly ADHelper _adHelper = new ADHelper();
+        private readonly LoginRepository _loginRepository;
 
         public LoginController(DBHelpers databaseHelper, ISessao sessao)
         {
             _dbHelper = databaseHelper;
             _sessao = sessao;
         }
+        
         public IActionResult Index()
         {
             //Se usuario estiver logado, redirecionar para home
@@ -24,11 +27,12 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
 
             return View();
         }
+        
         public IActionResult Sair()
         {
             _sessao.RemoverSessaoUsuario();
             return RedirectToAction("Index", "Login");
-        }
+        }        
 
         [HttpPost]
         public IActionResult LoginOrganizador(LoginModel loginModel)
@@ -37,20 +41,17 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    // Consultar o banco de dados local
-                    var sSQL = $"SELECT ID FROM USUARIO WHERE USUARIO = '{loginModel.Login}'";
-                    var returnDataTable = _dbHelper.ExecuteQuery(sSQL, "CertificadoConnection");
+                    // Tenta buscar o ID do usuario                    
+                    loginModel.Id = RetornarIdUsuario(loginModel.Login, "", true);
 
-                    if (returnDataTable != null && returnDataTable.Rows.Count > 0)
+                    //Valida se retornou algo
+                    if (loginModel.Id > 0)
                     {
-                        // Atribuir o ID retornado da consulta SQL ao atributo ID do loginModel
-                        loginModel.Id = returnDataTable.Rows[0].Field<int>("ID");
-
                         //Usuário encontrado no banco de dados da aplicação, agora verificar login e senha no AD
                         if (_adHelper.VerificaUsuario(loginModel.Login, loginModel.Senha))
                         {
                             _sessao.CriarSessaoDoUsuario(loginModel);
-                            return RedirectToAction("Login", "Home");
+                            return RedirectToAction("Login", "Home_Organizador");
                         }
                         else
                         {
@@ -64,20 +65,78 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                         ModelState.AddModelError(string.Empty, "Usuário não localilzado.");
                     }
                 }
-                // Retornar para a view de LoginOrganizador, onde as mensagens de erro serão exibidas
+                // Se chegar aqui não foi possivel buscar o Usuário, volta para tela de login para nova tentativa
                 return View("~/Views/Login_Organizador/Login_organizador.cshtml", loginModel);
             }
             catch (Exception ex)
             {
-                throw new Exception($"Ocorreu um erro em LoginController.Login. Erro: {ex.Message}");
+                throw new Exception($"Ocorreu um erro em [LoginController.LoginOrganizador] Erro: {ex.Message}");
+            }
+        }        
+        
+        [HttpPost]
+        public IActionResult LoginParticipante(LoginModel loginModel)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    // Tenta buscar o ID do usuario
+                    loginModel.Id = RetornarIdUsuario(loginModel.Login, loginModel.Senha, false);
+
+                    //Valida se retornou algo
+                    if (loginModel.Id > 0)
+                    {
+                        _sessao.CriarSessaoDoUsuario(loginModel);
+                        return RedirectToAction("Login", "Home_Participante");
+                    }
+                    else
+                    {
+                        // Adicionar mensagem de erro ao ModelState
+                        ModelState.AddModelError(string.Empty, "Usuário ou senha inválidos.");
+                    }
+                }
+
+                // Se chegar aqui não foi possivel buscar o Usuário, volta para tela de login para nova tentativa
+                return View("~/Views/Login_Participante/Login_participante.cshtml", loginModel);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ocorreu um erro em [LoginController.LoginParticipante] Erro: {ex.Message}");
             }
         }
-
-        [HttpPost]  
-        public IActionResult LoginParticipante(LoginModel loginModel) 
+        
+        private int RetornarIdUsuario(string usuario, string senha, bool administrativo)
         {
-            // Retornar para a view de LoginParticipante, onde as mensagens de erro serão exibidas
-            return View("~/Views/Login_Participante/Login_participante.cshtml", loginModel);
+
+            string sSQL = "";
+            Int32 Id = 0;
+            DataTable oDT = new DataTable();
+
+            try
+            {
+                if (administrativo)
+                {
+                    sSQL = $"SELECT ID FROM USUARIO WHERE USUARIO = '{usuario}' AND ADMINISTRATIVO = '{administrativo}'";
+                }
+                else
+                {
+                    sSQL = $"SELECT ID FROM USUARIO WHERE USUARIO = '{usuario}' AND SENHA = '{senha}' AND ADMINISTRATIVO = '{administrativo}'";
+                }
+
+                oDT = _dbHelper.ExecuteQuery(sSQL, "CertificadoConnection");
+
+                if (oDT != null && oDT.Rows.Count > 0)
+                {
+                    Id = oDT.Rows[0].Field<int>("ID");
+                }
+
+                return Id;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ocorreu um erro em [LoginRepository.RetornarIdUsuario] Erro: {ex.Message}");
+            }
         }
     }
 }
