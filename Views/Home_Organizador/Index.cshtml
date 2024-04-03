@@ -1,0 +1,91 @@
+﻿@{
+    ViewData["Title"] = "Home Organizador";
+}
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emissor de Certificados</title>
+    <div id="logoEmescam"><img src="/logoemescam.png" alt="logo"></div>
+</head>
+<body>
+
+   <div class="cartao-menu">
+            
+        <div>Painel Inicial</div>
+                 
+        <form>
+            <div>
+                 <a class="nav-link text-dark" asp-action="login">Novo Envento</a>
+                 <a class="nav-link text-dark" asp-action="login">Meus Eventos</a>
+                 <a class="nav-link text-dark" asp-action="login">Buscar Pessoas</a>
+                 <a class="nav-link text-dark" asp-action="login">Qualquer coisa</a>
+                 <a class="nav-link text-dark" asp-action="login">Sair</a>
+            </div>
+        </form>
+    </div>
+   <div class="cartao-info"></div>
+   </divc>
+</body>
+</html>
+
+<style>
+    #logoEmescam {
+        position: fixed;
+        top: 70px;
+        left: 150px;
+        transform: translate(-50%, -50%);
+        border-radius: 5px;
+        width: 300px;
+        text-align: center;
+    }
+
+    #logoEmescam img {
+        width: 350px;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: linear-gradient(135deg, #01f949, #14086d);
+        font-family: Arial, sans-serif;
+    }
+
+    .cartao-menu {
+        background-color: rgba(250, 235, 215, 0.5); 
+        border-radius: 15px;
+        box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.2);
+        padding: 40px;
+        width: 300px;
+        height: 800px;
+        max-width: 90%;
+        text-align: center;
+        position: fixed;
+        top: 57%;
+        left: 175px;
+        transform: translate(-50%, -50%);
+    }
+
+    .cartao-info {
+        background-color:rgba(250, 235, 215, 0.5);
+        border-radius: 15px;
+        box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.2);
+        padding: 40px;
+        width: 1400px;
+        height: 800px;
+        max-width: 90%;
+        text-align: center;
+        position: fixed;
+        top: 545px;
+        left: 1050px;
+        transform: translate(-50%, -50%);
+    }
+
+    
+</style>

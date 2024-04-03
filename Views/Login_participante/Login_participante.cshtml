@@ -7,29 +7,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>login</title>
+    <title>login Participante</title>
+    <div id="logoEmescam"><img src="/logoemescam.png" alt="logo"></div>
 </head>
 <body>
     <div>
-        <div>
-            <h2>Login <br><span style="font-size:15px;">PARTICIPANTE</span></h2>
+        <div class="cartao-login">
+            <h2 style="font-family:'anek Kannada';">Login</h2>
+            <h7 style="font-family: 'anek Kannada';">PARTICIPANTE</h7>
 
             <!-- Exibir mensagens de erro -->
             <div asp-validation-summary="All" class="text-danger"></div>
 
             <form method="post" asp-action="LoginParticipante" asp-controller="Login">
                 <div>
-                    <input type="text" class="form-control" placeholder="Usuário" name="Login" required>
-                </div>
-                <div>
+                    <input type="text" class="form-control" placeholder="Usuário" name="login" required>
                     <input type="password" class="form-control" placeholder="Senha" name="Senha" required>
+                    <button style="font-family: 'anek kannada';" type="submit">Entrar</button>
                 </div>
-                 <button type="submit" class="btn btn-primary btn-block">Entrar</button>                
             </form>
         </div>
     </div>
 </body>
 </html>
 <style>
+
+    #logoEmescam {
+        position: fixed;
+        top: 10%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border-radius: 5px;
+        width: 300px;
+        text-align: center;
+    }
+
+        #logoEmescam img {
+            width: 300px;
+        }
+
+    body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: linear-gradient(135deg, #287e47, #99c33b);
+        font-family: Arial, sans-serif;
+    }
+
+    .cartao-login {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.2);
+        padding: 40px;
+        width: 300px;
+        max-width: 90%;
+        text-align: center;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+        .cartao-login h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .cartao-login input[type="text"],
+        .cartao-login input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .cartao-login button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: linear-gradient(135deg, #287e47, #99c33b);
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+            .cartao-login button:hover {
+                background: linear-gradient(135deg, #27ae60, #2ecc71);
+            }
 
 </style>
