@@ -12,22 +12,33 @@
 </head>
 <body>
 
-   <div class="cartao-menu">
-            
-        <div>Painel Inicial</div>
-                 
+    <div class="cartao-menu">
+        <div style="font-size:larger ">Bem-Vindo! "ORGANIZADOR"</div>
         <form>
             <div>
-                 <a class="nav-link text-dark" asp-action="login">Novo Envento</a>
-                 <a class="nav-link text-dark" asp-action="login">Meus Eventos</a>
-                 <a class="nav-link text-dark" asp-action="login">Buscar Pessoas</a>
-                 <a class="nav-link text-dark" asp-action="login">Qualquer coisa</a>
-                 <a class="nav-link text-dark" asp-action="login">Sair</a>
+                <a class="nav-link text-dark" href="#" onclick="mostrarCard('evento')">Novo Evento</a>
+                <a class="nav-link text-dark" href="#" onclick="mostrarCard('meus-eventos')">Meus Eventos</a>
+                <a class="nav-link text-dark" href="#" onclick="mostrarCard('buscar-pessoas')">Buscar Pessoas</a>
+                <a class="nav-link text-dark" href="#" onclick="mostrarCard('qualquer-coisa')">Qualquer coisa</a>
+                <a id="sair-link" class="nav-link text-dark" href="#">Sair</a> <!-- Adicionado um ID para o link "Sair" -->
             </div>
         </form>
+
+        <div id="card-evento" class="card">
+            Informações sobre Novo Evento
+        </div>
+        <div id="card-meus-eventos" class="card">
+            Informações sobre Meus Eventos
+        </div>
+        <div id="card-buscar-pessoas" class="card">
+            Informações sobre Buscar Pessoas
+        </div>
+        <div id="card-qualquer-coisa" class="card">
+            Informações sobre Qualquer coisa
+        </div>
+
     </div>
-   <div class="cartao-info"></div>
-   </divc>
+   </div>
 </body>
 </html>
 
@@ -58,7 +69,7 @@
     }
 
     .cartao-menu {
-        background-color: rgba(250, 235, 215, 0.5); 
+        background-color: rgba(250, 235, 215, 0.5);
         border-radius: 15px;
         box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.2);
         padding: 40px;
@@ -72,21 +83,52 @@
         transform: translate(-50%, -50%);
     }
 
-    .cartao-info {
-        background-color:rgba(250, 235, 215, 0.5);
-        border-radius: 15px;
-        box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.2);
+        .cartao-menu a {
+            display: block;
+            text-decoration: none;
+            color: #000;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid transparent;
+            transition: color 0.3s, border-color 0.3s;
+            border-color:#14086D;
+        }
+
+            .cartao-menu a:hover {
+                color: #ff0000;
+                border-color: #ff0000; 
+            }
+
+    .card {
+        background-color: rgba(250, 235, 215, 0.5);
         padding: 40px;
-        width: 1400px;
-        height: 800px;
-        max-width: 90%;
-        text-align: center;
-        position: fixed;
-        top: 545px;
-        left: 1050px;
-        transform: translate(-50%, -50%);
-    
+        width:1400px;
+        height:800px;
+        text-align:center;
+        position:fixed;
+        top:0px;
+        left:325px;
+        border-radius: 15px;
+        display: none; /* Oculta o card por padrão */
     }
 
     
 </style>
+
+
+<script>
+    // Função para mostrar o card correspondente ao link clicado
+    function mostrarCard(id) {
+        // Oculta todos os cards
+        var cards = document.querySelectorAll('.card');
+        cards.forEach(function (card) {
+            card.style.display = 'none';
+        });
+
+        // Mostra apenas o card correspondente ao ID recebido
+        var cardToShow = document.getElementById('card-' + id);
+        if (cardToShow) {
+            cardToShow.style.display = 'block';
+        }
+    }
+</script>
