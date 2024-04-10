@@ -8,6 +8,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emissor de Certificados</title>
+    <div id="logoEmescam"><img src="/LogoEmescam.png" alt="logo"></div>
 </head>
 <body>
 
@@ -15,11 +16,29 @@
         <div style="font-size:larger ">Bem-Vindo! "ORGANIZADOR"</div>
         <form>
             <div>
+                <a class="nav-link text-dark" href="#" onclick="mostrarCard('evento')">Novo Evento</a>
+                <a class="nav-link text-dark" href="#" onclick="mostrarCard('meus-eventos')">Meus Eventos</a>
+                <a class="nav-link text-dark" href="#" onclick="mostrarCard('buscar-pessoas')">Buscar Pessoas</a>
+                <a class="nav-link text-dark" href="#" onclick="mostrarCard('qualquer-coisa')">Qualquer coisa</a>
+                <a id="sair-link" class="nav-link text-dark" href="#">Sair</a> <!-- Adicionado um ID para o link "Sair" -->
             </div>
         </form>
 
+        <div id="card-evento" class="card">
+            Informações sobre Novo Evento
         </div>
+        <div id="card-meus-eventos" class="card">
+            Informações sobre Meus Eventos
         </div>
+        <div id="card-buscar-pessoas" class="card">
+            Informações sobre Buscar Pessoas
+        </div>
+        <div id="card-qualquer-coisa" class="card">
+            Informações sobre Qualquer coisa
+        </div>
+
+    </div>
+    </div>
 </body>
 </html>
 
@@ -34,9 +53,9 @@
         text-align: center;
     }
 
-    #logoEmescam img {
-        width: 350px;
-    }
+        #logoEmescam img {
+            width: 350px;
+        }
 
     body {
         margin: 0;
@@ -72,28 +91,27 @@
             padding: 10px;
             border: 1px solid transparent;
             transition: color 0.3s, border-color 0.3s;
-            border-color:#14086D;
+            border-color: #14086D;
         }
 
             .cartao-menu a:hover {
                 color: #ff0000;
-                border-color: #ff0000; 
+                border-color: #ff0000;
             }
 
     .card {
         background-color: rgba(250, 235, 215, 0.5);
         padding: 40px;
-        width:1400px;
-        height:800px;
-        text-align:center;
-        position:fixed;
-        top:0px;
-        left:325px;
+        width: 1400px;
+        height: 800px;
+        text-align: center;
+        position: fixed;
+        top: 0px;
+        left: 325px;
         border-radius: 15px;
         display: none; /* Oculta o card por padrão */
     }
 
-    
 </style>
 
 
