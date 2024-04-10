@@ -50,7 +50,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                         if (_adHelper.VerificaUsuario(loginModel.Login, loginModel.Senha))
                         {
                             _sessao.CriarSessaoDoUsuario(loginModel);
-                            return RedirectToAction("Login", "Home_Organizador");
+                            //return RedirectToAction("HomeOrganizador", "Home_Organizador");
+                            return RedirectToAction("Index", "Home_Organizador");
                         }
                         else
                         {
@@ -87,7 +88,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                     if (loginModel.Id > 0)
                     {
                         _sessao.CriarSessaoDoUsuario(loginModel);
-                        return RedirectToAction("Login", "Home_Participante");
+                        //return RedirectToAction("Login", "Home_Participante");
+                        return RedirectToAction("Index", "Home_Participante");
                     }
                     else
                     {
