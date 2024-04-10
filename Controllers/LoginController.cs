@@ -11,7 +11,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
     {
         private readonly DBHelpers _dbHelper;
         private readonly ISessao _sessao;
-        private readonly ADHelper _adHelper = new ADHelper();       
+        private readonly ADHelper _adHelper = new ADHelper();        
+        private readonly LoginRepository _loginRepository;
 
         public LoginController(DBHelpers databaseHelper, ISessao sessao)
         {
