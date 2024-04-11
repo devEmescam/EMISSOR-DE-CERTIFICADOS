@@ -50,7 +50,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                         if (_adHelper.VerificaUsuario(loginModel.Login, loginModel.Senha))
                         {
                             _sessao.CriarSessaoDoUsuario(loginModel);
-                            return RedirectToAction("Login", "Home_Organizador");
+                            return RedirectToAction("Index", "Home_Organizador");
                         }
                         else
                         {
