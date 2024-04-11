@@ -48,11 +48,7 @@ app.UseAuthorization();
 app.UseSession();
 
 app.MapControllerRoute(
-    name: "home_organizador",
-    pattern: "Home_Organizador/{action=Index}/{id?}",
-    defaults: new { controller = "Home_Organizador", action = "Index" });
-
-app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
 app.Run();
