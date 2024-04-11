@@ -2,7 +2,6 @@
 using EMISSOR_DE_CERTIFICADOS.Models;
 using EMISSOR_DE_CERTIFICADOS.DBConnections;
 using EMISSOR_DE_CERTIFICADOS.Helpers;
-using EMISSOR_DE_CERTIFICADOS.Repositories;
 using System.Data;
 
 namespace EMISSOR_DE_CERTIFICADOS.Controllers
@@ -11,8 +10,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
     {
         private readonly DBHelpers _dbHelper;
         private readonly ISessao _sessao;
-        private readonly ADHelper _adHelper = new ADHelper();        
-        private readonly LoginRepository _loginRepository;
+        private readonly ADHelper _adHelper = new ADHelper();                
 
         public LoginController(DBHelpers databaseHelper, ISessao sessao)
         {
