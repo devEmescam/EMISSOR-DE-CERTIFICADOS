@@ -1,8 +1,4 @@
-﻿@{
-    ViewData["Title"] = "Home Organizador";
-}
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -11,33 +7,87 @@
     <div id="logoEmescam"><img src="/LogoEmescam.png" alt="logo"></div>
 </head>
 <body>
-
     <div class="cartao-menu">
-        <div style="font-size:larger ">Bem-Vindo! "ORGANIZADOR"</div>
+        <div style="font-size:larger">Bem-Vindo! "ORGANIZADOR"</div>
         <form>
             <div>
-                <a class="nav-link text-dark" href="#" onclick="mostrarCard('evento')">Novo Evento</a>
+                
                 <a class="nav-link text-dark" href="#" onclick="mostrarCard('meus-eventos')">Meus Eventos</a>
                 <a class="nav-link text-dark" href="#" onclick="mostrarCard('buscar-pessoas')">Buscar Pessoas</a>
                 <a class="nav-link text-dark" href="#" onclick="mostrarCard('qualquer-coisa')">Qualquer coisa</a>
-                <a id="sair-link" class="nav-link text-dark" href="#">Sair</a> <!-- Adicionado um ID para o link "Sair" -->
+                <a id="sair-link" class="nav-link text-dark" asp-action="Login" asp-controller="Organizador">Sair</a>
             </div>
         </form>
 
         <div id="card-evento" class="card">
-            Informações sobre Novo Evento
+            <h3>Novo Evento</h3>
+            <div class="textarea-container">
+                <label>TEXTO DA FRENTE DO CERTIFICADO DOS PARTICIPANTES</label>
+                <textarea placeholder="Digite o texto da frente do certificado..." rows="4" cols="50"></textarea>
+            </div>
+            <br>
+            <div class="textarea-container">
+                <label>LISTA DE PARTICIPANTES (DE 1 A 300 PESSOAS)</label>
+                <textarea placeholder="nome1,CPF1,e-mail1 
+nome2,CPF2,e-mail2" rows="4" cols="50"></textarea>
+            </div>
+            <br>
+            <!--BOTAO DE IMPORTAR AQUIVO-->
+            <div class="input-file">
+                <label for="input-file">Importar Planilha</label>
+                <input type="file" id="input-file" accept=".xlsx">
+                <label for="input-file">Importar Layout Certificado</label>
+                <input type="file" id="input-file" accept=".jpg">
+                <input id="input-avancar" type="button" value="Avançar">
+            </div>
+            
         </div>
+
+
+
         <div id="card-meus-eventos" class="card">
-            Informações sobre Meus Eventos
+            <h4>Meus Eventos</h4>
+            <!-- Botão de "Adicionar Evento" -->
+            <button class="botao-adicionar" onclick="exibirFormularioAdicionar()"></button>
+           
+            <!-- Campo de pesquisa -->
+            <input type="text" id="campo-pesquisa" placeholder="Pesquisar eventos...">
+
+            <div class="tabela-eventos">
+                <!-- Tabela de eventos -->
+                <table>
+                    <tr>
+                        <td class="eventos">Informações do evento 1</td>
+                    </tr>
+                    <tr>
+                        <td class="eventos">Informações do evento 2</td>
+                    </tr>
+                    <tr>
+                        <td class="eventos">Informações do evento 3</td>
+                    </tr>
+                    <tr>
+                        <td class="eventos">Informações do evento 4</td>
+                    </tr>
+                    <tr>
+                        <td class="eventos">Informações do evento 5</td>
+                    </tr>
+                    <tr>
+                        <td class="eventos">Informações do evento 6</td>
+                    </tr>
+                    <tr>
+                        <td class="eventos">Informações do evento 7</td>
+                    </tr>
+                </table>
+            </div>
         </div>
+
         <div id="card-buscar-pessoas" class="card">
             Informações sobre Buscar Pessoas
         </div>
+
         <div id="card-qualquer-coisa" class="card">
             Informações sobre Qualquer coisa
         </div>
-
-    </div>
     </div>
 </body>
 </html>
@@ -112,22 +162,172 @@
         display: none; /* Oculta o card por padrão */
     }
 
+    .tabela-eventos {
+        max-height: 300px;
+        overflow-y: auto;
+        padding-right: 10px;
+    }
+
+    #campo-pesquisa {
+        margin-bottom: 10px;
+        width: 100%;
+        padding: 5px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+
+    .eventos {
+        background-color: #fff;
+        padding: 10px;
+        border: 5px solid #ccc;
+        border-radius: 5px;
+        width: 1300px;
+    }
+
+    .eventos1 {
+        background-color: #f9f9f9;
+    }
+
+    .botao-adicionar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: deepskyblue;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        position: absolute;
+        top: 20px;
+        right: 10px;
+        overflow: hidden;
+    }
+
+        .botao-adicionar::after {
+            content: "+";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .botao-adicionar:hover {
+            background-color: green;
+        }
+
+            .botao-adicionar:hover::after {
+                color: black;
+            }
+
+            #card-evento {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    label {
+        margin-bottom: 5px;
+    }
+    textarea {
+        margin-bottom: 10px;
+    }
+
+    #card-evento {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .textarea-container {
+        display: grid;
+        justify-items: left;
+        text-align: center;
+    }
+
+    h7 {
+        margin-bottom: 5px;
+    }
+
+    textarea {
+        margin-top: 5px;
+        margin-bottom: 10px;
+        width:650px;
+    }
+
+    .input-file {
+        display: grid;
+        justify-items: left;
+        text-align: center;   
+    }
+    
+    #input-avancar {
+        background: green;
+        color: white;
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
 </style>
 
-
 <script>
-    // Função para mostrar o card correspondente ao link clicado
+    window.onload = function () {
+        mostrarCard('meus-eventos');
+    };
+
     function mostrarCard(id) {
-        // Oculta todos os cards
         var cards = document.querySelectorAll('.card');
         cards.forEach(function (card) {
             card.style.display = 'none';
         });
 
-        // Mostra apenas o card correspondente ao ID recebido
         var cardToShow = document.getElementById('card-' + id);
         if (cardToShow) {
             cardToShow.style.display = 'block';
         }
     }
+
+    function exibirFormularioAdicionar() {
+        // Oculta todos os cards exceto o card de novo evento
+        var cards = document.querySelectorAll('.card');
+        cards.forEach(function (card) {
+            card.style.display = 'none';
+        });
+
+        // Exibe o card de novo evento
+        var cardNovoEvento = document.getElementById('card-evento');
+        if (cardNovoEvento) {
+            cardNovoEvento.style.display = 'block';
+
+            // Rola a página até o card de novo evento
+            cardNovoEvento.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    // Captura o campo de pesquisa
+    var campoPesquisa = document.getElementById('campo-pesquisa');
+
+    // Captura a tabela de eventos corretamente pela classe
+    var tabelaEventos = document.querySelector('.tabela-eventos');
+    var linhasEventos = tabelaEventos.getElementsByTagName('tr');
+
+    // Adiciona um ouvinte de evento de entrada ao campo de pesquisa
+    campoPesquisa.addEventListener('input', function () {
+        var termoPesquisa = campoPesquisa.value.toLowerCase(); // Converte o termo de pesquisa para minúsculas
+
+        // Itera sobre as linhas da tabela de eventos
+        for (var i = 0; i < linhasEventos.length; i++) {
+            var colunaEvento = linhasEventos[i].getElementsByTagName('td')[0]; // Obtém a primeira coluna (informações do evento)
+
+            // Verifica se o termo de pesquisa está contido nas informações do evento
+            if (colunaEvento) {
+                var textoEvento = colunaEvento.textContent || colunaEvento.innerText;
+                if (textoEvento.toLowerCase().indexOf(termoPesquisa) > -1) {
+                    linhasEventos[i].style.display = ''; // Exibe a linha se o termo de pesquisa for encontrado
+                } else {
+                    linhasEventos[i].style.display = 'none'; // Oculta a linha se o termo de pesquisa não for encontrado
+                }
+            }
+        }
+    });
 </script>
