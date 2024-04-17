@@ -2,9 +2,8 @@
 
 namespace EMISSOR_DE_CERTIFICADOS.Controllers
 {
-    public class Home_OrganizadorController : Controller
+    public class Home_ParticipanteController : Controller
     {
-        // GET: /Home_Organizador/Index
         public IActionResult Index()
         {
             return View();
