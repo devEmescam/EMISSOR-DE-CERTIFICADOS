@@ -39,5 +39,41 @@ namespace EMISSOR_DE_CERTIFICADOS.DBConnections
                 }
             }
         }
+
+        // Sobrecarga do método ExecuteQuery para aceitar um parâmetro de imagem
+        public DataTable ExecuteQuery(string query, byte[] imagemBytes, string connectionName = "CertificadoConnection")
+        {
+            using (var connection = GetConnection(connectionName))
+            {
+                using (var command = new SqlCommand(query, (SqlConnection)connection))
+                {
+                    // Adicione o parâmetro da imagem ao comando SQL
+                    var parametroImagem = new SqlParameter("@ImagemCertificado", SqlDbType.VarBinary)
+                    {
+                        Value = imagemBytes
+                    };
+                    command.Parameters.Add(parametroImagem);
+
+                    using (var adapter = new SqlDataAdapter(command))
+                    {
+                        var dataTable = new DataTable();
+                        adapter.Fill(dataTable);
+                        return dataTable;
+                    }
+                }
+            }
+        }
+
+        public object ExecuteScalar(string query, string connectionName = "CertificadoConnection")
+        {
+            using (var connection = GetConnection(connectionName))
+            {
+                using (var command = new SqlCommand(query, (SqlConnection)connection))
+                {
+                    return command.ExecuteScalar();
+                }
+            }
+        }
+
     }
 }
