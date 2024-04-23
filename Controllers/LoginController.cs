@@ -49,6 +49,12 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                         if (_adHelper.VerificaUsuario(loginModel.Login, loginModel.Senha))
                         {
                             _sessao.CriarSessaoDoUsuario(loginModel);
+                            
+                            // Armazena o Id do usuário na sessão
+                            HttpContext.Session.SetInt32("UserId", loginModel.Id);
+                            // Armazenar o Login do usuário na sessão
+                            HttpContext.Session.SetString("Login", loginModel.Login);
+
                             return RedirectToAction("Index", "Home_Organizador");
                         }
                         else
@@ -103,8 +109,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             {
                 throw new Exception($"Ocorreu um erro em [LoginController.LoginParticipante] Erro: {ex.Message}");
             }
-        }
-        
+        }        
         private int RetornarIdUsuario(string usuario, string senha, bool administrativo)
         {
 

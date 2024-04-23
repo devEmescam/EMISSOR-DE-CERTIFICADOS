@@ -2,6 +2,7 @@
 using System.Data;
 using EMISSOR_DE_CERTIFICADOS.DBConnections;
 using EMISSOR_DE_CERTIFICADOS.Models;
+using EMISSOR_DE_CERTIFICADOS.Helpers;
 
 namespace EMISSOR_DE_CERTIFICADOS.Controllers
 {
@@ -15,11 +16,11 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         }
 
         #region *** IActionResults ***
-        // GET: Pessoa
+        // GET: PESSOAS
         public IActionResult Index()
         {
             // Recupera todas as pessoas do banco de dados
-            var pessoas = GetAllPessoas();
+            var pessoas = BuscarTodasPessoas();
             return View(pessoas);
         }
 
@@ -27,7 +28,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         public IActionResult Details(int id)
         {
             // Recupera uma pessoa específica do banco de dados
-            var pessoa = GetPessoaById(id);
+            var pessoa = BuscarPessoaPorId(id);
             if (pessoa == null)
             {
                 return NotFound();
@@ -49,7 +50,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             if (ModelState.IsValid)
             {
                 // Insere a pessoa no banco de dados
-                InsertPessoa(pessoa);
+                InserirPessoa(pessoa);
                 return RedirectToAction(nameof(Index));
             }
             return View(pessoa);
@@ -59,7 +60,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         public IActionResult Edit(int id)
         {
             // Recupera a pessoa do banco de dados para edição
-            var pessoa = GetPessoaById(id);
+            var pessoa = BuscarPessoaPorId(id);
             if (pessoa == null)
             {
                 return NotFound();
@@ -80,7 +81,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             if (ModelState.IsValid)
             {
                 // Atualiza a pessoa no banco de dados
-                UpdatePessoa(pessoa);
+                AtualizarPessoa(pessoa);
                 return RedirectToAction(nameof(Index));
             }
             return View(pessoa);
@@ -90,7 +91,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         public IActionResult Delete(int id)
         {
             // Recupera a pessoa do banco de dados para exclusão
-            var pessoa = GetPessoaById(id);
+            var pessoa = BuscarPessoaPorId(id);
             if (pessoa == null)
             {
                 return NotFound();
@@ -104,72 +105,178 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         public IActionResult DeleteConfirmed(int id)
         {
             // Exclui a pessoa do banco de dados
-            DeletePessoa(id);
+            DeletarPessoa(id);
             return RedirectToAction(nameof(Index));
         }
         #endregion
 
         #region *** METODOS PRIVADOS ***
+
         // Método para retornar todas as pessoas do banco de dados
-        private IEnumerable<PessoaModel> GetAllPessoas()
+        private IEnumerable<PessoaModel> BuscarTodasPessoas()
         {
-            var query = "SELECT * FROM Pessoa";
-            var dataTable = _dbHelper.ExecuteQuery(query);
-            var pessoas = new List<PessoaModel>();
-
-            foreach (DataRow row in dataTable.Rows)
+            try
             {
-                pessoas.Add(new PessoaModel
-                {
-                    Id = Convert.ToInt32(row["Id"]),
-                    Nome = Convert.ToString(row["Nome"]),
-                    CPF = Convert.ToString(row["CPF"]),
-                    Email = Convert.ToString(row["Email"])
-                });
-            }
+                var query = "SELECT * FROM PESSOA";
+                var dataTable = _dbHelper.ExecuteQuery(query);
+                var pessoas = new List<PessoaModel>();
 
-            return pessoas;
+                foreach (DataRow row in dataTable.Rows)
+                {
+                    pessoas.Add(new PessoaModel
+                    {
+                        Id = Convert.ToInt32(row["ID"]),
+                        Nome = Convert.ToString(row["NOME"]),
+                        CPF = Convert.ToString(row["CPF"]),
+                        Email = Convert.ToString(row["EMAIL"])
+                    });
+                }
+
+                return pessoas;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ocorreu um erro em [PessoaController.BuscarTodasPessoas] Erro: {ex.Message}");
+            }
         }
 
         // Método para retornar uma pessoa específica pelo ID
-        private PessoaModel GetPessoaById(int id)
+        private PessoaModel BuscarPessoaPorId(int id)
         {
-            var query = $"SELECT * FROM Pessoa WHERE Id = {id}";
-            var dataTable = _dbHelper.ExecuteQuery(query);
-            if (dataTable.Rows.Count > 0)
+            try
             {
-                var row = dataTable.Rows[0];
-                return new PessoaModel
+                var query = $"SELECT * FROM PESSOA WHERE ID = {id}";
+                var dataTable = _dbHelper.ExecuteQuery(query);
+                if (dataTable.Rows.Count > 0)
                 {
-                    Id = Convert.ToInt32(row["Id"]),
-                    Nome = Convert.ToString(row["Nome"]),
-                    CPF = Convert.ToString(row["CPF"]),
-                    Email = Convert.ToString(row["Email"])
-                };
+                    var row = dataTable.Rows[0];
+                    return new PessoaModel
+                    {
+                        Id = Convert.ToInt32(row["Id"]),
+                        Nome = Convert.ToString(row["Nome"]),
+                        CPF = Convert.ToString(row["CPF"]),
+                        Email = Convert.ToString(row["Email"])
+                    };
+                }
+                return null;
             }
-            return null;
+            catch (Exception ex)
+            {
+                throw new Exception($"Ocorreu um erro em [PessoaController.BuscarPessoaPorId] Erro: {ex.Message}");
+            }
         }
 
-        // Método para inserir uma nova pessoa no banco de dados
-        private void InsertPessoa(PessoaModel pessoa)
-        {
-            var query = $"INSERT INTO Pessoa (Nome, CPF, Email) VALUES ('{pessoa.Nome}', '{pessoa.CPF}', '{pessoa.Email}')";
-            _dbHelper.ExecuteQuery(query);
-        }
+        // Método para inserir uma nova pessoa no banco de dados. Publico porque é chamado no momento de inserir novos EVENTOS
+        public string InserirPessoa(PessoaModel pessoa)
+        {            
+            try
+            {
+                // Valida se a pessoa não existe no banco de dados
+                if (!ExistePessoaComCPF(pessoa.CPF))
+                {
+                    if (Util.ValidaCPF(pessoa.CPF))
+                    {
+                        if (Util.ValidaEstruturaEmail(pessoa.Email))
+                        {
+                            // Se não existir, insere a nova pessoa
+                            var query = $"INSERT INTO Pessoa (Nome, CPF, Email) VALUES ('{pessoa.Nome}', '{pessoa.CPF}', '{pessoa.Email}')";
+                            
+                            _dbHelper.ExecuteQuery(query);
+
+                            pessoa.Id = ObterIdPessoaPorCPF(pessoa.CPF);
+                            return "Inserido com Sucesso.";
+                        }
+                        else
+                        {
+                            return "O e-mail informado não é válido.";
+
+                        }
+                    }
+                    else
+                    {
+                        return "O CPF informado não é válido.";
+                    }
+                }
+                else
+                {
+                    pessoa.Id = ObterIdPessoaPorCPF(pessoa.CPF);
+                    return "CPF informado já existe em banco de dados.";
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ocorreu um erro em [PessoaController.InserirPessoa] Erro: {ex.Message}");
+            }
+        }      
 
         // Método para atualizar uma pessoa no banco de dados
-        private void UpdatePessoa(PessoaModel pessoa)
+        private void AtualizarPessoa(PessoaModel pessoa)
         {
-            var query = $"UPDATE Pessoa SET Nome = '{pessoa.Nome}', CPF = '{pessoa.CPF}', Email = '{pessoa.Email}' WHERE Id = {pessoa.Id}";
-            _dbHelper.ExecuteQuery(query);
+            try
+            {
+                var query = $"UPDATE Pessoa SET Nome = '{pessoa.Nome}', CPF = '{pessoa.CPF}', Email = '{pessoa.Email}' WHERE Id = {pessoa.Id}";
+                _dbHelper.ExecuteQuery(query);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ocorreu um erro em [PessoaController.AtualizarPessoa] Erro: {ex.Message}");
+            }
         }
 
         // Método para excluir uma pessoa do banco de dados
-        private void DeletePessoa(int id)
+        private void DeletarPessoa(int id)
         {
-            var query = $"DELETE FROM Pessoa WHERE Id = {id}";
-            _dbHelper.ExecuteQuery(query);
+            try
+            {
+                var query = $"DELETE FROM Pessoa WHERE Id = {id}";
+                _dbHelper.ExecuteQuery(query);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ocorreu um erro em [PessoaController.DeletePessoa] Erro: {ex.Message}");
+            }
         }
+
+        private bool ExistePessoaComCPF(string cpf)
+        {
+            try
+            {
+                // Consulta o banco de dados para verificar se existe uma pessoa com o mesmo CPF
+                var query = $"SELECT COUNT(*) FROM Pessoa WHERE CPF = '{cpf}'";
+                var result = _dbHelper.ExecuteScalar(query);
+                int count = Convert.ToInt32(result);
+
+                return count > 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ocorreu um erro em [PessoaController.ExistePessoaComCPF] Erro: {ex.Message}");
+            }
+        }
+
+        public int ObterIdPessoaPorCPF(string cpf)
+        {
+            try
+            {
+                var query = $"SELECT Id FROM Pessoa WHERE CPF = '{cpf}'";
+                var result = _dbHelper.ExecuteScalar(query);
+
+                // Se o resultado não for nulo, converte para inteiro e retorna o ID
+                if (result != null)
+                {
+                    return Convert.ToInt32(result);
+                }
+                else
+                {
+                    throw new InvalidOperationException("Não foi possível encontrar uma pessoa com o CPF fornecido.");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ocorreu um erro em [PessoaController.ObterIdPessoaPorCPF] Erro: {ex.Message}");
+            }
+        }
+
         #endregion
     }
 }
