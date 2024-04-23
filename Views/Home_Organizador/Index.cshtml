@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="cartao-menu">
-        <div style="font-size:larger">Bem-Vindo! "ORGANIZADOR"</div>
+        <div id="welcome-message" style="font-size:larger">Bem-Vindo! @ViewBag.Login</div>      
         <form>
             <div>
                 <a class="nav-link text-dark" href="#" onclick="mostrarCard('meus-eventos')">Meus Eventos</a>
@@ -167,10 +167,10 @@
 
     #campo-pesquisa {
         margin-bottom: 10px;
-        width: 100%;
+        width:30%;
         padding: 5px;
         border-radius: 5px;
-        border: 1px solid #ccc;
+        border: 1px solid #ccc; 
     }
 
     .eventos {
