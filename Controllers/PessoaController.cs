@@ -181,12 +181,9 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                             // Se não existir, insere a nova pessoa
                             var query = $"INSERT INTO Pessoa (Nome, CPF, Email) VALUES ('{pessoa.Nome}', '{pessoa.CPF}', '{pessoa.Email}')";
                             
-                            //_dbHelper.ExecuteQuery(query);
+                            _dbHelper.ExecuteQuery(query);
 
-                            //TO DO: testar se esse atende o requisito
-                            pessoa.Id = (int)_dbHelper.ExecuteScalar(query);
-
-
+                            pessoa.Id = ObterIdPessoaPorCPF(pessoa.CPF);
                             return "Inserido com Sucesso.";
                         }
                         else

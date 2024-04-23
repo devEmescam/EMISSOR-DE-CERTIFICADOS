@@ -8,7 +8,8 @@
 </head>
 <body>
     <div class="cartao-menu">
-        <div style="font-size:larger">Bem-Vindo! "ORGANIZADOR"</div>
+         <div style="font-size:larger">Bem-Vindo! @ViewBag.Login</div> 
+        
         <form>
             <div>
                 <a class="nav-link text-dark" href="#" onclick="mostrarCard('meus-eventos')">Meus Eventos</a>
@@ -17,65 +18,80 @@
                 <a id="sair-link" class="nav-link text-dark" asp-action="Login" asp-controller="Organizador">Sair</a>
             </div>
         </form>
-
+        <!--NOVO EVENTO-->
         <div id="card-evento" class="card">
             <h3>Novo Evento</h3>
-            <div class="textarea-container">
-                <label>TEXTO DA FRENTE DO CERTIFICADO DOS PARTICIPANTES</label>
-                <textarea placeholder="Digite o texto da frente do certificado..." rows="4" cols="50"></textarea>
-            </div>
-            <br>
-            <div class="textarea-container">
-                <label>LISTA DE PARTICIPANTES (DE 1 A 300 PESSOAS)</label>
-                <textarea placeholder="nome1,CPF1,e-mail1 
+            <form id="form-novo-evento" method="post" enctype="multipart/form-data">
+
+                <div class="textarea-container">
+                    <label>NOME EVENTO</label>
+                    <textarea name="Nome" placeholder="Digite o nome do evento" rows="1" cols="50"></textarea>
+                </div>
+
+                <div class="textarea-container">
+                    <label>TEXTO DA FRENTE DO CERTIFICADO DOS PARTICIPANTES</label>
+                    <textarea name="TextoFrenteCertificado" placeholder="Digite o texto da frente do certificado..." rows="4" cols="50"></textarea>
+                </div>
+
+                <input type="hidden" name="TextoFrenteCertificado" id="textoFrenteCertificado" />
+
+                <br>
+                <div class="textarea-container">
+                    <label>LISTA DE PARTICIPANTES (DE 1 A 300 PESSOAS)</label>
+                    <textarea name="Participantes" placeholder="nome1,CPF1,e-mail1
 nome2,CPF2,e-mail2" rows="4" cols="50"></textarea>
-            </div>
-            <br>
-            <!--BOTAO DE IMPORTAR AQUIVO-->
-            <div class="input-file">
-                <label for="input-file">Importar Planilha</label>
-                <input type="file" id="input-file" accept=".xlsx">
-                <label for="input-file">Importar Layout Certificado</label>
-                <input type="file" id="input-file" accept=".jpg">
-                <input id="input-avancar" type="button" value="Avançar">
-            </div>
-            
+                </div>
+                <br>
+                <!--CAMPO DE ENVIO DE ARQUIVO-->
+                <div class="input-file">
+                    <label for="input-imagem-certificado">Importar Layout Certificado</label>
+                    <input type="file" id="input-imagem-certificado" name="ImagemCertificado" accept=".jpg">
+                    <input id="input-criar" type="button" value="Criar">
+                </div>
+            </form>
         </div>
-
-
-
+        
+        <!--MEUS EVENTOS-->
         <div id="card-meus-eventos" class="card">
             <h4>Meus Eventos</h4>
             <!-- Botão de "Adicionar Evento" -->
             <button class="botao-adicionar" onclick="exibirFormularioAdicionar()"></button>
-           
+
             <!-- Campo de pesquisa -->
             <input type="text" id="campo-pesquisa" placeholder="Pesquisar eventos...">
 
             <div class="tabela-eventos">
                 <!-- Tabela de eventos -->
                 <table>
-                    <tr>
-                        <td class="eventos">Informações do evento 1</td>
-                    </tr>
-                    <tr>
-                        <td class="eventos">Informações do evento 2</td>
-                    </tr>
-                    <tr>
-                        <td class="eventos">Informações do evento 3</td>
-                    </tr>
-                    <tr>
-                        <td class="eventos">Informações do evento 4</td>
-                    </tr>
-                    <tr>
-                        <td class="eventos">Informações do evento 5</td>
-                    </tr>
-                    <tr>
-                        <td class="eventos">Informações do evento 6</td>
-                    </tr>
-                    <tr>
-                        <td class="eventos">Informações do evento 7</td>
-                    </tr>
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;">Código</th>
+                            <th style="width: 80%">Nome</th>
+                            <th style="width: 15%;">Imagem do Certificado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var evento in Model)
+                        {
+                            <tr>
+                                <td>@evento.Id</td>
+                                <td style="text-align:left">@evento.Nome</td>                                
+                                @* <td><img src="@Url.Action("VisualizarImagem", "Home_Organizador", new { id = evento.Id })" alt="Imagem do Certificado" /></td> *@
+                                <td>
+                                    <!-- Miniatura da imagem -->
+                                    <!-- Verifica se há uma imagem associada ao evento -->
+                                    @if (evento.ImagemCertificado != null)
+                                    {
+                                        <!-- Miniatura da imagem -->
+                                        <img src="@Url.Action("VisualizarImagem", "Home_Organizador", new { id = evento.Id })"
+                                             alt="Imagem do Certificado"
+                                             style="width: 50px; height: auto; cursor: pointer;"
+                                             onclick="window.open('@Url.Action("VisualizarImagem", "Home_Organizador", new { id = evento.Id })')">
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -258,7 +274,7 @@ nome2,CPF2,e-mail2" rows="4" cols="50"></textarea>
         text-align: center;   
     }
     
-    #input-avancar {
+    #input-criar {
         background: green;
         color: white;
         position: absolute;
@@ -315,18 +331,62 @@ nome2,CPF2,e-mail2" rows="4" cols="50"></textarea>
         var termoPesquisa = campoPesquisa.value.toLowerCase(); // Converte o termo de pesquisa para minúsculas
 
         // Itera sobre as linhas da tabela de eventos
-        for (var i = 0; i < linhasEventos.length; i++) {
-            var colunaEvento = linhasEventos[i].getElementsByTagName('td')[0]; // Obtém a primeira coluna (informações do evento)
+        for (var i = 1; i < linhasEventos.length; i++) { // Começa do índice 1 para ignorar o cabeçalho da tabela
+            var colunasEvento = linhasEventos[i].getElementsByTagName('td'); // Obtém todas as colunas da linha
 
-            // Verifica se o termo de pesquisa está contido nas informações do evento
-            if (colunaEvento) {
-                var textoEvento = colunaEvento.textContent || colunaEvento.innerText;
-                if (textoEvento.toLowerCase().indexOf(termoPesquisa) > -1) {
-                    linhasEventos[i].style.display = ''; // Exibe a linha se o termo de pesquisa for encontrado
-                } else {
-                    linhasEventos[i].style.display = 'none'; // Oculta a linha se o termo de pesquisa não for encontrado
+            var encontrado = false; // Variável para rastrear se o termo de pesquisa foi encontrado em qualquer coluna
+
+            // Itera sobre as colunas do evento
+            for (var j = 0; j < colunasEvento.length; j++) {
+                var textoColuna = colunasEvento[j].textContent || colunasEvento[j].innerText; // Obtém o texto da coluna
+                if (textoColuna.toLowerCase().indexOf(termoPesquisa) > -1) { // Verifica se o termo de pesquisa está presente na coluna
+                    encontrado = true;
+                    break; // Interrompe a iteração se o termo de pesquisa for encontrado em qualquer coluna
                 }
+            }
+
+            // Exibe ou oculta a linha com base no resultado da pesquisa
+            if (encontrado) {
+                linhasEventos[i].style.display = ''; // Exibe a linha se o termo de pesquisa for encontrado em qualquer coluna
+            } else {
+                linhasEventos[i].style.display = 'none'; // Oculta a linha se o termo de pesquisa não for encontrado em nenhuma coluna
             }
         }
     });
+
+    document.getElementById("input-criar").addEventListener("click", function () {
+        var form = document.getElementById("form-novo-evento");
+        var formData = new FormData(form);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/Home_Organizador/NovoEvento");
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                // Tratar a resposta do servidor se necessário
+                console.log("Evento criado com sucesso!");
+                // Redirecionar ou realizar outras ações conforme necessário
+                window.location.href = "/Home_Organizador/Index";
+            } else {
+                console.error("Erro ao criar evento:", xhr.statusText);
+            }
+        };
+        xhr.onerror = function () {
+            console.error("Erro de rede ao criar evento:", xhr.statusText);
+        };
+        xhr.send(formData);
+    });
+
+    // Função para atualizar o valor do input hidden com o conteúdo do textarea
+    function atualizarTextoFrenteCertificado() {
+        var textoFrenteCertificado = document.getElementById("textoFrenteCertificado");
+        var textarea = document.querySelector('textarea[name="TextoFrenteCertificado"]');
+        textoFrenteCertificado.value = textarea.value;
+    }
+
+    // Adicione um event listener para o evento "submit" do formulário
+    document.getElementById("form-novo-evento").addEventListener("submit", function (event) {
+        // Chama a função para atualizar o valor do input hidden antes de enviar o formulário
+        atualizarTextoFrenteCertificado();
+    });
+    
 </script>

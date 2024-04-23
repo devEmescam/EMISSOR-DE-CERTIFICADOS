@@ -6,12 +6,10 @@ namespace EMISSOR_DE_CERTIFICADOS.DBConnections
     public class DBHelpers
     {
         private readonly Dictionary<string, string> _connectionStrings;        
-
         public DBHelpers(Dictionary<string, string> connectionStrings)
         {
             _connectionStrings = connectionStrings ?? throw new ArgumentNullException(nameof(connectionStrings), "O dicionário de cadeias de conexão não pode ser nulo.");
-        }
-      
+        }      
         public IDbConnection GetConnection(string connectionName = "CertificadoConnection")
         {
             if (!_connectionStrings.TryGetValue(connectionName, out var connectionString))
@@ -24,6 +22,7 @@ namespace EMISSOR_DE_CERTIFICADOS.DBConnections
 
             return connection;
         }
+        //Executa a consulta retornado um datatable do resultado
         public DataTable ExecuteQuery(string query, string connectionName = "CertificadoConnection")
         {
             using (var connection = GetConnection(connectionName))
@@ -38,8 +37,7 @@ namespace EMISSOR_DE_CERTIFICADOS.DBConnections
                     }
                 }
             }
-        }
-
+        }        
         // Sobrecarga do método ExecuteQuery para aceitar um parâmetro de imagem
         public DataTable ExecuteQuery(string query, byte[] imagemBytes, string connectionName = "CertificadoConnection")
         {
@@ -63,7 +61,41 @@ namespace EMISSOR_DE_CERTIFICADOS.DBConnections
                 }
             }
         }
+        public byte[] ExecuteQueryArrayBytes(string query, int id, string connectionName = "CertificadoConnection")
+        {
+            try
+            {
+                using (var connection = GetConnection(connectionName))
+                {
+                    using (var command = new SqlCommand(query, (SqlConnection)connection))
+                    {
+                        // Crie um SqlParameter para o parâmetro @Id
+                        var idParameter = new SqlParameter("@Id", SqlDbType.Int);
+                        idParameter.Value = id;
 
+                        command.Parameters.Add(idParameter);
+
+                        // Execute o comando e obtenha o resultado
+                        object result = command.ExecuteScalar();
+
+                        // Verifique se o resultado é nulo ou DBNull
+                        if (result == null || result == DBNull.Value)
+                        {
+                            return null; // Retorna nulo se a imagem não existir
+                        }
+                        else
+                        {
+                            // Converta o resultado em um array de bytes e retorne
+                            return (byte[])result;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ocorreu um erro em [DBHelpers.ExecuteQueryArrayBytes] Erro: {ex.Message}");
+            }
+        }
         public object ExecuteScalar(string query, string connectionName = "CertificadoConnection")
         {
             using (var connection = GetConnection(connectionName))
@@ -74,6 +106,41 @@ namespace EMISSOR_DE_CERTIFICADOS.DBConnections
                 }
             }
         }
+        //Executa a consulta e retorna o resultado com o tipo de dado informado na chamado
+        public T ExecuteScalar<T>(string query, string connectionName = "CertificadoConnection")
+        {
+            using (var connection = GetConnection(connectionName))
+            {
+                using (var command = new SqlCommand(query, (SqlConnection)connection))
+                {
+                    var result = command.ExecuteScalar();
 
+                    // Converte o resultado para o tipo T especificado
+                    return (result == DBNull.Value) ? default(T) : (T)Convert.ChangeType(result, typeof(T));
+                }
+            }
+        }
+        //Sobrecarga do metodo: Executa a consulta, recebendo como parametro um array de bytes e retorna o resultado com o tipo de dado informado na chamado
+        public T ExecuteScalar<T>(string query, byte[] imagemBytes = null, string connectionName = "CertificadoConnection")
+        {
+            using (var connection = GetConnection(connectionName))
+            {
+                using (var command = new SqlCommand(query, (SqlConnection)connection))
+                {
+                    // Se a consulta SQL contém parâmetros para a imagem, adiciona-os ao comando
+                    if (imagemBytes != null)
+                    {
+                        var imagemParam = new SqlParameter("@ImagemCertificado", SqlDbType.VarBinary);
+                        imagemParam.Value = imagemBytes;
+                        command.Parameters.Add(imagemParam);
+                    }
+
+                    var result = command.ExecuteScalar();
+
+                    // Converte o resultado para o tipo T especificado
+                    return (result == DBNull.Value) ? default(T) : (T)Convert.ChangeType(result, typeof(T));
+                }
+            }
+        }
     }
 }
