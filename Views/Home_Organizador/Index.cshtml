@@ -8,7 +8,8 @@
 </head>
 <body>
     <div class="cartao-menu">
-        <div style="font-size:larger">Bem-Vindo! "ORGANIZADOR"</div>
+         <div style="font-size:larger">Bem-Vindo! @ViewBag.Login</div> 
+        
         <form>
             <div>
                 <a class="nav-link text-dark" href="#" onclick="mostrarCard('meus-eventos')">Meus Eventos</a>
@@ -17,48 +18,28 @@
             </div>
         </form>
 
-
-        <!--CADASTRAR EVENTO-->
         <div id="card-evento" class="card">
             <h3>Novo Evento</h3>
-            <hr>
-            <!-- Input para o nome do evento -->
-            <input type="text" id="nomeEvento" placeholder="Nome do Evento">
-
-            <!--Aqui preenchem os dados-->
-            <div id="dados-form">
-                <input type="text" id="inputNome" placeholder="Nome">
-                <input type="text" id="inputCPF" placeholder="CPF">
-                <input type="text" id="inputEmail1" placeholder="Email">
-                <input type="text" id="tipoPessoa" placeholder="Tipo Pessoa">
-                <textarea id="textareaTexto" placeholder="Texto"></textarea>
-                <!-- <button id="botaoAdicionar" onclick="atualizarDados()">Adicionar Dados</button> -->
-                <button id="botaoAcao" onclick="atualizarDados()">Adicionar Dados</button>
+            <div class="textarea-container">
+                <label>TEXTO DA FRENTE DO CERTIFICADO DOS PARTICIPANTES</label>
+                <textarea placeholder="Digite o texto da frente do certificado..." rows="4" cols="50"></textarea>
             </div>
-            <hr>
-            <div class="upload-container">
-                <!-- Botão de importar EXCEL -->
-                <input type="file" id="excelFile" accept=".xlsx">
-                <button onclick="importarExcel()">Importar Pessoas</button>
-                <input type="file" id="arteCertificadoFile" accept=".jpeg">
-                <button onclick="importarArteCertificado()">Importar Certificado</button>
+            <br>
+            <div class="textarea-container">
+                <label>LISTA DE PARTICIPANTES (DE 1 A 300 PESSOAS)</label>
+                <textarea placeholder="nome1,CPF1,e-mail1 
+nome2,CPF2,e-mail2" rows="4" cols="50"></textarea>
             </div>
-            <!--Tabela que será preenchida-->
-            <table id="tabela" class="display">
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>CPF</th>
-                        <th>Email</th>
-                        <th>Tipo Pessoa</th>
-                        <th>Texto</th>
-                        <th>ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-           <button id="CadastrarEvento">Cadastrar Evento</button>
+            <br>
+            <!--BOTAO DE IMPORTAR AQUIVO-->
+            <div class="input-file">
+                <label for="input-file">Importar Planilha</label>
+                <input type="file" id="input-file" accept=".xlsx">
+                <label for="input-file">Importar Layout Certificado</label>
+                <input type="file" id="input-file" accept=".jpg">
+                <input id="input-avancar" type="button" value="Avançar">
+            </div>
+            
         </div>
 
 
@@ -76,6 +57,24 @@
                 <table>
                     <tr>
                         <td class="eventos">Informações do evento 1</td>
+                    </tr>
+                    <tr>
+                        <td class="eventos">Informações do evento 2</td>
+                    </tr>
+                    <tr>
+                        <td class="eventos">Informações do evento 3</td>
+                    </tr>
+                    <tr>
+                        <td class="eventos">Informações do evento 4</td>
+                    </tr>
+                    <tr>
+                        <td class="eventos">Informações do evento 5</td>
+                    </tr>
+                    <tr>
+                        <td class="eventos">Informações do evento 6</td>
+                    </tr>
+                    <tr>
+                        <td class="eventos">Informações do evento 7</td>
                     </tr>
                 </table>
             </div>
@@ -257,7 +256,7 @@
         justify-items: left;
         text-align: center;
     }
-
+    
     #input-avancar {
         background: green;
         color: white;
@@ -410,188 +409,61 @@
         var termoPesquisa = campoPesquisa.value.toLowerCase(); // Converte o termo de pesquisa para minúsculas
 
         // Itera sobre as linhas da tabela de eventos
-        for (var i = 0; i < linhasEventos.length; i++) {
-            var colunaEvento = linhasEventos[i].getElementsByTagName('td')[0]; // Obtém a primeira coluna (informações do evento)
+        for (var i = 1; i < linhasEventos.length; i++) { // Começa do índice 1 para ignorar o cabeçalho da tabela
+            var colunasEvento = linhasEventos[i].getElementsByTagName('td'); // Obtém todas as colunas da linha
 
-            // Verifica se o termo de pesquisa está contido nas informações do evento
-            if (colunaEvento) {
-                var textoEvento = colunaEvento.textContent || colunaEvento.innerText;
-                if (textoEvento.toLowerCase().indexOf(termoPesquisa) > -1) {
-                    linhasEventos[i].style.display = ''; // Exibe a linha se o termo de pesquisa for encontrado
-                } else {
-                    linhasEventos[i].style.display = 'none'; // Oculta a linha se o termo de pesquisa não for encontrado
+            var encontrado = false; // Variável para rastrear se o termo de pesquisa foi encontrado em qualquer coluna
+
+            // Itera sobre as colunas do evento
+            for (var j = 0; j < colunasEvento.length; j++) {
+                var textoColuna = colunasEvento[j].textContent || colunasEvento[j].innerText; // Obtém o texto da coluna
+                if (textoColuna.toLowerCase().indexOf(termoPesquisa) > -1) { // Verifica se o termo de pesquisa está presente na coluna
+                    encontrado = true;
+                    break; // Interrompe a iteração se o termo de pesquisa for encontrado em qualquer coluna
                 }
             }
-        }
-    });
 
-
-
-    //Preencher table de novo evento
-    // Função para adicionar botões de exclusão e atualização a cada linha da tabela
-    function adicionarBotoesLinha(linha) {
-        var colunaAcoes = linha.insertCell(-1);
-        var botaoExcluir = document.createElement("button");
-        botaoExcluir.textContent = "Excluir";
-        botaoExcluir.onclick = function () {
-            excluirLinha(linha);
-        };
-        colunaAcoes.appendChild(botaoExcluir);
-
-        var botaoAtualizar = document.createElement("button");
-        botaoAtualizar.textContent = "Atualizar";
-        botaoAtualizar.onclick = function () {
-            carregarDadosParaEditar(linha);
-        };
-        colunaAcoes.appendChild(botaoAtualizar);
-    }
-
-    // Função para adicionar ou atualizar dados
-    function atualizarDados() {
-        if (modoAdicionar) {
-            // Se estiver no modo de adicionar, adiciona uma nova linha
-            var tabela = document.getElementById("tabela");
-
-            // Obter os valores dos inputs
-            var nome = document.getElementById("inputNome").value;
-            var cpf = document.getElementById("inputCPF").value;
-            var email = document.getElementById("inputEmail1").value;
-            var tipoPessoa = document.getElementById("tipoPessoa").value;
-            var texto = document.getElementById("textareaTexto").value;
-
-            // Verificar se todos os campos estão preenchidos
-            if (nome === "" || cpf === "" || email === "" || tipoPessoa === "" || texto === "") {
-                alert("Por favor, preencha todos os campos.");
-                return;
+            // Exibe ou oculta a linha com base no resultado da pesquisa
+            if (encontrado) {
+                linhasEventos[i].style.display = ''; // Exibe a linha se o termo de pesquisa for encontrado em qualquer coluna
+            } else {
+                linhasEventos[i].style.display = 'none'; // Oculta a linha se o termo de pesquisa não for encontrado em nenhuma coluna
             }
-
-            // Adicionar uma nova linha com os valores inseridos
-            var novaLinha = tabela.insertRow(-1); // Insere na última posição da tabela
-            var celulaNome = novaLinha.insertCell(0);
-            var celulaCPF = novaLinha.insertCell(1);
-            var celulaEmail = novaLinha.insertCell(2);
-            var celulaTipoPessoa = novaLinha.insertCell(3);
-            var celulaTexto = novaLinha.insertCell(4);
-
-            // Atribuir os valores às células da nova linha
-            celulaNome.innerHTML = nome;
-            celulaCPF.innerHTML = cpf;
-            celulaEmail.innerHTML = email;
-            celulaTipoPessoa.innerHTML = tipoPessoa;
-            celulaTexto.innerHTML = texto;
-
-            // Adicionar botões de exclusão e atualização
-            adicionarBotoesLinha(novaLinha);
-
-            // Limpar os inputs após adicionar a tabela
-            limparCampos();
-        } else {
-            // Se estiver no modo de atualizar, atualiza a linha existente
-            var celulas = linhaEditavel.getElementsByTagName("td");
-            celulas[0].innerHTML = document.getElementById("inputNome").value;
-            celulas[1].innerHTML = document.getElementById("inputCPF").value;
-            celulas[2].innerHTML = document.getElementById("inputEmail1").value;
-            celulas[3].innerHTML = document.getElementById("tipoPessoa").value;
-            celulas[4].innerHTML = document.getElementById("textareaTexto").value;
-
-            // Volta para o modo de adicionar
-            alternarModo();
         }
-    }
-
-    // Função para excluir uma linha da tabela
-    function excluirLinha(linha) {
-        var index = linha.rowIndex;
-        document.getElementById("tabela").deleteRow(index);
-    }
-
-    // Função para atualizar uma linha da tabela
-    function atualizarLinha(linha) {
-        var celulas = linha.getElementsByTagName("td");
-        var inputNome = document.getElementById("inputNome");
-        var inputCPF = document.getElementById("inputCPF");
-        var inputEmail = document.getElementById("inputEmail1");
-        var inputTipoPessoa = document.getElementById("tipoPessoa");
-        var textareaTexto = document.getElementById("textareaTexto");
-
-        inputNome.value = celulas[0].innerHTML;
-        inputCPF.value = celulas[1].innerHTML;
-        inputEmail.value = celulas[2].innerHTML;
-        inputTipoPessoa.value = celulas[3].innerHTML;
-        textareaTexto.value = celulas[4].innerHTML;
-    }
-
-    // Variável para controlar o modo de operação (adicionar ou atualizar)
-    var modoAdicionar = true;
-
-    // Função para alternar entre os modos de adicionar e atualizar
-    function alternarModo() {
-        modoAdicionar = !modoAdicionar;
-        var botaoAcao = document.getElementById("botaoAcao");
-        if (modoAdicionar) {
-            botaoAcao.textContent = "Adicionar Dados";
-        } else {
-            botaoAcao.textContent = "Atualizar Dados";
-        }
-    }
-
-    // Função para limpar os campos de entrada
-    function limparCampos() {
-        document.getElementById("inputNome").value = "";
-        document.getElementById("inputCPF").value = "";
-        document.getElementById("inputEmail1").value = "";
-        document.getElementById("tipoPessoa").value = "";
-        document.getElementById("textareaTexto").value = "";
-    }
-
-    // Função para carregar os dados da linha de volta para os campos de entrada
-    function carregarDadosParaEditar(linha) {
-        var celulas = linha.getElementsByTagName("td");
-        var inputNome = document.getElementById("inputNome");
-        var inputCPF = document.getElementById("inputCPF");
-        var inputEmail = document.getElementById("inputEmail1");
-        var inputTipoPessoa = document.getElementById("tipoPessoa");
-        var textareaTexto = document.getElementById("textareaTexto");
-
-        inputNome.value = celulas[0].innerHTML;
-        inputCPF.value = celulas[1].innerHTML;
-        inputEmail.value = celulas[2].innerHTML;
-        inputTipoPessoa.value = celulas[3].innerHTML;
-        textareaTexto.value = celulas[4].innerHTML;
-
-        // Salva a linha editável para referência posterior
-        linhaEditavel = linha;
-
-        // Muda para o modo de atualização
-        alternarModo();
-    }
-
-    // Captura o botão "Cadastrar Evento"
-    var botaoCadastrarEvento = document.getElementById('CadastrarEvento');
-
-    // Adiciona um ouvinte de evento de clique ao botão
-    botaoCadastrarEvento.addEventListener('click', function () {
-        // Captura o valor do campo de entrada do nome do evento
-        var nomeEvento = document.getElementById('nomeEvento').value;
-
-        // Se o nome do evento estiver vazio, não faz nada
-        if (nomeEvento.trim() === '') {
-            alert('Por favor, insira o nome do evento.');
-            return;
-        }
-
-        // Cria uma nova linha na tabela de eventos
-        var tabelaEventos = document.querySelector('.tabela-eventos table');
-        var novaLinha = tabelaEventos.insertRow(-1);
-        var celulaEvento = novaLinha.insertCell(0);
-
-        // Adiciona o nome do evento como texto dentro da célula da nova linha
-        celulaEvento.textContent = nomeEvento;
     });
 
+    document.getElementById("input-criar").addEventListener("click", function () {
+        var form = document.getElementById("form-novo-evento");
+        var formData = new FormData(form);
 
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/Home_Organizador/NovoEvento");
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                // Tratar a resposta do servidor se necessário
+                console.log("Evento criado com sucesso!");
+                // Redirecionar ou realizar outras ações conforme necessário
+                window.location.href = "/Home_Organizador/Index";
+            } else {
+                console.error("Erro ao criar evento:", xhr.statusText);
+            }
+        };
+        xhr.onerror = function () {
+            console.error("Erro de rede ao criar evento:", xhr.statusText);
+        };
+        xhr.send(formData);
+    });
 
+    // Função para atualizar o valor do input hidden com o conteúdo do textarea
+    function atualizarTextoFrenteCertificado() {
+        var textoFrenteCertificado = document.getElementById("textoFrenteCertificado");
+        var textarea = document.querySelector('textarea[name="TextoFrenteCertificado"]');
+        textoFrenteCertificado.value = textarea.value;
+    }
 
-
-
+    // Adicione um event listener para o evento "submit" do formulário
+    document.getElementById("form-novo-evento").addEventListener("submit", function (event) {
+        // Chama a função para atualizar o valor do input hidden antes de enviar o formulário
+        atualizarTextoFrenteCertificado();
+    });
 </script>
