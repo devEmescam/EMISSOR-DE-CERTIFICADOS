@@ -21,8 +21,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Helpers
             this.ADContext = new DirectoryEntry();
 
         }
-
-
         public void ConnectToAD()
         {
             try
