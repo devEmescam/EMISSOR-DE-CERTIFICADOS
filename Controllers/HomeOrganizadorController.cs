@@ -231,8 +231,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                     {
                         Id = Convert.ToInt32(row["ID"]),
                         Nome = Convert.ToString(row["NOME"]),
-                        Participantes = Convert.ToString(row["PARTICIPANTES"]),
-                        TextoIndividual = Convert.ToBoolean(row["TEXTO_INDIVIDUAL"]),
+                        Participantes = Convert.ToString(row["PARTICIPANTES"]),                        
                         ImagemCertificado = imagemCertificado
                     };
                 }
@@ -346,7 +345,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         {
             try
             {
-                var query = $"UPDATE EVENTO SET NOME = '{evento.Nome}', TEXTO_INDIVIDUAL = '{evento.TextoIndividual}', PARTICIPANTES = '{evento.Participantes}' WHERE Id = {evento.Id}";
+                var query = $"UPDATE EVENTO SET NOME = '{evento.Nome}', PARTICIPANTES = '{evento.Participantes}' WHERE Id = {evento.Id}";
                 _dbHelper.ExecuteQuery(query);
             }
             catch (Exception ex)
