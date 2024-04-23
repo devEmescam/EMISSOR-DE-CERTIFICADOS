@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="cartao-menu">
-        <div id="welcome-message" style="font-size:larger">Bem-Vindo! @ViewBag.Login</div>      
+        <div style="font-size:larger">Bem-Vindo! "ORGANIZADOR"</div>
         <form>
             <div>
                 <a class="nav-link text-dark" href="#" onclick="mostrarCard('meus-eventos')">Meus Eventos</a>
@@ -61,9 +61,7 @@
             <button id="CadastrarEvento">Cadastrar Evento</button>
         </div>
 
-
-
-        <div id="card-meus-eventos" class="card">
+        @* <div id="card-meus-eventos" class="card">
             <h4>Meus Eventos</h4>
             <!-- Botão de "Adicionar Evento" -->
             <button class="botao-adicionar" onclick="exibirFormularioAdicionar()"></button>
@@ -79,7 +77,52 @@
                     </tr>
                 </table>
             </div>
+        </div> *@
+
+
+
+        <div id="card-meus-eventos" class="card">
+            <h4>Meus Eventos</h4>
+            <!-- Botão de "Adicionar Evento" -->
+            <button class="botao-adicionar" onclick="exibirFormularioAdicionar()"></button>
+
+            <!-- Campo de pesquisa -->
+            <input type="text" id="campo-pesquisa" placeholder="Pesquisar eventos...">
+
+            <div class="tabela-eventos">
+                <!-- Tabela de eventos -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;">Código</th>
+                            <th style="width: 80%">Nome</th>
+                            <th style="width: 15%;">Imagem do Certificado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var evento in Model)
+                        {
+                            <tr>
+                                <td>@evento.Id</td>
+                                <td>@evento.Nome</td>                                
+                                <td>
+                                    <!-- Miniatura da imagem -->
+                                    <img src="@Url.Action("VisualizarImagem", "Home_Organizador", new { id = evento.Id })"
+                                         alt="Imagem do Certificado"
+                                         style="width: 60px; height: auto; cursor: pointer;"
+                                         onclick="window.open('@Url.Action("VisualizarImagem", "Home_Organizador", new { id = evento.Id })')">
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
+
+
+
+
+
 
         <div id="card-buscar-pessoas" class="card">
             Informações sobre Buscar Pessoas
@@ -401,7 +444,7 @@
     // Captura o campo de pesquisa
     var campoPesquisa = document.getElementById('campo-pesquisa');
 
-    // Captura a tabela de eventos corretamente pela classe
+    // Captura a tabela de eventos
     var tabelaEventos = document.querySelector('.tabela-eventos');
     var linhasEventos = tabelaEventos.getElementsByTagName('tr');
 
@@ -410,22 +453,28 @@
         var termoPesquisa = campoPesquisa.value.toLowerCase(); // Converte o termo de pesquisa para minúsculas
 
         // Itera sobre as linhas da tabela de eventos
-        for (var i = 0; i < linhasEventos.length; i++) {
-            var colunaEvento = linhasEventos[i].getElementsByTagName('td')[0]; // Obtém a primeira coluna (informações do evento)
+        for (var i = 1; i < linhasEventos.length; i++) { // Começa do índice 1 para ignorar o cabeçalho da tabela
+            var colunasEvento = linhasEventos[i].getElementsByTagName('td'); // Obtém todas as colunas da linha
 
-            // Verifica se o termo de pesquisa está contido nas informações do evento
-            if (colunaEvento) {
-                var textoEvento = colunaEvento.textContent || colunaEvento.innerText;
-                if (textoEvento.toLowerCase().indexOf(termoPesquisa) > -1) {
-                    linhasEventos[i].style.display = ''; // Exibe a linha se o termo de pesquisa for encontrado
-                } else {
-                    linhasEventos[i].style.display = 'none'; // Oculta a linha se o termo de pesquisa não for encontrado
+            var encontrado = false; // Variável para rastrear se o termo de pesquisa foi encontrado em qualquer coluna
+
+            // Itera sobre as colunas do evento
+            for (var j = 0; j < colunasEvento.length; j++) {
+                var textoColuna = colunasEvento[j].textContent || colunasEvento[j].innerText; // Obtém o texto da coluna
+                if (textoColuna.toLowerCase().indexOf(termoPesquisa) > -1) { // Verifica se o termo de pesquisa está presente na coluna
+                    encontrado = true;
+                    break; // Interrompe a iteração se o termo de pesquisa for encontrado em qualquer coluna
                 }
+            }
+
+            // Exibe ou oculta a linha com base no resultado da pesquisa
+            if (encontrado) {
+                linhasEventos[i].style.display = ''; // Exibe a linha se o termo de pesquisa for encontrado em qualquer coluna
+            } else {
+                linhasEventos[i].style.display = 'none'; // Oculta a linha se o termo de pesquisa não for encontrado em nenhuma coluna
             }
         }
     });
-
-
 
     //Preencher table de novo evento
     // Função para adicionar botões de exclusão e atualização a cada linha da tabela

@@ -177,13 +177,13 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             try
             {
                 // Recupera o Id do usuário da sessão
-                int userId = HttpContext.Session.GetInt32("UserId") ?? 0;               
+                int userId = HttpContext.Session.GetInt32("UserId") ?? 0;
 
                 // Se o Id do usuário for zero, significa que não está logado ou o Id não foi encontrado
                 if (userId == 0)
-                {                    
+                {
                     throw new Exception($"Falha ao identificar usuário logado.");
-                }
+                }               
 
                 var query = $"SELECT ID, NOME, IMAGEM_CERTIFICADO FROM EVENTO WHERE ID_USUARIO_ADMINISTRATIVO = {userId}";
                 var dataTable = _dbHelper.ExecuteQuery(query);
