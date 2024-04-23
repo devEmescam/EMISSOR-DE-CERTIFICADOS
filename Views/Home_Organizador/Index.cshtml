@@ -13,33 +13,52 @@
             <div>
                 <a class="nav-link text-dark" href="#" onclick="mostrarCard('meus-eventos')">Meus Eventos</a>
                 <a class="nav-link text-dark" href="#" onclick="mostrarCard('buscar-pessoas')">Buscar Pessoas</a>
-                <a class="nav-link text-dark" href="#" onclick="mostrarCard('qualquer-coisa')">Qualquer coisa</a>
                 <a id="sair-link" class="nav-link text-dark" asp-action="Login" asp-controller="Organizador">Sair</a>
             </div>
         </form>
 
+
+        <!--CADASTRAR EVENTO-->
         <div id="card-evento" class="card">
             <h3>Novo Evento</h3>
-            <div class="textarea-container">
-                <label>TEXTO DA FRENTE DO CERTIFICADO DOS PARTICIPANTES</label>
-                <textarea placeholder="Digite o texto da frente do certificado..." rows="4" cols="50"></textarea>
+            <hr>
+            <!-- Input para o nome do evento -->
+            <input type="text" id="nomeEvento" placeholder="Nome do Evento">
+
+            <!--Aqui preenchem os dados-->
+            <div id="dados-form">
+                <input type="text" id="inputNome" placeholder="Nome">
+                <input type="text" id="inputCPF" placeholder="CPF">
+                <input type="text" id="inputEmail1" placeholder="Email">
+                <input type="text" id="tipoPessoa" placeholder="Tipo Pessoa">
+                <textarea id="textareaTexto" placeholder="Texto"></textarea>
+                <!-- <button id="botaoAdicionar" onclick="atualizarDados()">Adicionar Dados</button> -->
+                <button id="botaoAcao" onclick="atualizarDados()">Adicionar Dados</button>
             </div>
-            <br>
-            <div class="textarea-container">
-                <label>LISTA DE PARTICIPANTES (DE 1 A 300 PESSOAS)</label>
-                <textarea placeholder="nome1,CPF1,e-mail1 
-nome2,CPF2,e-mail2" rows="4" cols="50"></textarea>
+            <hr>
+            <div class="upload-container">
+                <!-- Botão de importar EXCEL -->
+                <input type="file" id="excelFile" accept=".xlsx">
+                <button onclick="importarExcel()">Importar Pessoas</button>
+                <input type="file" id="arteCertificadoFile" accept=".jpeg">
+                <button onclick="importarArteCertificado()">Importar Certificado</button>
             </div>
-            <br>
-            <!--BOTAO DE IMPORTAR AQUIVO-->
-            <div class="input-file">
-                <label for="input-file">Importar Planilha</label>
-                <input type="file" id="input-file" accept=".xlsx">
-                <label for="input-file">Importar Layout Certificado</label>
-                <input type="file" id="input-file" accept=".jpg">
-                <input id="input-avancar" type="button" value="Avançar">
-            </div>
-            
+            <!--Tabela que será preenchida-->
+            <table id="tabela" class="display">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>CPF</th>
+                        <th>Email</th>
+                        <th>Tipo Pessoa</th>
+                        <th>Texto</th>
+                        <th>ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+           <button id="CadastrarEvento">Cadastrar Evento</button>
         </div>
 
 
@@ -48,7 +67,7 @@ nome2,CPF2,e-mail2" rows="4" cols="50"></textarea>
             <h4>Meus Eventos</h4>
             <!-- Botão de "Adicionar Evento" -->
             <button class="botao-adicionar" onclick="exibirFormularioAdicionar()"></button>
-           
+
             <!-- Campo de pesquisa -->
             <input type="text" id="campo-pesquisa" placeholder="Pesquisar eventos...">
 
@@ -58,34 +77,12 @@ nome2,CPF2,e-mail2" rows="4" cols="50"></textarea>
                     <tr>
                         <td class="eventos">Informações do evento 1</td>
                     </tr>
-                    <tr>
-                        <td class="eventos">Informações do evento 2</td>
-                    </tr>
-                    <tr>
-                        <td class="eventos">Informações do evento 3</td>
-                    </tr>
-                    <tr>
-                        <td class="eventos">Informações do evento 4</td>
-                    </tr>
-                    <tr>
-                        <td class="eventos">Informações do evento 5</td>
-                    </tr>
-                    <tr>
-                        <td class="eventos">Informações do evento 6</td>
-                    </tr>
-                    <tr>
-                        <td class="eventos">Informações do evento 7</td>
-                    </tr>
                 </table>
             </div>
         </div>
 
         <div id="card-buscar-pessoas" class="card">
             Informações sobre Buscar Pessoas
-        </div>
-
-        <div id="card-qualquer-coisa" class="card">
-            Informações sobre Qualquer coisa
         </div>
     </div>
 </body>
@@ -121,14 +118,14 @@ nome2,CPF2,e-mail2" rows="4" cols="50"></textarea>
         background-color: rgba(250, 235, 215, 0.5);
         border-radius: 15px;
         box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.2);
-        padding: 40px;
-        width: 300px;
-        height: 800px;
-        max-width: 90%;
+        padding: 5%;
+        width: 18%;
+        max-width: 50%;
+        height: 80%;
         text-align: center;
         position: fixed;
-        top: 57%;
-        left: 175px;
+        top: 55%;
+        left: 10%;
         transform: translate(-50%, -50%);
     }
 
@@ -150,16 +147,17 @@ nome2,CPF2,e-mail2" rows="4" cols="50"></textarea>
 
     .card {
         background-color: rgba(250, 235, 215, 0.5);
-        padding: 40px;
-        width: 1400px;
-        height: 800px;
+        padding: 5%;
+        width: 442%;
+        height: 100%;
         text-align: center;
         position: fixed;
-        top: 0px;
-        left: 325px;
+        top: 0;
+        left: 103%;
         border-radius: 15px;
         display: none; /* Oculta o card por padrão */
     }
+
 
     .tabela-eventos {
         max-height: 300px;
@@ -218,14 +216,16 @@ nome2,CPF2,e-mail2" rows="4" cols="50"></textarea>
                 color: black;
             }
 
-            #card-evento {
+    #card-evento {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
     }
+
     label {
         margin-bottom: 5px;
     }
+
     textarea {
         margin-bottom: 10px;
     }
@@ -249,15 +249,15 @@ nome2,CPF2,e-mail2" rows="4" cols="50"></textarea>
     textarea {
         margin-top: 5px;
         margin-bottom: 10px;
-        width:650px;
+        width: 650px;
     }
 
     .input-file {
         display: grid;
         justify-items: left;
-        text-align: center;   
+        text-align: center;
     }
-    
+
     #input-avancar {
         background: green;
         color: white;
@@ -265,6 +265,101 @@ nome2,CPF2,e-mail2" rows="4" cols="50"></textarea>
         bottom: 10px;
         left: 50%;
         transform: translateX(-50%);
+    }
+
+    #dados-form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 80%;
+        padding: 20px;
+    }
+
+    #inputCPF {
+    }
+
+    #inputEmail1 {
+    }
+
+    #tipoPessoa {
+    }
+
+    #textareaTexto {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+
+    #atualizarDados {
+        background-color: green;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+        #atualizarDados:hover {
+            background-color: deepskyblue;
+        }
+
+    .upload-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1%;
+    }
+
+        .upload-container input[type="file"] {
+            margin-right: 0.3%;
+        }
+
+
+
+        .upload-container button {
+            background-color: green;
+            border: none;
+            color: white;
+            padding: 3px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+            .upload-container button:hover {
+                background-color: deepskyblue;
+            }
+    /* Estilos para a tabela */
+    #tabela {
+        width: 100%;
+        border-collapse: collapse;
+        max-height: 10px; /* Altura máxima da tabela */
+        overflow-y: auto; /* Adicionar rolagem vertical quando necessário */
+    }
+
+        #tabela th, #tabela td {
+            border: 1px solid #dddddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        #tabela th {
+            background-color: #f2f2f2; /* Cor de fundo do cabeçalho */
+        }
+
+        /* Estilos para linhas alternadas */
+        #tabela tbody tr:nth-child(even) {
+            background-color: #f9f9f9; /* Cor de fundo para linhas pares */
+        }
+
+    /* Estilo para a rolagem automática */
+    .scrollable {
+        max-height: 50px; /* Altura máxima antes de aparecer a barra de rolagem */
+        overflow-y: auto;
     }
 
 </style>
@@ -329,4 +424,174 @@ nome2,CPF2,e-mail2" rows="4" cols="50"></textarea>
             }
         }
     });
+
+
+
+    //Preencher table de novo evento
+    // Função para adicionar botões de exclusão e atualização a cada linha da tabela
+    function adicionarBotoesLinha(linha) {
+        var colunaAcoes = linha.insertCell(-1);
+        var botaoExcluir = document.createElement("button");
+        botaoExcluir.textContent = "Excluir";
+        botaoExcluir.onclick = function () {
+            excluirLinha(linha);
+        };
+        colunaAcoes.appendChild(botaoExcluir);
+
+        var botaoAtualizar = document.createElement("button");
+        botaoAtualizar.textContent = "Atualizar";
+        botaoAtualizar.onclick = function () {
+            carregarDadosParaEditar(linha);
+        };
+        colunaAcoes.appendChild(botaoAtualizar);
+    }
+
+    // Função para adicionar ou atualizar dados
+    function atualizarDados() {
+        if (modoAdicionar) {
+            // Se estiver no modo de adicionar, adiciona uma nova linha
+            var tabela = document.getElementById("tabela");
+
+            // Obter os valores dos inputs
+            var nome = document.getElementById("inputNome").value;
+            var cpf = document.getElementById("inputCPF").value;
+            var email = document.getElementById("inputEmail1").value;
+            var tipoPessoa = document.getElementById("tipoPessoa").value;
+            var texto = document.getElementById("textareaTexto").value;
+
+            // Verificar se todos os campos estão preenchidos
+            if (nome === "" || cpf === "" || email === "" || tipoPessoa === "" || texto === "") {
+                alert("Por favor, preencha todos os campos.");
+                return;
+            }
+
+            // Adicionar uma nova linha com os valores inseridos
+            var novaLinha = tabela.insertRow(-1); // Insere na última posição da tabela
+            var celulaNome = novaLinha.insertCell(0);
+            var celulaCPF = novaLinha.insertCell(1);
+            var celulaEmail = novaLinha.insertCell(2);
+            var celulaTipoPessoa = novaLinha.insertCell(3);
+            var celulaTexto = novaLinha.insertCell(4);
+
+            // Atribuir os valores às células da nova linha
+            celulaNome.innerHTML = nome;
+            celulaCPF.innerHTML = cpf;
+            celulaEmail.innerHTML = email;
+            celulaTipoPessoa.innerHTML = tipoPessoa;
+            celulaTexto.innerHTML = texto;
+
+            // Adicionar botões de exclusão e atualização
+            adicionarBotoesLinha(novaLinha);
+
+            // Limpar os inputs após adicionar a tabela
+            limparCampos();
+        } else {
+            // Se estiver no modo de atualizar, atualiza a linha existente
+            var celulas = linhaEditavel.getElementsByTagName("td");
+            celulas[0].innerHTML = document.getElementById("inputNome").value;
+            celulas[1].innerHTML = document.getElementById("inputCPF").value;
+            celulas[2].innerHTML = document.getElementById("inputEmail1").value;
+            celulas[3].innerHTML = document.getElementById("tipoPessoa").value;
+            celulas[4].innerHTML = document.getElementById("textareaTexto").value;
+
+            // Volta para o modo de adicionar
+            alternarModo();
+        }
+    }
+
+    // Função para excluir uma linha da tabela
+    function excluirLinha(linha) {
+        var index = linha.rowIndex;
+        document.getElementById("tabela").deleteRow(index);
+    }
+
+    // Função para atualizar uma linha da tabela
+    function atualizarLinha(linha) {
+        var celulas = linha.getElementsByTagName("td");
+        var inputNome = document.getElementById("inputNome");
+        var inputCPF = document.getElementById("inputCPF");
+        var inputEmail = document.getElementById("inputEmail1");
+        var inputTipoPessoa = document.getElementById("tipoPessoa");
+        var textareaTexto = document.getElementById("textareaTexto");
+
+        inputNome.value = celulas[0].innerHTML;
+        inputCPF.value = celulas[1].innerHTML;
+        inputEmail.value = celulas[2].innerHTML;
+        inputTipoPessoa.value = celulas[3].innerHTML;
+        textareaTexto.value = celulas[4].innerHTML;
+    }
+
+    // Variável para controlar o modo de operação (adicionar ou atualizar)
+    var modoAdicionar = true;
+
+    // Função para alternar entre os modos de adicionar e atualizar
+    function alternarModo() {
+        modoAdicionar = !modoAdicionar;
+        var botaoAcao = document.getElementById("botaoAcao");
+        if (modoAdicionar) {
+            botaoAcao.textContent = "Adicionar Dados";
+        } else {
+            botaoAcao.textContent = "Atualizar Dados";
+        }
+    }
+
+    // Função para limpar os campos de entrada
+    function limparCampos() {
+        document.getElementById("inputNome").value = "";
+        document.getElementById("inputCPF").value = "";
+        document.getElementById("inputEmail1").value = "";
+        document.getElementById("tipoPessoa").value = "";
+        document.getElementById("textareaTexto").value = "";
+    }
+
+    // Função para carregar os dados da linha de volta para os campos de entrada
+    function carregarDadosParaEditar(linha) {
+        var celulas = linha.getElementsByTagName("td");
+        var inputNome = document.getElementById("inputNome");
+        var inputCPF = document.getElementById("inputCPF");
+        var inputEmail = document.getElementById("inputEmail1");
+        var inputTipoPessoa = document.getElementById("tipoPessoa");
+        var textareaTexto = document.getElementById("textareaTexto");
+
+        inputNome.value = celulas[0].innerHTML;
+        inputCPF.value = celulas[1].innerHTML;
+        inputEmail.value = celulas[2].innerHTML;
+        inputTipoPessoa.value = celulas[3].innerHTML;
+        textareaTexto.value = celulas[4].innerHTML;
+
+        // Salva a linha editável para referência posterior
+        linhaEditavel = linha;
+
+        // Muda para o modo de atualização
+        alternarModo();
+    }
+
+    // Captura o botão "Cadastrar Evento"
+    var botaoCadastrarEvento = document.getElementById('CadastrarEvento');
+
+    // Adiciona um ouvinte de evento de clique ao botão
+    botaoCadastrarEvento.addEventListener('click', function () {
+        // Captura o valor do campo de entrada do nome do evento
+        var nomeEvento = document.getElementById('nomeEvento').value;
+
+        // Se o nome do evento estiver vazio, não faz nada
+        if (nomeEvento.trim() === '') {
+            alert('Por favor, insira o nome do evento.');
+            return;
+        }
+
+        // Cria uma nova linha na tabela de eventos
+        var tabelaEventos = document.querySelector('.tabela-eventos table');
+        var novaLinha = tabelaEventos.insertRow(-1);
+        var celulaEvento = novaLinha.insertCell(0);
+
+        // Adiciona o nome do evento como texto dentro da célula da nova linha
+        celulaEvento.textContent = nomeEvento;
+    });
+
+
+
+
+
+
 </script>
