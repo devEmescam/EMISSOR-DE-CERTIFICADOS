@@ -415,20 +415,19 @@
             var table = document.getElementById('tabela').getElementsByTagName('tbody')[0];
             var rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, range: 1 });
 
-            rows.forEach(function (row) {
+            rows.forEach(function (row, rowIndex) {
                 var newRow = table.insertRow(-1);
                 row.forEach(function (cellContent) {
                     var cell = newRow.insertCell();
                     cell.textContent = cellContent;
                 });
-                adicionarBotoesLinha(newRow); // Adicionar botões de exclusão e atualização
+                // Adicionar botões de exclusão e atualização apenas se não for o último registro
+                if (rowIndex < rows.length - 1) {
+                    adicionarBotoesLinha(newRow);
+                }
             });
         };
 
         reader.readAsArrayBuffer(file);
     }
-
-
-
-
 </script>
