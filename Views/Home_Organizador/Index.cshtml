@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emissor de Certificados</title>
     <div id="logoEmescam"><img src="/LogoEmescam.png" alt="logo"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
 </head>
 
 <body>
@@ -99,11 +101,6 @@
                 </table>
             </div>
         </div>
-
-
-
-
-
 
         <div id="card-buscar-pessoas" class="card">
             Informações sobre Buscar Pessoas
@@ -358,8 +355,56 @@
         // Adiciona o nome do evento como texto dentro da célula da nova linha
         celulaEvento.textContent = nomeEvento;
     });
+    
+    // Função para importar dados da planilha Excel e preencher a tabela
+    function importarExcel() {
+        var input = document.getElementById('excelFile');
 
-    //atualizado 10:40
+        // Verificar se um arquivo foi selecionado
+        if (!input.files || input.files.length === 0) {
+            alert('Por favor, selecione um arquivo Excel.');
+            return;
+        }
+
+        var file = input.files[0];
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            var data = new Uint8Array(e.target.result);
+            var workbook = XLSX.read(data, { type: 'array' });
+
+            // Obter a primeira planilha do arquivo
+            var sheetName = workbook.SheetNames[0];
+            var worksheet = workbook.Sheets[sheetName];
+
+            // Verificar se o modelo da planilha está correto
+            var expectedColumns = ['NOME_PESSOA', 'CPF_PESSOA', 'EMAIL_PESSOA', 'TIPO_PESSOA', 'TEXTO'];
+            var headerRow = XLSX.utils.sheet_to_json(worksheet, { header: 1, range: 'A1:E1' })[0];
+            var isValidModel = expectedColumns.every(function (col, index) {
+                return headerRow[index] === col;
+            });
+
+            if (!isValidModel) {
+                alert('O modelo da planilha selecionada está incorreto.');
+                return;
+            }
+
+            // Percorrer os registros da planilha e preencher a tabela
+            var table = document.getElementById('tabela').getElementsByTagName('tbody')[0];
+            var rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, range: 1 });
+
+            rows.forEach(function (row) {
+                var newRow = table.insertRow(-1);
+                row.forEach(function (cellContent) {
+                    var cell = newRow.insertCell();
+                    cell.textContent = cellContent;
+                });
+                adicionarBotoesLinha(newRow); // Adicionar botões de exclusão e atualização
+            });
+        };
+
+        reader.readAsArrayBuffer(file);
+    }
+    
 </script>
-
 
