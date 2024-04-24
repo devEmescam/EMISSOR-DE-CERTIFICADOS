@@ -1,0 +1,276 @@
+<style >
+
+#logoEmescam {
+    position: fixed;
+    top: 70px;
+    left: 150px;
+    transform: translate(-50%, -50%);
+    border-radius: 5px;
+    width: 300px;
+    text-align: center;
+}
+
+#logoEmescam img {
+    width: 350px;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #01f949, #14086d);
+    font-family: Arial, sans-serif;
+}
+
+.cartao-menu {
+    background-color: rgba(250, 235, 215, 0.5);
+    border-radius: 15px;
+    box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.2);
+    padding: 5%;
+    width: 18%;
+    max-width: 50%;
+    height: 80%;
+    text-align: center;
+    position: fixed;
+    top: 55%;
+    left: 10%;
+    transform: translate(-50%, -50%);
+}
+
+    .cartao-menu a {
+        display: block;
+        text-decoration: none;
+        color: #000;
+        margin: 10px 0;
+        padding: 10px;
+        border: 1px solid transparent;
+        transition: color 0.3s, border-color 0.3s;
+        border-color: #14086D;
+    }
+
+        .cartao-menu a:hover {
+            color: #ff0000;
+            border-color: #ff0000;
+        }
+
+.card {
+    background-color: rgba(250, 235, 215, 0.5);
+    padding: 5%;
+    width: 442%;
+    height: 100%;
+    text-align: center;
+    position: fixed;
+    top: 0;
+    left: 103%;
+    border-radius: 15px;
+    display: none; /* Oculta o card por padrão */
+}
+
+
+.tabela-eventos {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+#campo-pesquisa {
+    margin-bottom: 10px;
+    width: 30%;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.eventos {
+    background-color: #fff;
+    padding: 10px;
+    border: 5px solid #ccc;
+    border-radius: 5px;
+    width: 1300px;
+}
+
+.eventos1 {
+    background-color: #f9f9f9;
+}
+
+.botao-adicionar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: deepskyblue;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    position: absolute;
+    top: 20px;
+    right: 10px;
+    overflow: hidden;
+}
+
+    .botao-adicionar::after {
+        content: "+";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .botao-adicionar:hover {
+        background-color: green;
+    }
+
+        .botao-adicionar:hover::after {
+            color: black;
+        }
+
+#card-evento {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+label {
+    margin-bottom: 5px;
+}
+
+textarea {
+    margin-bottom: 10px;
+}
+
+#card-evento {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.textarea-container {
+    display: grid;
+    justify-items: left;
+    text-align: center;
+}
+
+h7 {
+    margin-bottom: 5px;
+}
+
+textarea {
+    margin-top: 5px;
+    margin-bottom: 10px;
+    width: 650px;
+}
+
+.input-file {
+    display: grid;
+    justify-items: left;
+    text-align: center;
+}
+
+#input-avancar {
+    background: green;
+    color: white;
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#dados-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%;
+    padding: 20px;
+}
+
+#inputCPF {
+}
+
+#inputEmail1 {
+}
+
+#tipoPessoa {
+}
+
+#textareaTexto {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+#atualizarDados {
+    background-color: green;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+    #atualizarDados:hover {
+        background-color: deepskyblue;
+    }
+
+.upload-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1%;
+}
+
+    .upload-container input[type="file"] {
+        margin-right: 0.3%;
+    }
+
+
+
+    .upload-container button {
+        background-color: green;
+        border: none;
+        color: white;
+        padding: 3px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+        .upload-container button:hover {
+            background-color: deepskyblue;
+        }
+/* Estilos para a tabela */
+#tabela {
+    width: 100%;
+    border-collapse: collapse;
+    max-height: 10px; /* Altura máxima da tabela */
+    overflow-y: auto; /* Adicionar rolagem vertical quando necessário */
+}
+
+    #tabela th, #tabela td {
+        border: 1px solid #dddddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    #tabela th {
+        background-color: #f2f2f2; /* Cor de fundo do cabeçalho */
+    }
+
+    /* Estilos para linhas alternadas */
+    #tabela tbody tr:nth-child(even) {
+        background-color: #f9f9f9; /* Cor de fundo para linhas pares */
+    }
+
+/* Estilo para a rolagem automática */
+.scrollable {
+    max-height: 50px; /* Altura máxima antes de aparecer a barra de rolagem */
+    overflow-y: auto;
+}
+
+</style >
