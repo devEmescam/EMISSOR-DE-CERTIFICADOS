@@ -45,25 +45,51 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             return View();
         }
         // POST: /Home_Organizador/NovoEvento
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public IActionResult NovoEvento_OLD(string TextoFrenteCertificado, EventoModel evento)
+        //{
+        //    try
+        //    {
+        //        if (ModelState.IsValid)
+        //        {
+        //            // Insere o evento no banco de dados
+        //            InserirEvento_OLD(TextoFrenteCertificado, evento);
+        //            return RedirectToAction(nameof(Index));
+        //        }
+        //        return View(evento);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, $"Ocorreu um erro em Home_OrganizadorController.NovoEvento. Erro: {ex.Message}");
+        //    }
+        //}
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult NovoEvento(string TextoFrenteCertificado,EventoModel evento) 
+        public IActionResult NovoEvento([FromForm] IFormFile ImagemCertificado, [FromBody] List<List<string>> DadosTabela, string Nome)
         {
+            EventoModel evento = new EventoModel();
             try
             {
-                if (ModelState.IsValid)
+                evento = new EventoModel
                 {
-                    // Insere o evento no banco de dados
-                    InserirEvento(TextoFrenteCertificado, evento);
-                    return RedirectToAction(nameof(Index));
-                }
-                return View(evento);
+                    Nome = Nome,
+                    ImagemCertificado = ImagemCertificado
+                };
+
+                // Chamar o método privado InserirEvento para inserir o evento no banco de dados
+                InserirEvento(evento, DadosTabela);
+
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Ocorreu um erro em Home_OrganizadorController.NovoEvento. Erro: {ex.Message}");
-            }           
+            }
         }
+
+
         // POST: /Home_Organizador/LerPlanilha
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -231,7 +257,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                     {
                         Id = Convert.ToInt32(row["ID"]),
                         Nome = Convert.ToString(row["NOME"]),
-                        Participantes = Convert.ToString(row["PARTICIPANTES"]),                        
+                        //Participantes = Convert.ToString(row["PARTICIPANTES"]),                        
                         ImagemCertificado = imagemCertificado
                     };
                 }
@@ -242,14 +268,114 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 throw new Exception($"Ocorreu um erro em [Home_OrganizadorController.BuscarEventoPorId] Erro: {ex.Message}");
             }
         }
-        private void InserirEvento(string TextoFrenteCertificado,EventoModel evento)
+        //private void InserirEvento_OLD(string TextoFrenteCertificado, EventoModel evento)
+        //{
+        //    int idEvento = -1;
+        //    int idPessoa = -1;
+        //    string sSQL = "";
+
+        //    try
+        //    {
+        //        byte[] imagemBytes = null; // Inicialize com um valor padrão
+
+        //        // Verifica se o arquivo de imagem foi fornecido
+        //        if (evento.ImagemCertificado != null && evento.ImagemCertificado.Length > 0)
+        //        {
+        //            // Converte o arquivo de imagem para um array de bytes                    
+        //            using (var memoryStream = new MemoryStream())
+        //            {
+        //                evento.ImagemCertificado.CopyTo(memoryStream);
+        //                imagemBytes = memoryStream.ToArray();
+        //            }
+        //        }
+
+        //        // Insira o evento no banco de dados, incluindo a imagem convertida
+        //        // Se o evento for inserido de maneira manual o texto nunca será individual para os participantes envolvidos
+        //        sSQL = $"INSERT INTO EVENTO (NOME, IMAGEM_CERTIFICADO) " +
+        //               $"VALUES ('{evento.Nome}', @ImagemCertificado);" +
+        //               "SELECT SCOPE_IDENTITY();"; // Obtem o ID do evento inserido
+        //                                           // 
+        //        idEvento = _dbHelper.ExecuteScalar<int>(sSQL, imagemBytes);
+
+        //        if (!string.IsNullOrEmpty(evento.Participantes))
+        //        {
+        //            // Verifica se o conteúdo de "evento.Participantes" tem quebras de linha
+        //            if (evento.Participantes.Contains("\n"))
+        //            {
+        //                // Divide o conteúdo em linhas
+        //                string[] linhas = evento.Participantes.Split('\n');
+
+        //                foreach (var linha in linhas)
+        //                {
+        //                    // Divide os dados separados por vírgula
+        //                    string[] dados = linha.Split(',');
+
+        //                    // Cria e insere a pessoa
+        //                    PessoaModel pessoa = new PessoaModel
+        //                    {
+        //                        Nome = dados[0].Trim(),
+        //                        CPF = dados[1].Trim(),
+        //                        Email = dados[2].Trim()
+        //                    };
+
+        //                    // Chama o método InserirPessoa do controlador PessoaController
+        //                    using (PessoaController pessoaController = new PessoaController(_dbHelper))
+        //                    {
+        //                        pessoaController.InserirPessoa(pessoa);
+
+        //                        //Nesse momento o evento já foi cadastrado e a pessoa também
+        //                        //Necessário registrar em banco a relação da pessoa com o evento e seus respectivos textos
+        //                        sSQL = "";
+        //                        sSQL = $"INSERT INTO EVENTO_PESSOA (ID_EVENTO, ID_PESSOA, TEXTO_FRENTE) " +
+        //                               $"VALUES ({idEvento}, {pessoa.Id}, '{TextoFrenteCertificado}')";
+        //                        //"SELECT SCOPE_IDENTITY();"; // Obtem o ID do evento inserido
+        //                        _dbHelper.ExecuteQuery(sSQL);
+        //                    }
+        //                }
+        //            }
+        //            else
+        //            {
+        //                // Se não houver quebras de linha, trata como se houvesse apenas um participante
+        //                string[] dados = evento.Participantes.Split(',');
+
+        //                // Cria e insere a pessoa
+        //                PessoaModel pessoa = new PessoaModel
+        //                {
+        //                    Nome = dados[0].Trim(),
+        //                    CPF = dados[1].Trim(),
+        //                    Email = dados[2].Trim()
+        //                };
+
+        //                // Chama o método InserirPessoa do controlador PessoaController
+        //                using (PessoaController pessoaController = new PessoaController(_dbHelper))
+        //                {
+        //                    pessoaController.InserirPessoa(pessoa);
+
+        //                    //Nesse momento o evento já foi cadastrado e a pessoa também
+        //                    //Necessário registrar em banco a relação da pessoa com o evento e seus respectivos textos
+        //                    sSQL = "";
+        //                    sSQL = $"INSERT INTO EVENTO_PESSOA (ID_EVENTO, ID_PESSOA, TEXTO_FRENTE) " +
+        //                           $"VALUES ({idEvento}, {pessoa.Id}, '')";
+        //                    _dbHelper.ExecuteQuery(sSQL);
+        //                }
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new Exception($"Ocorreu um erro em [Home_OrganizadorController.InserirEvento] Erro: {ex.Message}");
+        //    }
+        //}
+
+
+        private void InserirEvento( EventoModel evento, List<List<string>> dadosTabela)
         {
             int idEvento = -1;
             int idPessoa = -1;
             string sSQL = "";
 
             try
-            {               
+            {
                 byte[] imagemBytes = null; // Inicialize com um valor padrão
 
                 // Verifica se o arquivo de imagem foi fornecido
@@ -264,74 +390,42 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 }
 
                 // Insira o evento no banco de dados, incluindo a imagem convertida
-                // Se o evento for inserido de maneira manual o texto nunca será individual para os participantes envolvidos
-                 sSQL = $"INSERT INTO EVENTO (NOME, IMAGEM_CERTIFICADO) " +
-                        $"VALUES ('{evento.Nome}', @ImagemCertificado);" +
-                        "SELECT SCOPE_IDENTITY();"; // Obtem o ID do evento inserido
-                                                    // 
-                idEvento = _dbHelper.ExecuteScalar<int>(sSQL, imagemBytes);                
+                sSQL = $"INSERT INTO EVENTO (NOME, IMAGEM_CERTIFICADO) " +
+                       $"VALUES ('{evento.Nome}', @ImagemCertificado);" +
+                       "SELECT SCOPE_IDENTITY();"; // Obtem o ID do evento inserido
+                                                   // 
+                idEvento = _dbHelper.ExecuteScalar<int>(sSQL, imagemBytes);
 
-                if (!string.IsNullOrEmpty(evento.Participantes))
+                // Processar os dados da tabela
+                foreach (var dadosLinha in dadosTabela)
                 {
-                    // Verifica se o conteúdo de "evento.Participantes" tem quebras de linha
-                    if (evento.Participantes.Contains("\n"))
+                    // Aqui você pode processar cada linha da tabela conforme necessário
+                    // Vamos supor que os dados estão na ordem: Nome, CPF, Email, Tipo Pessoa, Texto
+                    string nome = dadosLinha[0];
+                    string cpf = dadosLinha[1];
+                    string email = dadosLinha[2];
+                    string tipoPessoa = dadosLinha[3];
+                    string texto = dadosLinha[4];
+
+                    // Crie e insira a pessoa
+                    PessoaModel pessoa = new PessoaModel
                     {
-                        // Divide o conteúdo em linhas
-                        string[] linhas = evento.Participantes.Split('\n');
+                        Nome = nome.Trim(),
+                        CPF = cpf.Trim(),
+                        Email = email.Trim()
+                    };
 
-                        foreach (var linha in linhas)
-                        {
-                            // Divide os dados separados por vírgula
-                            string[] dados = linha.Split(',');
-
-                            // Cria e insere a pessoa
-                            PessoaModel pessoa = new PessoaModel
-                            {
-                                Nome = dados[0].Trim(),
-                                CPF = dados[1].Trim(),
-                                Email = dados[2].Trim()
-                            };
-
-                            // Chama o método InserirPessoa do controlador PessoaController
-                            using (PessoaController pessoaController = new PessoaController(_dbHelper))
-                            {
-                                pessoaController.InserirPessoa(pessoa);
-
-                                //Nesse momento o evento já foi cadastrado e a pessoa também
-                                //Necessário registrar em banco a relação da pessoa com o evento e seus respectivos textos
-                                sSQL = "";
-                                sSQL = $"INSERT INTO EVENTO_PESSOA (ID_EVENTO, ID_PESSOA, TEXTO_FRENTE) " +
-                                       $"VALUES ({idEvento}, {pessoa.Id}, '{TextoFrenteCertificado}')";
-                                //"SELECT SCOPE_IDENTITY();"; // Obtem o ID do evento inserido
-                                _dbHelper.ExecuteQuery(sSQL);
-                            }
-                        }
-                    }
-                    else
+                    // Chama o método InserirPessoa do controlador PessoaController
+                    using (PessoaController pessoaController = new PessoaController(_dbHelper))
                     {
-                        // Se não houver quebras de linha, trata como se houvesse apenas um participante
-                        string[] dados = evento.Participantes.Split(',');
+                        pessoaController.InserirPessoa(pessoa);
 
-                        // Cria e insere a pessoa
-                        PessoaModel pessoa = new PessoaModel
-                        {
-                            Nome = dados[0].Trim(),
-                            CPF = dados[1].Trim(),
-                            Email = dados[2].Trim()
-                        };
-
-                        // Chama o método InserirPessoa do controlador PessoaController
-                        using (PessoaController pessoaController = new PessoaController(_dbHelper))
-                        {
-                            pessoaController.InserirPessoa(pessoa);
-
-                            //Nesse momento o evento já foi cadastrado e a pessoa também
-                            //Necessário registrar em banco a relação da pessoa com o evento e seus respectivos textos
-                            sSQL = "";
-                            sSQL = $"INSERT INTO EVENTO_PESSOA (ID_EVENTO, ID_PESSOA, TEXTO_FRENTE) " +
-                                   $"VALUES ({idEvento}, {pessoa.Id}, '')";                            
-                            _dbHelper.ExecuteQuery(sSQL);
-                        }
+                        //Nesse momento o evento já foi cadastrado e a pessoa também
+                        //Necessário registrar em banco a relação da pessoa com o evento e seus respectivos textos
+                        sSQL = "";
+                        sSQL = $"INSERT INTO EVENTO_PESSOA (ID_EVENTO, ID_PESSOA, TEXTO_FRENTE) " +
+                               $"VALUES ({idEvento}, {pessoa.Id}, '{texto}')";
+                        _dbHelper.ExecuteQuery(sSQL);
                     }
                 }
             }
@@ -345,7 +439,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         {
             try
             {
-                var query = $"UPDATE EVENTO SET NOME = '{evento.Nome}', PARTICIPANTES = '{evento.Participantes}' WHERE Id = {evento.Id}";
+                //var query = $"UPDATE EVENTO SET NOME = '{evento.Nome}', PARTICIPANTES = '{evento.Participantes}' WHERE Id = {evento.Id}";
+                var query = $"UPDATE EVENTO SET NOME = '{evento.Nome}' WHERE Id = {evento.Id}";
                 _dbHelper.ExecuteQuery(query);
             }
             catch (Exception ex)

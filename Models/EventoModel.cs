@@ -3,8 +3,7 @@
     public class EventoModel
     {
         public int Id {get; set;}
-        public string Nome {get; set;}
-        public string Participantes {get; set;}                
+        public string Nome {get; set;}                 
         public IFormFile ImagemCertificado {get; set;}
     }
 }
