@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emissor de Certificados</title>
-    <div id="logoEmescam"><img src="/LogoEmescam.png" alt="logo"></div>
     <link rel="stylesheet" href="~/css/Home_Organizador.css">
     <script src="~/js/Home_Organizador.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+    <img id="logo" src="/logoemescam.png" alt="logo">
 
 </head>
 
@@ -49,20 +49,22 @@
                 <button onclick="importarArteCertificado()">Importar Certificado</button>
             </div>
             <!--Tabela que será preenchida-->
-            <table id="tabela" class="display">
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>CPF</th>
-                        <th>Email</th>
-                        <th>Tipo Pessoa</th>
-                        <th>Texto</th>
-                        <th>ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
+            <div class="scrollable">
+                <table id="tabela" class="display">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>CPF</th>
+                            <th>Email</th>
+                            <th>Tipo Pessoa</th>
+                            <th>Texto</th>
+                            <th>ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
             <button id="CadastrarEvento">Cadastrar Evento</button>
         </div>
 
