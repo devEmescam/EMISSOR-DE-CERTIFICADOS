@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emissor de Certificados</title>
     <div id="logoEmescam"><img src="/LogoEmescam.png" alt="logo"></div>
-
+    <link rel="stylesheet" href="~/css/Home_Organizador.css">
+    <script src="~/js/Home_Organizador.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+
 </head>
 
 <body>
@@ -19,6 +21,7 @@
                 <a id="sair-link" class="nav-link text-dark" asp-action="Login" asp-controller="Organizador">Sair</a>
             </div>
         </form>
+
 
         <!--CADASTRAR EVENTO-->
         <div id="card-evento" class="card">
@@ -33,17 +36,16 @@
                 <input type="text" id="inputCPF" placeholder="CPF">
                 <input type="text" id="inputEmail1" placeholder="Email">
                 <input type="text" id="tipoPessoa" placeholder="Tipo Pessoa">
-                <textarea id="textareaTexto" placeholder="Texto"></textarea>                
+                <textarea id="textareaTexto" placeholder="Texto"></textarea>
+                <!-- <button id="botaoAdicionar" onclick="atualizarDados()">Adicionar Dados</button> -->
                 <button id="botaoAcao" onclick="atualizarDados()">Adicionar Dados</button>
             </div>
             <hr>
             <div class="upload-container">
                 <!-- Botão de importar EXCEL -->
-                <input type="file" id="excelFile" accept=".xlsx">                
+                <input type="file" id="excelFile" accept=".xlsx">
                 <button onclick="importarExcel()">Importar Pessoas</button>
-
-                <!-- Botão de importar ARTE CERITIFICADO -->
-                <input type="file" id="arteCertificadoFile" accept=".jpeg, .jpg">
+                <input type="file" id="arteCertificadoFile" accept=".jpeg">
                 <button onclick="importarArteCertificado()">Importar Certificado</button>
             </div>
             <!--Tabela que será preenchida-->
@@ -55,14 +57,34 @@
                         <th>Email</th>
                         <th>Tipo Pessoa</th>
                         <th>Texto</th>
-                        <th>Ações</th>
+                        <th>ações</th>
                     </tr>
                 </thead>
                 <tbody>
                 </tbody>
             </table>
             <button id="CadastrarEvento">Cadastrar Evento</button>
-        </div>       
+        </div>
+
+        @* <div id="card-meus-eventos" class="card">
+        <h4>Meus Eventos</h4>
+        <!-- Botão de "Adicionar Evento" -->
+        <button class="botao-adicionar" onclick="exibirFormularioAdicionar()"></button>
+
+        <!-- Campo de pesquisa -->
+        <input type="text" id="campo-pesquisa" placeholder="Pesquisar eventos...">
+
+        <div class="tabela-eventos">
+        <!-- Tabela de eventos -->
+        <table>
+        <tr>
+        <td class="eventos">Informações do evento 1</td>
+        </tr>
+        </table>
+        </div>
+        </div> *@
+
+
 
         <div id="card-meus-eventos" class="card">
             <h4>Meus Eventos</h4>
@@ -83,11 +105,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var evento in Model) 
+                        @foreach (var evento in Model)
                         {
                             <tr>
                                 <td>@evento.Id</td>
-                                <td>@evento.Nome</td>                                
+                                <td>@evento.Nome</td>
                                 <td>
                                     <!-- Miniatura da imagem -->
                                     <img src="@Url.Action("VisualizarImagem", "Home_Organizador", new { id = evento.Id })"
@@ -101,7 +123,6 @@
                 </table>
             </div>
         </div>
-
         <div id="card-buscar-pessoas" class="card">
             Informações sobre Buscar Pessoas
         </div>
@@ -355,7 +376,8 @@
         // Adiciona o nome do evento como texto dentro da célula da nova linha
         celulaEvento.textContent = nomeEvento;
     });
-    
+
+
     // Função para importar dados da planilha Excel e preencher a tabela
     function importarExcel() {
         var input = document.getElementById('excelFile');
@@ -405,6 +427,8 @@
 
         reader.readAsArrayBuffer(file);
     }
-    
-</script>
 
+
+
+
+</script>
