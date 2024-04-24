@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="~/css/Home_Organizador.css">
     <script src="~/js/Home_Organizador.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
-    <img id="logo" src="/logoemescam.png" alt="logo">
 
 </head>
 
@@ -21,7 +20,6 @@
                 <a id="sair-link" class="nav-link text-dark" asp-action="Login" asp-controller="Organizador">Sair</a>
             </div>
         </form>
-
 
         <!--CADASTRAR EVENTO-->
         <div id="card-evento" class="card">
@@ -45,48 +43,26 @@
                 <!-- Botão de importar EXCEL -->
                 <input type="file" id="excelFile" accept=".xlsx">
                 <button onclick="importarExcel()">Importar Pessoas</button>
-                <input type="file" id="arteCertificadoFile" accept=".jpeg">
+                <input type="file" id="arteCertificadoFile" accept=".jpeg, .jpg">
                 <button onclick="importarArteCertificado()">Importar Certificado</button>
             </div>
             <!--Tabela que será preenchida-->
-            <div class="scrollable">
-                <table id="tabela" class="display">
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>CPF</th>
-                            <th>Email</th>
-                            <th>Tipo Pessoa</th>
-                            <th>Texto</th>
-                            <th>ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-            </div>
+            <table id="tabela" class="display">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>CPF</th>
+                        <th>Email</th>
+                        <th>Tipo Pessoa</th>
+                        <th>Texto</th>
+                        <th>ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
             <button id="CadastrarEvento">Cadastrar Evento</button>
         </div>
-
-        @* <div id="card-meus-eventos" class="card">
-        <h4>Meus Eventos</h4>
-        <!-- Botão de "Adicionar Evento" -->
-        <button class="botao-adicionar" onclick="exibirFormularioAdicionar()"></button>
-
-        <!-- Campo de pesquisa -->
-        <input type="text" id="campo-pesquisa" placeholder="Pesquisar eventos...">
-
-        <div class="tabela-eventos">
-        <!-- Tabela de eventos -->
-        <table>
-        <tr>
-        <td class="eventos">Informações do evento 1</td>
-        </tr>
-        </table>
-        </div>
-        </div> *@
-
-
 
         <div id="card-meus-eventos" class="card">
             <h4>Meus Eventos</h4>
@@ -107,7 +83,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var evento in Model)
+                      <!--  @foreach (var evento in Model)
                         {
                             <tr>
                                 <td>@evento.Id</td>
@@ -429,7 +405,54 @@
                 }
             });
         };
-
         reader.readAsArrayBuffer(file);
     }
+
+    // Função para enviar os dados do evento para o controller
+    function enviarDadosEvento() {
+        // Obter o nome do evento
+        var nomeEvento = document.getElementById('nomeEvento').value;
+
+        // Obter a imagem do certificado
+        var arquivoCertificado = document.getElementById('arteCertificadoFile').files[0];
+
+        // Obter os dados da tabela
+        var tabela = document.getElementById('tabela');
+        var dadosTabela = [];
+        var linhas = tabela.getElementsByTagName('tr');
+
+        for (var i = 0; i < linhas.length; i++) {
+            var linha = linhas[i];
+            var celulas = linha.getElementsByTagName('td');
+            var dadosLinha = [];
+
+            for (var j = 0; j < celulas.length - 1; j++) { // Ignorar a última célula (contendo botões)
+                dadosLinha.push(celulas[j].textContent);
+            }
+
+            dadosTabela.push(dadosLinha);
+        }
+
+        // Construir o objeto FormData para enviar os dados
+        var formData = new FormData();
+        formData.append('Nome', nomeEvento);
+        formData.append('ImagemCertificado', arquivoCertificado);
+
+        // Enviar os dados para o controller usando AJAX
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/Home_Organizador/NovoEvento');
+        xhr.setRequestHeader('Content-Type', 'application/json'); // Definir o tipo de conteúdo como JSON
+        xhr.onload = function () {
+            // Tratar a resposta do servidor, se necessário
+            if (xhr.status === 200) {
+                alert('Evento cadastrado com sucesso!');
+                // Redirecionar para a página inicial, por exemplo
+                window.location.href = '/Home_Organizador/Index';
+            } else {
+                alert('Erro ao cadastrar o evento. Por favor, tente novamente.');
+            }
+        };
+        xhr.send(JSON.stringify(dadosTabela)); // Enviar os dados da tabela como JSON
+    }
+
 </script>
