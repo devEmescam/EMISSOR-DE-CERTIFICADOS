@@ -27,17 +27,21 @@
             <hr>
             <!-- Input para o nome do evento -->
             <input type="text" id="nomeEvento" placeholder="Nome do Evento">
-
+            <hr>
             <!--Aqui preenchem os dados-->
-            <div id="dados-form">
-                <input type="text" id="inputNome" placeholder="Nome">
-                <input type="text" id="inputCPF" placeholder="CPF">
-                <input type="text" id="inputEmail1" placeholder="Email">
-                <input type="text" id="tipoPessoa" placeholder="Tipo Pessoa">
+            <div class="dados-form">
+                <div id="divDados">
+                    <input type="text" id="inputNome" placeholder="Nome">
+                    <input type="text" id="inputCPF" placeholder="CPF">
+                    <input type="text" id="inputEmail1" placeholder="Email">
+                    <input type="text" id="tipoPessoa" placeholder="Tipo Pessoa">
+                </div>
                 <textarea id="textareaTexto" placeholder="Texto"></textarea>
-                <!-- <button id="botaoAdicionar" onclick="atualizarDados()">Adicionar Dados</button> -->
-                <button id="botaoAcao" onclick="atualizarDados()">Adicionar Dados</button>
             </div>
+
+            <button id="botaoAcao" onclick="atualizarDados()">Adicionar Dados</button>
+
+
             <hr>
             <div class="upload-container">
                 <!-- Botão de importar EXCEL -->
@@ -46,21 +50,26 @@
                 <input type="file" id="arteCertificadoFile" accept=".jpeg, .jpg">
                 <button onclick="importarArteCertificado()">Importar Certificado</button>
             </div>
+
+
             <!--Tabela que será preenchida-->
-            <table id="tabela" class="display">
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>CPF</th>
-                        <th>Email</th>
-                        <th>Tipo Pessoa</th>
-                        <th>Texto</th>
-                        <th>ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
+            <div class="tabela-container">
+                <table id="tabela" class="display">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>CPF</th>
+                            <th>Email</th>
+                            <th>Tipo Pessoa</th>
+                            <th>Texto</th>
+                            <th>ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+
             <button id="CadastrarEvento">Cadastrar Evento</button>
         </div>
 
@@ -83,7 +92,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                      <!--  @foreach (var evento in Model)
+                        @foreach (var evento in Model)
                         {
                             <tr>
                                 <td>@evento.Id</td>
@@ -454,5 +463,58 @@
         };
         xhr.send(JSON.stringify(dadosTabela)); // Enviar os dados da tabela como JSON
     }
+
+
+   @*  // Função para validar o CPF
+    function validarCPF(cpf) {
+        cpf = cpf.replace(/[^\d]/g, ''); // Remove caracteres não numéricos
+
+        if (cpf.length !== 11 || !/[0-9]{11}/.test(cpf)) {
+            return false; // Retorna falso se o CPF não tiver 11 dígitos numéricos
+        }
+
+        // Verifica se todos os dígitos são iguais
+        if (/^(\d)\1{10}$/.test(cpf)) {
+            return false;
+        }
+
+        // Calcula o primeiro dígito verificador
+        let soma = 0;
+        for (let i = 0; i < 9; i++) {
+            soma += parseInt(cpf.charAt(i)) * (10 - i);
+        }
+        let resto = 11 - (soma % 11);
+        let digitoVerificador1 = resto === 10 || resto === 11 ? 0 : resto;
+
+        // Verifica o primeiro dígito verificador
+        if (digitoVerificador1 !== parseInt(cpf.charAt(9))) {
+            return false;
+        }
+
+        // Calcula o segundo dígito verificador
+        soma = 0;
+        for (let i = 0; i < 10; i++) {
+            soma += parseInt(cpf.charAt(i)) * (11 - i);
+        }
+        resto = 11 - (soma % 11);
+        let digitoVerificador2 = resto === 10 || resto === 11 ? 0 : resto;
+
+        // Verifica o segundo dígito verificador
+        if (digitoVerificador2 !== parseInt(cpf.charAt(10))) {
+            return false;
+        }
+
+        return true; // Retorna verdadeiro se o CPF for válido
+    }
+
+    // Função para validar o CPF quando o input perde o foco
+    document.getElementById('inputCPF').addEventListener('blur', function () {
+        let cpf = this.value;
+        if (!validarCPF(cpf)) {
+            alert('CPF inválido');
+            this.value = ''; // Limpa o campo se o CPF for inválido
+        }
+    }); *@
+
 
 </script>

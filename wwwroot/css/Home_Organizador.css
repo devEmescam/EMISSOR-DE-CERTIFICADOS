@@ -1,4 +1,5 @@
-<style >
+
+<style>
 
 #logoEmescam {}
 #logo {
@@ -123,22 +124,35 @@ body {
     flex-direction: column;
     align-items: flex-start;
 }
-
-#dados-form {
+#divDados{
+    float:left;
+    margin-left:-3.5%;
+}
+.dados-form {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 80%;
-    padding: 20px;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between; /* Distribui os itens uniformemente */
+    width: 100%;
 }
 
 #textareaTexto {
-    width: 100%;
+    width: 200%; 
+    height: 150px; 
     padding: 10px;
-    margin-bottom: 10px;
+    margin-left: -40px; /* Adiciona um espaço entre o textarea e os inputs */
     border: 1px solid #ccc;
     border-radius: 5px;
     box-sizing: border-box;
+}
+
+.dados-form input,
+.dados-form textarea {
+    margin-bottom: 10px; /* Adiciona espaço entre os elementos */
+}
+
+.dados-form input {
+    width: calc(70% - 10px); /* Ajuste conforme necessário */
 }
 
 .upload-container {
@@ -173,22 +187,28 @@ body {
 #tabela {
     width: 100%;
     border-collapse: collapse;
-    max-height: 10px; /* Altura máxima da tabela */
-    overflow-y: auto; /* Adicionar rolagem vertical quando necessário */
+    max-height: 300px;
 }
 
     #tabela th {
         background-color: #f2f2f2; /* Cor de fundo do cabeçalho */
     }
+    #tabela tbody tr {
+        border-bottom: 1px solid black;
+    }
 
     /* Estilos para linhas alternadas */
     #tabela tbody tr:nth-child(even) {
         background-color: #f9f9f9; /* Cor de fundo para linhas pares */
+        
+    }
+    #tabela tbody tr:nth-child(odd) {
+        background-color: white; /* Cor de fundo para linhas ímpares */
     }
 
-/* Estilo para a rolagem automática */
-.scrollable {
-    max-height: 270px; /* Ajuste a altura máxima conforme necessário */
-    overflow-y: auto;
+.tabela-container {
+    max-height: 320px; 
+    overflow-y: auto; 
 }
+
 </style>
