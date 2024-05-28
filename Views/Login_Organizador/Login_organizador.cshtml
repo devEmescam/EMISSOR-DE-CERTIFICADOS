@@ -14,17 +14,17 @@
 
     <div>
         <div class="cartao-login">
-            <h2 style="font-family: 'anek Kannada';">Login</h2>
-            <h7 style="font-family: 'anek Kannada';">ORGANIZADOR</h7>
+            <h3 style="color: white;">LOGIN</h3>
+            <h7 style="color: white;">ORGANIZADOR</h7>
 
             <!-- Exibir mensagens de erro -->
             <div asp-validation-summary="All" class="text-danger"></div>
 
             <form method="post" asp-action="LoginOrganizador" asp-controller="Login">
                 <div>
-                    <input type="text" placeholder="Usuário" name="Login" required>
-                    <input type="password" placeholder="Senha" name="Senha" required>
-                    <button style="font-family: 'anek kannada';" type="submit">Entrar</button>
+                    <input type="text" placeholder="Usuário" name="Login" required style="background: white; border: 2px solid white; color: black;">
+                    <input type="password" placeholder="Senha" name="Senha" required style="background: white; border: 2px solid white; color: black;">
+                    <button style="background: transparent; border: 2px solid white; border-radius: 5px; padding: 10px; font-size: 16px; cursor: pointer; transition: all 0.3s ease; width: 100%; color: white; font-weight: bold;" onmouseover="this.style.background='white'; this.style.color='black';" onmouseout="this.style.background='transparent'; this.style.color='white';">Entrar</button>
                 </div>
             </form>
         </div>
@@ -60,9 +60,8 @@
     }
 
     .cartao-login {
-        background: white;
+        background: transparent;
         border-radius: 15px;
-        box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.2);
         padding: 40px;
         width: 300px;
         max-width: 90%;
@@ -71,11 +70,12 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
+        border: 2px solid white;
     }
 
         .cartao-login h2 {
             margin-bottom: 20px;
-            color: #333;
+            color: white;
         }
 
         .cartao-login input[type="text"],
@@ -83,10 +83,12 @@
             width: 100%;
             padding: 10px;
             margin-bottom: 20px;
-            border: 1px solid #ccc;
+            border: 2px solid white;
             border-radius: 5px;
             box-sizing: border-box;
             outline: none;
+            background: transparent;
+            color: white;
         }
 
         .cartao-login button {

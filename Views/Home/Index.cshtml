@@ -12,35 +12,30 @@
 <body>
     <div id="logoEmescam"><img src="/LogoEmescam.png" alt="logo"></div>
 
-    <h1 class="display-4">Emissor de Certificados</h1>
-
-    <div class="container">
-        <div class="acesso">
-            <a id="btn-participantes" class="nav-link text-dark" asp-action="Login" asp-controller="Participante">Acesso a Participantes</a>
-            <p>Se você tiver dúvidas ao acessar, por favor,<br>entre em contato para que possamos te ajudar!</p>
+    <div class="acessos">
+        <div class="participantes">
+            <img id="imgParticipantes" src="/grupo-de-usuarios (1).png"></img>
+            <p id="pParticipantes">ACESSO A<br> <span class="destaque">PARTICIPANTES</span></p>
+            <a id="btn-participantes" class="nav-link text-dark" asp-action="Login" asp-controller="Participante">ACESSAR</a>
         </div>
 
-        <div class="acesso">
-            <a id="btn-organizador" class="nav-link text-dark" asp-action="Login" asp-controller="Organizador">Acesso a Organizadores</a>
-            <p>Se você tiver dúvidas ao acessar, por favor,<br>entre em contato para que possamos te ajudar!</p>
+        <div class="organizador">
+            <img id="imgOrganizador" src="/homem-usuario (1).png"></img>
+            <p id="pOrganizador">ACESSO A<br> <span class="destaque">ORGANIZADOR</span></p>
+            <a id="btn-organizador" class="nav-link text-dark" asp-action="Login" asp-controller="Organizador">ACESSAR</a>
         </div>
     </div>
 </body>
 </html>
 <style>
-    #logoEmescam {
-        position: fixed;
-        top: 70px;
-        left: 150px;
-        transform: translate(-50%, -50%);
-        border-radius: 5px;
-        width: 300px;
-        text-align: center;
-    }
 
-        #logoEmescam img {
-            width: 350px;
-        }
+    #logoEmescam img {
+        width: 500px;
+        position: fixed;
+        top: -2%;
+        left: 50%;
+        transform: translateX(-50%);
+    }
 
     body {
         margin: 0;
@@ -51,36 +46,84 @@
         height: 100vh;
         background: linear-gradient(135deg, #01f949, #14086d);
         font-family: Arial, sans-serif;
+        text-align:center;
     }
 
-    .container {
+    .acessos {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        width: 1000px;
+        height: 700px;
+    }
+
+    .participantes {
+        background-color: transparent; 
+        width: 400px;
+        height: 600px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        border-radius: 20px;
+        border: 2px solid white; 
+        color:white;
+    }
+    
+
+    .organizador {
+        background-color: transparent; 
+        width: 400px;
+        height: 600px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        border-radius: 20px;
+        border: 2px solid white; 
+        color:white;
+    }
+
+  
+
+    #btn-organizador,
+    #btn-participantes {
+        background-color: transparent;
+        width: 150px;
+        height: 50px;
+        border-radius: 20px;
+        border: 2px solid white;
+        color: white !important;
         display: flex;
         justify-content: center;
         align-items: center;
-        flex-direction: row; /*linha para os botões ficarem lado a lado */
-        gap: 20px;
+        transition: background-color 0.3s, color 0.3s;
+        font-weight: bold;
     }
 
-    .acesso {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-        .acesso a {
-            text-decoration: none;
-            color: #000;
-            margin: 10px 0;
-            padding: 10px;
-            border: 1px solid transparent;
-            transition: color 0.3s, border-color 0.3s;
-            border-color: #14086D;
-            text-align: center;
-            width: 200px;
+        #btn-organizador:hover,
+        #btn-participantes:hover {
+            background-color: white;
+            color: black !important;
         }
 
-            .acesso a:hover {
-                color: #ff0000;
-                border-color: #ff0000;
-            }
+
+    #imgParticipantes{
+        width:250px;
+    }
+    #imgOrganizador{
+        width:210px;
+        margin-bottom:25px;
+    }
+
+    .destaque {
+        font-size: 1.7em; 
+    }
 </style>
+
