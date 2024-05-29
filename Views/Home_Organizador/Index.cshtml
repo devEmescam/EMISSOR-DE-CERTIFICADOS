@@ -39,40 +39,50 @@
             </div>
             <button id="botaoAcao" onclick="atualizarDados()">Adicionar Dados</button>
             <hr>
-           
+
             <!--Tabela que será preenchida-->
             <div class="tabela-container">
                 <table id="tabela" class="display">
                     <thead>
                         <tr>
-                            <th>Nome</th>
-                            <th>CPF</th>
-                            <th>Email</th>
-                            <th>Tipo Pessoa</th>
-                            <th>Texto</th>
-                            <th>Ações</th>
+                            <th style="width: 20%">Nome</th> <!-- Aumentando a largura da coluna "Nome" -->
+                            <th style="width: 10%">CPF</th> <!-- CPF, Email, Tipo Pessoa com larguras padrão -->
+                            <th style="width: 15%">Email</th>
+                            <th style="width: 10%">Tipo Pessoa</th>
+                            <th style="width: 40%">Texto</th> <!-- Diminuindo a largura da coluna "Texto" -->
+                            <th style="width: 5%">Ações</th> <!-- Ajustando ações para não ocupar muito espaço -->
                         </tr>
                     </thead>
                     <tbody>
+                        <!-- Os dados serão inseridos dinamicamente aqui -->
                     </tbody>
                 </table>
             </div>
             <div class="upload-container">
                 <!-- Botão de importar EXCEL -->
-                <input type="file" id="excelFile" accept=".xlsx">
-                <button onclick="importarExcel()">Importar Participantes</button>
-                <span style="margin-right: 10%;"></span>
-                <input type="file" id="arteCertificadoFile" accept=".jpeg, .jpg">
+                <input type="file" id="excelFile" accept=".xlsx" style="display:none" onchange="importarExcel()">
+                <label for="excelFile" class="custom-file-upload">
+                    Importar Pessoas
+                </label>
+                <span id="fileName" style="margin-left: 10px;"></span>
+
+                <!-- Botão de importar Certificado -->
+                <input type="file" id="arteCertificadoFile" accept=".jpeg, .jpg" style="display:none" onchange="importarCertificado()">
+                <label for="arteCertificadoFile" class="custom-file-upload">
+                    Importar Certificado
+                </label>
+                <span id="certificadoFileName" style="margin-left: 10px;"></span>
             </div>
+
             <button id="CadastrarEvento" onclick="cadastrarEvento()">Cadastrar Evento</button>
         </div>
 
         <div id="card-meus-eventos" class="card">
             <h4>Meus Eventos</h4>
             <!-- Botão de "Adicionar Evento" -->
-            <button class="botao-adicionar" onclick="exibirFormularioAdicionar()">Adicionar Evento</button>
+            <button class="botao-adicionar" onclick="exibirFormularioAdicionar()"></button>
             <!-- Campo de pesquisa -->
-            <input type="text" id="campo-pesquisa" placeholder="Pesquisar eventos...">
+            <input type="text" id="campo-pesquisa" placeholder="Pesquisar eventos..." onkeyup="filtrarEventos()">
             <hr>
             <div class="tabela-eventos">
                 <!-- Tabela de eventos -->
@@ -195,6 +205,7 @@
             var colunaAcoes = linha.insertCell(-1);
             var botaoExcluir = document.createElement("button");
             botaoExcluir.textContent = "Excluir";
+            botaoExcluir.className = 'btn table-btn'; // Adiciona a classe 'table-btn'
             botaoExcluir.onclick = function () {
                 excluirLinha(linha);
             };
@@ -202,6 +213,7 @@
 
             var botaoAtualizar = document.createElement("button");
             botaoAtualizar.textContent = "Atualizar";
+            botaoAtualizar.className = 'btn table-btn'; // Adiciona a classe 'table-btn'
             botaoAtualizar.onclick = function () {
                 carregarDadosParaEditar(linha);
             };
@@ -307,14 +319,16 @@
                 }
 
                 var table = document.getElementById('tabela').getElementsByTagName('tbody')[0];
-                var rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, range: 1 });
+                table.innerHTML = ''; // Limpa a tabela antes de adicionar novas linhas
 
+                var rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, range: 1 });
                 rows.forEach(function (row, rowIndex) {
                     var newRow = table.insertRow(-1);
                     row.forEach(function (cellContent) {
                         var cell = newRow.insertCell();
                         cell.textContent = cellContent;
                     });
+                    // Adiciona botões de ação a cada linha, exceto se for a última linha do arquivo
                     if (rowIndex < rows.length - 1) {
                         adicionarBotoesLinha(newRow);
                     }
@@ -417,6 +431,24 @@
             };
             xhr.send(formData);
         }
+        function filtrarEventos() {
+            var input = document.getElementById('campo-pesquisa');
+            var filter = input.value.toUpperCase();
+            var tbody = document.getElementById("eventos-tbody");
+            var tr = tbody.getElementsByTagName("tr");
+
+            for (var i = 0; i < tr.length; i++) {
+                var td = tr[i].getElementsByTagName("td")[1]; // Index 1 é a coluna do Nome do Evento
+                if (td) {
+                    var txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
     </script>
 </body>
 </html>
@@ -448,7 +480,7 @@
 
     .cartao-menu {
         background-color: rgba(250, 235, 215, 0.5);
-        border-radius: 15px;
+        border-radius: 5px;
         box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.2);
         padding: 5%;
         width: 18%;
@@ -487,132 +519,50 @@
         position: fixed;
         top: 0;
         left: 103%;
-        border-radius: 15px;
+        border-radius: 5px;
         display: none; /* Oculta o card por padrão */
-        background-color:white;
+        background-color: white;
     }
-
-
-
-    #campo-pesquisa {
-        margin-bottom: 10px;
-        width: 30%;
-        padding: 5px;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-    }
-
-    .eventos {
-        background-color: #fff;
-        padding: 10px;
-        border: 5px solid #ccc;
-        border-radius: 5px;
-        width: 1300px;
-    }
-
-    .eventos1 {
-        background-color: #f9f9f9;
-    }
-
-    .botao-adicionar {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background-color: deepskyblue;
-        border: none;
-        color: white;
-        font-size: 24px;
-        cursor: pointer;
-        position: absolute;
-        top: 20px;
-        right: 10px;
-        overflow: hidden;
-    }
-
-        .botao-adicionar::after {
-            content: "+";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .botao-adicionar:hover {
-            background-color: green;
-        }
-
-            .botao-adicionar:hover::after {
-                color: black;
-            }
 
     #card-evento {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
-        background-color:white;
+        background-color: white;
     }
 
-    #divDados {
-        float: left;
-        margin-left: -3.5%;
+    #nomeEvento {
+        width: 96%;
+        margin-bottom: 2px;
+        margin-left: 3.7%
     }
 
     .dados-form {
         display: flex;
         flex-direction: row;
         align-items: flex-start;
-        justify-content: space-between; /* Distribui os itens uniformemente */
+        justify-content: space-between;
         width: 100%;
     }
 
+        .dados-form input, .dados-form textarea {
+            margin-bottom: 10px;
+        }
+
+        .dados-form input {
+            width: calc(70% - 10px);
+        }
+
     #textareaTexto {
-        width: 200%;
+        width: 100%;
         height: 150px;
         padding: 10px;
-        margin-left: -40px; /* Adiciona um espaço entre o textarea e os inputs */
+        margin-left: -40px;
         border: 1px solid #ccc;
         border-radius: 5px;
         box-sizing: border-box;
     }
 
-    .dados-form input,
-    .dados-form textarea {
-        margin-bottom: 10px; /* Adiciona espaço entre os elementos */
-    }
-
-    .dados-form input {
-        width: calc(70% - 10px); /* Ajuste conforme necessário */
-    }
-
-    .upload-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 1%;
-    }
-
-        .upload-container input[type="file"] {
-            margin-right: 0.3%;
-        }
-
-
-
-        .upload-container button {
-            background-color: green;
-            border: none;
-            color: white;
-            padding: 3px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-            .upload-container button:hover {
-                background-color: deepskyblue;
-            }
-
-
-    /* Estilos para a tabela */
     #tabela {
         width: 100%;
         border-collapse: collapse;
@@ -620,20 +570,19 @@
     }
 
         #tabela th {
-            background-color: #f2f2f2; /* Cor de fundo do cabeçalho */
+            background-color: #f2f2f2;
         }
 
         #tabela tbody tr {
             border-bottom: 1px solid black;
         }
 
-            /* Estilos para linhas alternadas */
             #tabela tbody tr:nth-child(even) {
-                background-color: #f9f9f9; /* Cor de fundo para linhas pares */
+                background-color: #f9f9f9;
             }
 
             #tabela tbody tr:nth-child(odd) {
-                background-color: white; /* Cor de fundo para linhas ímpares */
+                background-color: white;
             }
 
     .tabela-container {
@@ -647,7 +596,7 @@
         text-transform: uppercase;
         color: white;
         border: none;
-        border-radius: 5px;
+        border-radius: 2px;
         cursor: pointer;
         margin: 5px;
         transition: background-color 0.3s;
@@ -668,4 +617,104 @@
         button.btn-atualizar:hover {
             background-color: #007B9E;
         }
+
+    #CadastrarEvento {
+        background-color: #4CAF50; /* Verde */
+        color: white;
+        padding: 5px 10px;
+        text-align: center;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 2px;
+    }
+
+        #CadastrarEvento:hover {
+            background-color: #008CBA; /* Azul */
+        }
+
+    .upload-container {
+        position: relative;
+        width: 100%;
+        height: 60px; /* Ajuste a altura conforme necessário */
+        background-color: transparent; 
+    }
+
+    .custom-file-upload {
+        display: inline-block;
+        padding: 3px 6px;
+        cursor: pointer;
+        background-color: #007bff; /* Cor azul */
+        color: white;
+        border: none;
+        border-radius: 2px; /* Bordas arredondadas */
+        position: relative; /* Posicionamento alterado para relativo */
+        margin: 10px 5px 10px 5px; /* Margens adicionadas para espaçamento */
+    }
+
+    #excelFile + .custom-file-upload {
+        float: left; /* Posiciona o botão de Excel à esquerda */
+        margin-right: 300px; /* Aumenta a margem à direita */
+    }
+
+    #arteCertificadoFile + .custom-file-upload {
+        float: right; /* Posiciona o botão de Certificado à direita */
+        margin-left: 300px; /* Aumenta a margem à esquerda */
+    }
+
+    span {
+        position: relative; /* Ajuste de posicionamento */
+        display: inline-block; /* Tornando inline para alinhamento */
+        vertical-align: middle; /* Alinhamento vertical */
+        margin-left: 10px; /* Espaçamento após o botão */
+        background-color: #fff; /* Mantendo o fundo branco */
+        border-radius: 5px; /* Bordas levemente arredondadas */
+        padding: 2px 5px;
+    }
+
+    hr {
+        margin-top: 1px; 
+        margin-bottom: 3px;
+    }
+
+    .btn.table-btn {
+        background-color: #007bff; /* Fundo azul para o botão */
+        color: white; /* Texto rosa */
+        border: none; /* Sem borda */
+        padding: 2px; /* Espaçamento interno mínimo */
+        font-size: 10px; /* Tamanho de fonte reduzido */
+        text-align: center; /* Centraliza o texto dentro do botão */
+        border-radius: 3px; /* Bordas levemente arredondadas */
+        cursor: pointer; /* Cursor do mouse como ponteiro para indicar ação */
+        margin: 1px; /* Margem mínima entre botões */
+        transition: background-color 0.3s, color 0.3s; /* Transição suave para hover */
+        width: 70px; /* Largura fixa para todos os botões */
+    }
+
+        .btn.table-btn:hover {
+            background-color: #007bff; /* Cor de fundo ao passar o mouse */
+            color: white; /* Cor do texto ao passar o mouse */
+        }
+
+    #botaoAcao {
+        background-color: #007bff; /* Cor de fundo do botão */
+        color: white; /* Cor da fonte */
+        border: none; /* Sem borda */
+        padding: 3px 6px; /* Espaçamento interno para aumentar a área de clique */
+        font-size: 13px; /* Tamanho da fonte */
+        cursor: pointer; /* Cursor em forma de ponteiro quando passar o mouse sobre o botão */
+        border-radius: 2px; /* Bordas retangulares sem arredondamento */
+    }
+
+
+
+
+
+
+
+
 </style>
+
+
+
