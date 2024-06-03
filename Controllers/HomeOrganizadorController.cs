@@ -37,7 +37,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, $"Ocorreu um erro em Home_OrganizadorController.Index. Erro: {ex.Message}");
-            }            
+            }
         }
         // GET: /Home_Organizador/NovoEvento
         public IActionResult NovoEvento()
@@ -165,7 +165,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         public IActionResult VisualizarImagem(int id)
         {
             try
-            {               
+            {
                 byte[] imagemBytes = BuscarBytesDaImagemNoBancoDeDados(id);
 
                 // Retorna a imagem como um arquivo para o navegador
@@ -177,7 +177,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Ocorreu um erro ao tentar visualizar a imagem: {ex.Message}");
             }
         }
-        
+
         // POST:/Home_Organizador/Logout
         // No controlador para logout
         [HttpPost]
@@ -200,7 +200,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
 
         #region *** METODOS PRIVADOS ***
         // Método para retornar todos os eventos do banco de dados
-        private IEnumerable<EventoModel> BuscarTodosEventos() 
+        private IEnumerable<EventoModel> BuscarTodosEventos()
         {
             try
             {
@@ -211,40 +211,40 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 if (userId == 0)
                 {
                     throw new Exception($"Falha ao identificar usuário logado.");
-                }               
+                }
 
                 var query = $"SELECT ID, NOME, IMAGEM_CERTIFICADO FROM EVENTO WHERE ID_USUARIO_ADMINISTRATIVO = {userId}";
                 var dataTable = _dbHelper.ExecuteQuery(query);
                 var eventos = new List<EventoModel>();
 
-                foreach (DataRow row in dataTable.Rows) 
+                foreach (DataRow row in dataTable.Rows)
                 {
                     // Converte a string base64 para um array de bytes                    
-                    byte[] imagemBytes = row["IMAGEM_CERTIFICADO"] as byte[];                                       
+                    byte[] imagemBytes = row["IMAGEM_CERTIFICADO"] as byte[];
 
                     eventos.Add(new EventoModel
                     {
                         Id = Convert.ToInt32(row["ID"]),
                         Nome = Convert.ToString(row["NOME"]),
                         ImagemCertificado = Util.ConvertToFormFile(imagemBytes)
-                    });                
+                    });
                 }
 
                 return eventos;
             }
             catch (Exception ex)
-            {                
+            {
                 throw new Exception($"Ocorreu um erro em [Home_OrganizadorController.BuscarTodosEventos] Erro: {ex.Message}");
             }
         }
         // Método para inserir um novo evento no banco de dados.
-        private EventoModel BuscarEventoPorId(int id) 
+        private EventoModel BuscarEventoPorId(int id)
         {
             try
             {
                 var query = $"SELECT * FROM EVENTO WHERE ID = {id}";
                 var dataTable = _dbHelper.ExecuteQuery(query);
-                if (dataTable.Rows.Count > 0) 
+                if (dataTable.Rows.Count > 0)
                 {
                     var row = dataTable.Rows[0];
 
@@ -254,7 +254,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
 
                     // Cria um objeto IFormFile a partir do array de bytes
                     IFormFile imagemCertificado = new FormFile(new MemoryStream(imagemBytes), 0, imagemBytes.Length, "ImagemCertificado", "imagem.jpg");
-                    
+
                     return new EventoModel
                     {
                         Id = Convert.ToInt32(row["ID"]),
@@ -291,14 +291,9 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             }
         }
 
-
-
-
-
-        private void InserirEvento( EventoModel evento, List<List<string>> dadosTabela)
+        private void InserirEvento(EventoModel evento, List<List<string>> dadosTabela)
         {
             int idEvento = -1;
-            int idPessoa = -1;
             string sSQL = "";
 
             try
@@ -320,8 +315,13 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 sSQL = $"INSERT INTO EVENTO (NOME, IMAGEM_CERTIFICADO) " +
                        $"VALUES ('{evento.Nome}', @ImagemCertificado);" +
                        "SELECT SCOPE_IDENTITY();"; // Obtem o ID do evento inserido
-                                                   // 
-                idEvento = _dbHelper.ExecuteScalar<int>(sSQL, imagemBytes);
+
+                var parameters = new Dictionary<string, object>
+        {
+            { "@ImagemCertificado", imagemBytes }
+        };
+
+                idEvento = _dbHelper.ExecuteScalar<int>(sSQL, parameters);
 
                 // Processar os dados da tabela
                 foreach (var dadosLinha in dadosTabela)
@@ -361,6 +361,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 throw new Exception($"Ocorreu um erro em [Home_OrganizadorController.InserirEvento] Erro: {ex.Message}");
             }
         }
+
         // Método para atualizar uma pessoa no banco de dados
         private void AtualizarEvento(EventoModel evento)
         {
@@ -374,7 +375,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             {
                 throw new Exception($"Ocorreu um erro em [Home_OrganizadorController.AtualizarEvento] Erro: {ex.Message}");
             }
-        }        
+        }
         private byte[] BuscarBytesDaImagemNoBancoDeDados(int id)
         {
             try
@@ -382,9 +383,9 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 // Comando SQL para selecionar a imagem do evento com o ID fornecido
                 string sql = "SELECT IMAGEM_CERTIFICADO FROM EVENTO WHERE ID = @Id";
 
-                byte[] imagemBytes = _dbHelper.ExecuteQueryArrayBytes(sql,id);
+                byte[] imagemBytes = _dbHelper.ExecuteQueryArrayBytes(sql, id);
 
-                return imagemBytes; 
+                return imagemBytes;
             }
             catch (Exception ex)
             {

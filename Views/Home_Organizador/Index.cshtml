@@ -103,7 +103,15 @@
         </div>
 
         <div id="card-buscar-pessoas" class="card">
-            Informações sobre Buscar Pessoas
+            <div>
+                <input type="text" id="searchInput" placeholder="Digite o nome da pessoa">
+                <button onclick="buscarPessoas()">Buscar</button>
+                <div id="resultList"></div>
+                <div class="details" id="details"></div>
+            </div>
+        </div>
+
+
         </div>
     </div>
 
@@ -527,6 +535,55 @@
             resultado = (soma % 11) < 2 ? 0 : 11 - (soma % 11);
             return resultado == parseInt(digitos.charAt(1));
         }
+
+        function buscarPessoas() {
+            var nome = $("#searchInput").val();
+            if (nome.length >= 3) { // Buscar apenas se o nome tiver 3 ou mais caracteres
+                $.ajax({
+                    url: '/Pessoa/BuscarPessoas',
+                    type: 'GET',
+                    data: { nome: nome },
+                    success: function (data) {
+                        var resultList = $("#resultList");
+                        resultList.empty(); // Limpar resultados anteriores
+
+                        data.forEach(function (pessoa) {
+                            var item = $("<div class='result-item'></div>")
+                                .text(pessoa.Nome)
+                                .data("id", pessoa.Id)
+                                .on("click", function () {
+                                    exibirDetalhes($(this).data("id"));
+                                });
+                            resultList.append(item);
+                        });
+                    },
+                    error: function () {
+                        alert("Erro ao buscar pessoas.");
+                    }
+                });
+            }
+        }
+
+        function exibirDetalhes(id) {
+            $.ajax({
+                url: '/Pessoa/DetalhesPessoa',
+                type: 'GET',
+                data: { id: id },
+                success: function (data) {
+                    var details = $("#details");
+                    details.empty(); // Limpar detalhes anteriores
+
+                    details.append("<p>Nome: " + data.Nome + "</p>");
+                    details.append("<p>Email: " + data.Email + "</p>");
+                    details.append("<p>CPF: " + data.CPF + "</p>");
+                },
+                error: function () {
+                    alert("Erro ao obter detalhes da pessoa.");
+                }
+            });
+        }
+
+
     </script>
 
 </body>
@@ -788,6 +845,23 @@
 
     .duplicado {
         background-color: yellow !important; /* Adiciona !important para garantir aplicação */
+    }
+
+    #resultadosBusca div {
+        cursor: pointer;
+        padding: 5px;
+        margin-top: 2px;
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+    }
+
+        #resultadosBusca div:hover {
+            background-color: #e9e9e9;
+        }
+
+    #detalhesPessoa p {
+        font-size: 14px;
+        color: #333;
     }
 
 </style>
