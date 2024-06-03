@@ -109,10 +109,10 @@
                 <div id="resultList"></div>
                 <div class="details" id="details"></div>
             </div>
+
         </div>
 
 
-        </div>
     </div>
 
     <script>
@@ -549,10 +549,12 @@
 
                         data.forEach(function (pessoa) {
                             var item = $("<div class='result-item'></div>")
-                                .text(pessoa.Nome)
-                                .data("id", pessoa.Id)
+                                .text(pessoa.nome)  // Certifique-se de que "pessoa.nome" está correto
+                                .data("id", pessoa.id)  // Certifique-se de que "pessoa.id" está correto
+                                .data("cpf", pessoa.cpf)
+                                .data("email", pessoa.email)
                                 .on("click", function () {
-                                    exibirDetalhes($(this).data("id"));
+                                    exibirDetalhes($(this).data("id"), $(this).text(), $(this).data("cpf"), $(this).data("email"));
                                 });
                             resultList.append(item);
                         });
@@ -564,25 +566,15 @@
             }
         }
 
-        function exibirDetalhes(id) {
-            $.ajax({
-                url: '/Pessoa/DetalhesPessoa',
-                type: 'GET',
-                data: { id: id },
-                success: function (data) {
-                    var details = $("#details");
-                    details.empty(); // Limpar detalhes anteriores
+        function exibirDetalhes(id, nome, cpf, email) {
+            var details = $("#details");
+            details.empty(); // Limpar detalhes anteriores
 
-                    details.append("<p>Nome: " + data.Nome + "</p>");
-                    details.append("<p>Email: " + data.Email + "</p>");
-                    details.append("<p>CPF: " + data.CPF + "</p>");
-                },
-                error: function () {
-                    alert("Erro ao obter detalhes da pessoa.");
-                }
-            });
+            details.append("<p>ID: " + id + "</p>");
+            details.append("<p>Nome: " + nome + "</p>");
+            details.append("<p>CPF: " + cpf + "</p>");
+            details.append("<p>Email: " + email + "</p>");
         }
-
 
     </script>
 

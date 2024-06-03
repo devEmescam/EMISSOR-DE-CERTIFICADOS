@@ -117,32 +117,24 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         public IActionResult BuscarPessoas(string nome)
         {
             var pessoas = BuscarPessoasPorNome(nome)
-                          .Select(p => new { p.Id, p.Nome })
+                          .Select(p => new { p.Id, p.Nome, p.CPF, p.Email })
                           .ToList();
             return Json(pessoas);
         }
 
-        [HttpGet]
-        public IActionResult DetalhesPessoa(int id)
-        {
-            var pessoa = BuscarPessoaPorId(id);
-            if (pessoa == null)
-            {
-                return NotFound();
-            }
-            return Json(new { pessoa.Nome, pessoa.Email, pessoa.CPF });
-        }
 
-        // Método para buscar pessoas pelo nome
+
+
+        // Método para buscar pessoas pelo nome       
         private IEnumerable<PessoaModel> BuscarPessoasPorNome(string nome)
         {
             try
             {
-                var query = "SELECT Id, Nome FROM PESSOA WHERE Nome LIKE @Nome";
+                var query = "SELECT Id, Nome, CPF, Email FROM PESSOA WHERE Nome LIKE @Nome";
                 var parameters = new Dictionary<string, object>
-                {
-                    { "@Nome", "%" + nome + "%" }
-                };
+        {
+            { "@Nome", "%" + nome + "%" }
+        };
                 var dataTable = _dbHelper.ExecuteQuery(query, parameters);
                 var pessoas = new List<PessoaModel>();
 
@@ -151,7 +143,9 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                     pessoas.Add(new PessoaModel
                     {
                         Id = Convert.ToInt32(row["Id"]),
-                        Nome = Convert.ToString(row["Nome"])
+                        Nome = Convert.ToString(row["Nome"]),
+                        CPF = Convert.ToString(row["CPF"]),
+                        Email = Convert.ToString(row["Email"])
                     });
                 }
 
@@ -162,6 +156,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 throw new Exception($"Ocorreu um erro em [PessoaController.BuscarPessoasPorNome] Erro: {ex.Message}");
             }
         }
+
 
         // Método para retornar uma pessoa específica pelo ID
         private PessoaModel BuscarPessoaPorId(int id)

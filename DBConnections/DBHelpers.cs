@@ -61,6 +61,7 @@ namespace EMISSOR_DE_CERTIFICADOS.DBConnections
             }
         }
 
+
         public byte[] ExecuteQueryArrayBytes(string query, int id, string connectionName = "CertificadoConnection")
         {
             try
