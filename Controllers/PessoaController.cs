@@ -110,7 +110,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         }
         #endregion
 
-        #region *** METODOS PRIVADOS ***
+        #region *** METODOS ***
 
         // Método para retornar todas as pessoas do banco de dados
         private IEnumerable<PessoaModel> BuscarTodasPessoas()
@@ -254,7 +254,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             }
         }
 
-        public int ObterIdPessoaPorCPF(string cpf)
+        private int ObterIdPessoaPorCPF(string cpf)
         {
             try
             {
