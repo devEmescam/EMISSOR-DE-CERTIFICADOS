@@ -138,7 +138,6 @@
             }
         }
 
-        //AQUI ESTAO OS EVENTOS CADASTRADOS
         var eventos = [
             { id: 20376, nome: "CAAL 2020 - CAAL Convida: SUS, História e Desafios", data: "09/11/2020", imagem: "path/to/image1.png" },
             { id: 20373, nome: "CAAL 2020 - CAAL Convida: Crises Sanitárias e Negacionismo", data: "09/11/2020", imagem: "path/to/image2.png" },
@@ -169,10 +168,9 @@
                 celulaImagem.appendChild(img);
 
                 var celulaAcoes = novaLinha.insertCell(3);
-
                 var botaoEmitir = document.createElement('button');
                 botaoEmitir.textContent = 'Emitir certificado';
-                botaoEmitir.className = 'btn btn-emitir'; // Classe para estilizar
+                botaoEmitir.className = 'btn btn-emitir';
                 botaoEmitir.onclick = function () {
                     emitirCertificado(evento.nome);
                 };
@@ -180,22 +178,22 @@
 
                 var botaoAtualizar = document.createElement('button');
                 botaoAtualizar.textContent = 'Atualizar';
-                botaoAtualizar.className = 'btn btn-atualizar'; // Classe para estilizar
+                botaoAtualizar.className = 'btn btn-atualizar';
                 botaoAtualizar.onclick = function () {
                     atualizarEvento(evento.nome);
                 };
                 celulaAcoes.appendChild(botaoAtualizar);
             });
+
+            destacarCPFsInvalidos();
         }
 
         function emitirCertificado(nome) {
             alert('Emitir certificado para: ' + nome);
-            // Lógica para emitir certificado
         }
 
         function atualizarEvento(nome) {
             alert('Atualizar evento: ' + nome);
-            // Lógica para atualizar evento
         }
 
         var modoAdicionar = true;
@@ -205,15 +203,16 @@
             var colunaAcoes = linha.insertCell(-1);
             var botaoExcluir = document.createElement("button");
             botaoExcluir.textContent = "Excluir";
-            botaoExcluir.className = 'btn table-btn'; // Adiciona a classe 'table-btn'
+            botaoExcluir.className = 'btn table-btn';
             botaoExcluir.onclick = function () {
                 excluirLinha(linha);
+                destacarCPFsInvalidos();
             };
             colunaAcoes.appendChild(botaoExcluir);
 
             var botaoAtualizar = document.createElement("button");
             botaoAtualizar.textContent = "Atualizar";
-            botaoAtualizar.className = 'btn table-btn'; // Adiciona a classe 'table-btn'
+            botaoAtualizar.className = 'btn table-btn';
             botaoAtualizar.onclick = function () {
                 carregarDadosParaEditar(linha);
             };
@@ -241,41 +240,41 @@
                 var celulaTipoPessoa = novaLinha.insertCell(3);
                 var celulaTexto = novaLinha.insertCell(4);
 
-                celulaNome.innerHTML = nome;
-                celulaCPF.innerHTML = cpf;
-                celulaEmail.innerHTML = email;
-                celulaTipoPessoa.innerHTML = tipoPessoa;
-                celulaTexto.innerHTML = texto;
+                celulaNome.textContent = nome;
+                celulaCPF.textContent = cpf;
+                celulaEmail.textContent = email;
+                celulaTipoPessoa.textContent = tipoPessoa;
+                celulaTexto.textContent = texto;
 
                 adicionarBotoesLinha(novaLinha);
                 limparCampos();
-                destacarDuplicatas(); // Chama função para destacar duplicatas
+                destacarCPFsInvalidos();
             } else {
                 var celulas = linhaEditavel.getElementsByTagName("td");
-                celulas[0].innerHTML = document.getElementById("inputNome").value;
-                celulas[1].innerHTML = document.getElementById("inputCPF").value;
-                celulas[2].innerHTML = document.getElementById("inputEmail1").value;
-                celulas[3].innerHTML = document.getElementById("tipoPessoa").value;
-                celulas[4].innerHTML = document.getElementById("textareaTexto").value;
+                celulas[0].textContent = document.getElementById("inputNome").value;
+                celulas[1].textContent = document.getElementById("inputCPF").value;
+                celulas[2].textContent = document.getElementById("inputEmail1").value;
+                celulas[3].textContent = document.getElementById("tipoPessoa").value;
+                celulas[4].textContent = document.getElementById("textareaTexto").value;
                 alternarModo();
                 limparCampos();
-                destacarDuplicatas(); // Chama função para destacar duplicatas
+                destacarCPFsInvalidos();
             }
         }
 
         function excluirLinha(linha) {
             var index = linha.rowIndex;
             document.getElementById("tabela").deleteRow(index);
-            destacarDuplicatas(); // Atualiza a marcação de duplicatas após exclusão
+            destacarCPFsInvalidos();
         }
 
         function carregarDadosParaEditar(linha) {
             var celulas = linha.getElementsByTagName("td");
-            document.getElementById("inputNome").value = celulas[0].innerHTML;
-            document.getElementById("inputCPF").value = celulas[1].innerHTML;
-            document.getElementById("inputEmail1").value = celulas[2].innerHTML;
-            document.getElementById("tipoPessoa").value = celulas[3].innerHTML;
-            document.getElementById("textareaTexto").value = celulas[4].innerHTML;
+            document.getElementById("inputNome").value = celulas[0].textContent;
+            document.getElementById("inputCPF").value = celulas[1].textContent;
+            document.getElementById("inputEmail1").value = celulas[2].textContent;
+            document.getElementById("tipoPessoa").value = celulas[3].textContent;
+            document.getElementById("textareaTexto").value = celulas[4].textContent;
 
             linhaEditavel = linha;
             alternarModo();
@@ -376,7 +375,6 @@
 
             var celulaAcoes = novaLinha.insertCell(3);
 
-
             var botaoEmitir = document.createElement('button');
             botaoEmitir.textContent = 'Emitir certificado';
             botaoEmitir.className = 'btn btn-emitir'; // Classe para estilizar
@@ -435,6 +433,7 @@
             };
             xhr.send(formData);
         }
+
         function filtrarEventos() {
             var input = document.getElementById('campo-pesquisa');
             var filter = input.value.toUpperCase();
@@ -452,8 +451,84 @@
                     }
                 }
             }
-        }  
+        }
+
+        function destacarDuplicatas() {
+            const tabela = document.getElementById("tabela").getElementsByTagName("tbody")[0];
+            const linhas = tabela.getElementsByTagName("tr");
+            let valoresVistos = {
+                nome: {},
+                cpf: {},
+                email: {},
+                texto: {}
+            };
+
+            Array.from(linhas).forEach((linha, linhaIndex) => {
+                ["nome", "cpf", "email", "texto"].forEach((campo, index) => {
+                    const valor = linha.cells[index].textContent.trim();
+                    console.log(`Processando: ${campo}, Valor: ${valor}, Linha: ${linhaIndex}`); // Debugar valor e linha
+                    if (valoresVistos[campo][valor]) {
+                        valoresVistos[campo][valor].push(linha.cells[index]);
+                    } else {
+                        valoresVistos[campo][valor] = [linha.cells[index]];
+                    }
+                });
+            });
+
+            Object.keys(valoresVistos).forEach(campo => {
+                console.log(`Duplicatas em ${campo}:`, valoresVistos[campo]); // Mostrar estrutura de duplicatas
+                Object.keys(valoresVistos[campo]).forEach(valor => {
+                    if (valoresVistos[campo][valor].length > 1) {
+                        valoresVistos[campo][valor].forEach(celula => {
+                            celula.classList.add('duplicado');
+                        });
+                    }
+                });
+            });
+        }
+
+        function destacarCPFsInvalidos() {
+            var tabela = document.getElementById("tabela");
+            var linhas = tabela.getElementsByTagName("tr");
+            for (var i = 0; i < linhas.length; i++) {
+                var celulaCPF = linhas[i].getElementsByTagName("td")[1]; // Assume que CPF está na segunda coluna
+                if (celulaCPF && !validarCPF(celulaCPF.textContent)) {
+                    celulaCPF.style.backgroundColor = 'red'; // Pinta de vermelho se o CPF for inválido
+                }
+            }
+        }
+
+        function validarCPF(cpf) {
+            cpf = cpf.replace(/[^\d]+/g, '');
+            if (cpf.length != 11) {
+                return false;
+            }
+
+            var numeros = cpf.substring(0, 9);
+            var digitos = cpf.substring(9);
+            var soma = 0;
+            var resultado;
+
+            for (var i = 10; i > 1; i--) {
+                soma += numeros.charAt(10 - i) * i;
+            }
+
+            resultado = (soma % 11) < 2 ? 0 : 11 - (soma % 11);
+            if (resultado != parseInt(digitos.charAt(0))) {
+                return false;
+            }
+
+            soma = 0;
+            numeros = cpf.substring(0, 10);
+            for (i = 11; i > 1; i--) {
+                soma += numeros.charAt(11 - i) * i;
+            }
+
+            resultado = (soma % 11) < 2 ? 0 : 11 - (soma % 11);
+            return resultado == parseInt(digitos.charAt(1));
+        }
     </script>
+
 </body>
 </html>
 
@@ -711,6 +786,8 @@
         border-radius: 2px; /* Bordas retangulares sem arredondamento */
     }
 
-    
+    .duplicado {
+        background-color: yellow !important; /* Adiciona !important para garantir aplicação */
+    }
 
 </style>
