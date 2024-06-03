@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using EMISSOR_DE_CERTIFICADOS.DBConnections;
 using EMISSOR_DE_CERTIFICADOS.Models;
@@ -110,7 +110,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         }
         #endregion
 
-        #region *** METODOS ***
+        #region *** METODOS PRIVADOS ***
 
         // Método para retornar todas as pessoas do banco de dados
         private IEnumerable<PessoaModel> BuscarTodasPessoas()
@@ -254,7 +254,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             }
         }
 
-        private int ObterIdPessoaPorCPF(string cpf)
+        public int ObterIdPessoaPorCPF(string cpf)
         {
             try
             {

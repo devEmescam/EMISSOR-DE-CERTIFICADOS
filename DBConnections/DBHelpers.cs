@@ -5,11 +5,11 @@ namespace EMISSOR_DE_CERTIFICADOS.DBConnections
 {
     public class DBHelpers
     {
-        private readonly Dictionary<string, string> _connectionStrings;        
+        private readonly Dictionary<string, string> _connectionStrings;
         public DBHelpers(Dictionary<string, string> connectionStrings)
         {
             _connectionStrings = connectionStrings ?? throw new ArgumentNullException(nameof(connectionStrings), "O dicionário de cadeias de conexão não pode ser nulo.");
-        }      
+        }
         public IDbConnection GetConnection(string connectionName = "CertificadoConnection")
         {
             if (!_connectionStrings.TryGetValue(connectionName, out var connectionString))
@@ -37,20 +37,19 @@ namespace EMISSOR_DE_CERTIFICADOS.DBConnections
                     }
                 }
             }
-        }        
-        // Sobrecarga do método ExecuteQuery para aceitar um parâmetro de imagem
-        public DataTable ExecuteQuery(string query, byte[] imagemBytes, string connectionName = "CertificadoConnection")
+        }
+
+        // Sobrecarga do método ExecuteQuery para aceitar parâmetros
+        public DataTable ExecuteQuery(string query, Dictionary<string, object> parameters, string connectionName = "CertificadoConnection")
         {
             using (var connection = GetConnection(connectionName))
             {
                 using (var command = new SqlCommand(query, (SqlConnection)connection))
                 {
-                    // Adicione o parâmetro da imagem ao comando SQL
-                    var parametroImagem = new SqlParameter("@ImagemCertificado", SqlDbType.VarBinary)
+                    foreach (var param in parameters)
                     {
-                        Value = imagemBytes
-                    };
-                    command.Parameters.Add(parametroImagem);
+                        command.Parameters.AddWithValue(param.Key, param.Value);
+                    }
 
                     using (var adapter = new SqlDataAdapter(command))
                     {
@@ -61,6 +60,8 @@ namespace EMISSOR_DE_CERTIFICADOS.DBConnections
                 }
             }
         }
+
+
         public byte[] ExecuteQueryArrayBytes(string query, int id, string connectionName = "CertificadoConnection")
         {
             try
@@ -96,6 +97,7 @@ namespace EMISSOR_DE_CERTIFICADOS.DBConnections
                 throw new Exception($"Ocorreu um erro em [DBHelpers.ExecuteQueryArrayBytes] Erro: {ex.Message}");
             }
         }
+
         public object ExecuteScalar(string query, string connectionName = "CertificadoConnection")
         {
             using (var connection = GetConnection(connectionName))
@@ -106,6 +108,7 @@ namespace EMISSOR_DE_CERTIFICADOS.DBConnections
                 }
             }
         }
+
         //Executa a consulta e retorna o resultado com o tipo de dado informado na chamado
         public T ExecuteScalar<T>(string query, string connectionName = "CertificadoConnection")
         {
@@ -120,19 +123,17 @@ namespace EMISSOR_DE_CERTIFICADOS.DBConnections
                 }
             }
         }
+
         //Sobrecarga do metodo: Executa a consulta, recebendo como parametro um array de bytes e retorna o resultado com o tipo de dado informado na chamado
-        public T ExecuteScalar<T>(string query, byte[] imagemBytes = null, string connectionName = "CertificadoConnection")
+        public T ExecuteScalar<T>(string query, Dictionary<string, object> parameters, string connectionName = "CertificadoConnection")
         {
             using (var connection = GetConnection(connectionName))
             {
                 using (var command = new SqlCommand(query, (SqlConnection)connection))
                 {
-                    // Se a consulta SQL contém parâmetros para a imagem, adiciona-os ao comando
-                    if (imagemBytes != null)
+                    foreach (var param in parameters)
                     {
-                        var imagemParam = new SqlParameter("@ImagemCertificado", SqlDbType.VarBinary);
-                        imagemParam.Value = imagemBytes;
-                        command.Parameters.Add(imagemParam);
+                        command.Parameters.AddWithValue(param.Key, param.Value);
                     }
 
                     var result = command.ExecuteScalar();
@@ -142,5 +143,6 @@ namespace EMISSOR_DE_CERTIFICADOS.DBConnections
                 }
             }
         }
+
     }
 }
