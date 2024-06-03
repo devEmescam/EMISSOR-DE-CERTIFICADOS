@@ -1,10 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using EMISSOR_DE_CERTIFICADOS.DBConnections;
 using EMISSOR_DE_CERTIFICADOS.Models;
 using EMISSOR_DE_CERTIFICADOS.Helpers;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace EMISSOR_DE_CERTIFICADOS.Controllers
 {
@@ -113,76 +111,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         #endregion
 
         #region *** METODOS PRIVADOS ***
-        [HttpGet]
-        public IActionResult BuscarPessoas(string nome)
-        {
-            var pessoas = BuscarPessoasPorNome(nome)
-                          .Select(p => new { p.Id, p.Nome, p.CPF, p.Email })
-                          .ToList();
-            return Json(pessoas);
-        }
-
-
-
-
-        // Método para buscar pessoas pelo nome       
-        private IEnumerable<PessoaModel> BuscarPessoasPorNome(string nome)
-        {
-            try
-            {
-                var query = "SELECT Id, Nome, CPF, Email FROM PESSOA WHERE Nome LIKE @Nome";
-                var parameters = new Dictionary<string, object>
-        {
-            { "@Nome", "%" + nome + "%" }
-        };
-                var dataTable = _dbHelper.ExecuteQuery(query, parameters);
-                var pessoas = new List<PessoaModel>();
-
-                foreach (DataRow row in dataTable.Rows)
-                {
-                    pessoas.Add(new PessoaModel
-                    {
-                        Id = Convert.ToInt32(row["Id"]),
-                        Nome = Convert.ToString(row["Nome"]),
-                        CPF = Convert.ToString(row["CPF"]),
-                        Email = Convert.ToString(row["Email"])
-                    });
-                }
-
-                return pessoas;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Ocorreu um erro em [PessoaController.BuscarPessoasPorNome] Erro: {ex.Message}");
-            }
-        }
-
-
-        // Método para retornar uma pessoa específica pelo ID
-        private PessoaModel BuscarPessoaPorId(int id)
-        {
-            try
-            {
-                var query = $"SELECT * FROM PESSOA WHERE ID = {id}";
-                var dataTable = _dbHelper.ExecuteQuery(query);
-                if (dataTable.Rows.Count > 0)
-                {
-                    var row = dataTable.Rows[0];
-                    return new PessoaModel
-                    {
-                        Id = Convert.ToInt32(row["Id"]),
-                        Nome = Convert.ToString(row["Nome"]),
-                        CPF = Convert.ToString(row["CPF"]),
-                        Email = Convert.ToString(row["Email"])
-                    };
-                }
-                return null;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Ocorreu um erro em [PessoaController.BuscarPessoaPorId] Erro: {ex.Message}");
-            }
-        }
 
         // Método para retornar todas as pessoas do banco de dados
         private IEnumerable<PessoaModel> BuscarTodasPessoas()
@@ -212,9 +140,35 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             }
         }
 
+        // Método para retornar uma pessoa específica pelo ID
+        private PessoaModel BuscarPessoaPorId(int id)
+        {
+            try
+            {
+                var query = $"SELECT * FROM PESSOA WHERE ID = {id}";
+                var dataTable = _dbHelper.ExecuteQuery(query);
+                if (dataTable.Rows.Count > 0)
+                {
+                    var row = dataTable.Rows[0];
+                    return new PessoaModel
+                    {
+                        Id = Convert.ToInt32(row["Id"]),
+                        Nome = Convert.ToString(row["Nome"]),
+                        CPF = Convert.ToString(row["CPF"]),
+                        Email = Convert.ToString(row["Email"])
+                    };
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ocorreu um erro em [PessoaController.BuscarPessoaPorId] Erro: {ex.Message}");
+            }
+        }
+
         // Método para inserir uma nova pessoa no banco de dados. Publico porque é chamado no momento de inserir novos EVENTOS
         public string InserirPessoa(PessoaModel pessoa)
-        {
+        {            
             try
             {
                 // Valida se a pessoa não existe no banco de dados
@@ -226,7 +180,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                         {
                             // Se não existir, insere a nova pessoa
                             var query = $"INSERT INTO Pessoa (Nome, CPF, Email) VALUES ('{pessoa.Nome}', '{pessoa.CPF}', '{pessoa.Email}')";
-
+                            
                             _dbHelper.ExecuteQuery(query);
 
                             pessoa.Id = ObterIdPessoaPorCPF(pessoa.CPF);
@@ -253,7 +207,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             {
                 throw new Exception($"Ocorreu um erro em [PessoaController.InserirPessoa] Erro: {ex.Message}");
             }
-        }
+        }      
 
         // Método para atualizar uma pessoa no banco de dados
         private void AtualizarPessoa(PessoaModel pessoa)
