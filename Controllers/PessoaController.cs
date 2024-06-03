@@ -3,8 +3,6 @@ using System.Data;
 using EMISSOR_DE_CERTIFICADOS.DBConnections;
 using EMISSOR_DE_CERTIFICADOS.Models;
 using EMISSOR_DE_CERTIFICADOS.Helpers;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace EMISSOR_DE_CERTIFICADOS.Controllers
 {
@@ -18,6 +16,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         }
 
         #region *** IActionResults ***
+
         // GET: PESSOAS
         public IActionResult Index()
         {
@@ -113,6 +112,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         #endregion
 
         #region *** METODOS PRIVADOS ***
+
         [HttpGet]
         public IActionResult BuscarPessoas(string nome)
         {
@@ -158,32 +158,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         }
 
 
-        // Método para retornar uma pessoa específica pelo ID
-        private PessoaModel BuscarPessoaPorId(int id)
-        {
-            try
-            {
-                var query = $"SELECT * FROM PESSOA WHERE ID = {id}";
-                var dataTable = _dbHelper.ExecuteQuery(query);
-                if (dataTable.Rows.Count > 0)
-                {
-                    var row = dataTable.Rows[0];
-                    return new PessoaModel
-                    {
-                        Id = Convert.ToInt32(row["Id"]),
-                        Nome = Convert.ToString(row["Nome"]),
-                        CPF = Convert.ToString(row["CPF"]),
-                        Email = Convert.ToString(row["Email"])
-                    };
-                }
-                return null;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Ocorreu um erro em [PessoaController.BuscarPessoaPorId] Erro: {ex.Message}");
-            }
-        }
-
         // Método para retornar todas as pessoas do banco de dados
         private IEnumerable<PessoaModel> BuscarTodasPessoas()
         {
@@ -209,6 +183,32 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             catch (Exception ex)
             {
                 throw new Exception($"Ocorreu um erro em [PessoaController.BuscarTodasPessoas] Erro: {ex.Message}");
+            }
+        }
+
+        // Método para retornar uma pessoa específica pelo ID
+        private PessoaModel BuscarPessoaPorId(int id)
+        {
+            try
+            {
+                var query = $"SELECT * FROM PESSOA WHERE ID = {id}";
+                var dataTable = _dbHelper.ExecuteQuery(query);
+                if (dataTable.Rows.Count > 0)
+                {
+                    var row = dataTable.Rows[0];
+                    return new PessoaModel
+                    {
+                        Id = Convert.ToInt32(row["Id"]),
+                        Nome = Convert.ToString(row["Nome"]),
+                        CPF = Convert.ToString(row["CPF"]),
+                        Email = Convert.ToString(row["Email"])
+                    };
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ocorreu um erro em [PessoaController.BuscarPessoaPorId] Erro: {ex.Message}");
             }
         }
 
