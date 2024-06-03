@@ -112,6 +112,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         #endregion
 
         #region *** METODOS PRIVADOS ***
+
+
         [HttpGet]
         public IActionResult BuscarPessoas(string nome)
         {
@@ -120,6 +122,42 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                           .ToList();
             return Json(pessoas);
         }
+
+
+
+
+        // Método para buscar pessoas pelo nome       
+        private IEnumerable<PessoaModel> BuscarPessoasPorNome(string nome)
+        {
+            try
+            {
+                var query = "SELECT Id, Nome, CPF, Email FROM PESSOA WHERE Nome LIKE @Nome";
+                var parameters = new Dictionary<string, object>
+        {
+            { "@Nome", "%" + nome + "%" }
+        };
+                var dataTable = _dbHelper.ExecuteQuery(query, parameters);
+                var pessoas = new List<PessoaModel>();
+
+                foreach (DataRow row in dataTable.Rows)
+                {
+                    pessoas.Add(new PessoaModel
+                    {
+                        Id = Convert.ToInt32(row["Id"]),
+                        Nome = Convert.ToString(row["Nome"]),
+                        CPF = Convert.ToString(row["CPF"]),
+                        Email = Convert.ToString(row["Email"])
+                    });
+                }
+
+                return pessoas;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ocorreu um erro em [PessoaController.BuscarPessoasPorNome] Erro: {ex.Message}");
+            }
+        }
+
 
         // Método para retornar todas as pessoas do banco de dados
         private IEnumerable<PessoaModel> BuscarTodasPessoas()
