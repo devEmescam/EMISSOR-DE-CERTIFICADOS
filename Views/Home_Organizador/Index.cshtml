@@ -537,12 +537,12 @@
         }
 
         function buscarPessoas() {
-            var nome = $("#searchInput").val();
-            if (nome.length >= 3) { // Buscar apenas se o nome tiver 3 ou mais caracteres
+            var termo = $("#searchInput").val();
+            if (termo.length >= 3) { // Buscar apenas se o nome tiver 3 ou mais caracteres
                 $.ajax({
                     url: '/Pessoa/BuscarPessoas',
                     type: 'GET',
-                    data: { nome: nome },
+                    data: { termo: termo },
                     success: function (data) {
                         var resultList = $("#resultList");
                         resultList.empty(); // Limpar resultados anteriores

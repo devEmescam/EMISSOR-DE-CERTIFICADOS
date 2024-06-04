@@ -66,7 +66,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             return View(evento);
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult NovoEvento([FromForm] IFormFile ImagemCertificado, [FromBody] List<List<string>> DadosTabela, string Nome)
@@ -270,7 +269,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 throw new Exception($"Ocorreu um erro em [Home_OrganizadorController.BuscarEventoPorId] Erro: {ex.Message}");
             }
         }
-
         private void InserirEvento(string TextoFrenteCertificado, EventoModel evento)
         {
             using (SqlConnection con = (SqlConnection)_dbHelper.GetConnection())
@@ -290,7 +288,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 }
             }
         }
-
         private void InserirEvento(EventoModel evento, List<List<string>> dadosTabela)
         {
             int idEvento = -1;
