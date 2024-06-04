@@ -39,6 +39,14 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             return View(pessoa);
         }
 
+        [HttpGet]
+        public IActionResult BuscarPessoas(string termo)
+        {          
+
+            var pessoas = BuscarPessoasPorNomeOuCpfOuEmail(termo).Select(p => new {p.Id, p.Nome, p.CPF, p.Email}).ToList();
+            return Json(pessoas);
+        }
+
         // GET: Pessoa/Create
         public IActionResult Create()
         {
@@ -113,26 +121,23 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         }
         #endregion
 
-        #region *** METODOS PRIVADOS ***
-        [HttpGet]
-        public IActionResult BuscarPessoas(string nome)
-        {
-            var pessoas = BuscarPessoasPorNome(nome)
-                          .Select(p => new { p.Id, p.Nome, p.CPF, p.Email })
-                          .ToList();
-            return Json(pessoas);
-        }
+        #region *** METODOS PRIVADOS ***      
 
-        // Método para buscar pessoas pelo nome
-        private IEnumerable<PessoaModel> BuscarPessoasPorNome(string nome)
+        // Método para buscar pessoas pelo termo informado
+        private IEnumerable<PessoaModel> BuscarPessoasPorNomeOuCpfOuEmail(string termo)
         {
             try
             {
-                var query = "SELECT Id, Nome, CPF, Email FROM PESSOA WHERE Nome LIKE @Nome";
+                var query = @"SELECT * FROM PESSOA 
+                              WHERE Nome LIKE @Termo 
+                                    OR CPF LIKE @Termo 
+                                    OR Email LIKE @Termo";
+
                 var parameters = new Dictionary<string, object>
                 {
-                    { "@Nome", "%" + nome + "%" }
+                    { "@Termo", "%" + termo + "%" }
                 };
+
                 var dataTable = _dbHelper.ExecuteQuery(query, parameters);
                 var pessoas = new List<PessoaModel>();
 
@@ -151,7 +156,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             }
             catch (Exception ex)
             {
-                throw new Exception($"Ocorreu um erro em [PessoaController.BuscarPessoasPorNome] Erro: {ex.Message}");
+                throw new Exception($"Ocorreu um erro em [PessoaController.BuscarPessoasPorNomeOuCpfOuEmail] Erro: {ex.Message}");
             }
         }
 
