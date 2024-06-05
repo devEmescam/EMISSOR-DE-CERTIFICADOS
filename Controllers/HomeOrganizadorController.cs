@@ -2,6 +2,7 @@
 using EMISSOR_DE_CERTIFICADOS.DBConnections;
 using EMISSOR_DE_CERTIFICADOS.Models;
 using EMISSOR_DE_CERTIFICADOS.Helpers;
+using EMISSOR_DE_CERTIFICADOS.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.SqlClient;
@@ -14,7 +15,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
     {
         private readonly DBHelpers _dbHelper;
         private readonly ISessao _sessao;
-
         public Home_OrganizadorController(DBHelpers dbHelper)
         {
             _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelpers não pode ser nulo.");
@@ -39,6 +39,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Ocorreu um erro em Home_OrganizadorController.Index. Erro: {ex.Message}");
             }
         }
+
         // GET: /Home_Organizador/NovoEvento
         public IActionResult NovoEvento()
         {
@@ -90,11 +91,10 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             }
         }
 
-
         // POST: /Home_Organizador/LerPlanilha
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // Método para ler e validar a planilha
+        // Rotina para ler e validar a planilha
         public IActionResult LerPlanilha(string caminhoArquivo, string evento)
         {
             List<PessoaModel> pessoas = new List<PessoaModel>();
@@ -160,6 +160,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Erro ao ler a planilha: {ex.Message}");
             }
         }
+
         // Ação para visualizar a imagem do certificado
         public IActionResult VisualizarImagem(int id)
         {
@@ -174,6 +175,28 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             {
                 // Se ocorrer algum erro, retorna um status 500 (Internal Server Error)
                 return StatusCode(500, $"Ocorreu um erro ao tentar visualizar a imagem: {ex.Message}");
+            }
+        }
+
+        // POST:/Home_Organizador
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        //Rotina de Emissão de certificados:
+        //percorre os participantes do evento, cria usuario e senha para cada um, gera o certificado (junta texto e certificado), emite email ao participante com instruções e certificado anexo
+        public IActionResult EmitirCeritificado(EventoModel evento) 
+        {
+            try
+            {
+                if(ModelState.IsValid) 
+                {
+                    GerarCertifcado(evento);
+                }
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Ocorreu um erro em Home_OrganizadorController.EmitirCeritificado. Erro: {ex.Message}");
             }
         }
 
@@ -314,24 +337,22 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                        "SELECT SCOPE_IDENTITY();"; // Obtem o ID do evento inserido
 
                 var parameters = new Dictionary<string, object>
-        {
-            { "@ImagemCertificado", imagemBytes }
-        };
+                {
+                    { "@ImagemCertificado", imagemBytes }
+                };
 
                 idEvento = _dbHelper.ExecuteScalar<int>(sSQL, parameters);
 
                 // Processar os dados da tabela
                 foreach (var dadosLinha in dadosTabela)
-                {
-                    // Aqui você pode processar cada linha da tabela conforme necessário
-                    // Vamos supor que os dados estão na ordem: Nome, CPF, Email, Tipo Pessoa, Texto
+                {                    
                     string nome = dadosLinha[0];
                     string cpf = dadosLinha[1];
                     string email = dadosLinha[2];
                     string tipoPessoa = dadosLinha[3];
                     string texto = dadosLinha[4];
 
-                    // Crie e insira a pessoa
+                    // Criar objeto e inserir a pessoa
                     PessoaModel pessoa = new PessoaModel
                     {
                         Nome = nome.Trim(),
@@ -386,8 +407,52 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             }
             catch (Exception ex)
             {
-                // Trate exceções adequadamente
-                throw new Exception("Erro ao buscar bytes da imagem no banco de dados: " + ex.Message);
+                throw new Exception("Erro em [Home_OrganizadorController.BuscarBytesDaImagemNoBancoDeDados]: " + ex.Message);
+            }
+        }
+        private void GerarCertifcado(EventoModel evento) 
+        {
+            string sSQL = "";
+            DataTable oDT = new DataTable();
+            var usuariosService = new UsuariosService(_dbHelper);
+            int idUsuario = -1;
+
+            try
+            {                
+                //Buscar as pessoas do evento
+                sSQL = $"SELECT * FROM EVENTO_PESSOA WHERE ID_EVENTO = {evento.Id}";
+                oDT = _dbHelper.ExecuteQuery(sSQL);
+
+                if (oDT != null && oDT.Rows.Count > 0) 
+                {
+                    //Percorre-las
+                    foreach (DataRow row in oDT.Rows)
+                    {                                                
+                        int idPessoa = Convert.ToInt32(row["ID"]);
+                        string texto = Convert.ToString(row["TEXTO_FRENTE"]);
+                        
+                        //Só manda gerar se houver texto e imagem
+                        if (!string.IsNullOrEmpty(texto) &&  evento.ImagemCertificado != null) 
+                        {
+                            //Se gerar certificado
+                            if (CertificadosService.GerarCertificado_SEM_NEGRITO(idPessoa, texto, evento.ImagemCertificado)) 
+                            {
+                                //Criar usuario e senha da pessoa
+                                idUsuario = usuariosService.GerarUsuario(idPessoa);
+                                if (idUsuario > 0)
+                                {
+                                    //5- por ultimo enviar email com os dados do usuario e certificado anexo
+
+                                    
+                                }                                
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro em [Home_OrganizadorController.GerarCertifcado]: " + ex.Message);
             }
         }
         #endregion
