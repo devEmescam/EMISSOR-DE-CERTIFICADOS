@@ -58,6 +58,7 @@
                     </tbody>
                 </table>
             </div>
+
             <div class="upload-container">
                 <!-- Botão de importar EXCEL -->
                 <input type="file" id="excelFile" accept=".xlsx" style="display:none" onchange="importarExcel()">
@@ -85,18 +86,35 @@
             <input type="text" id="campo-pesquisa" placeholder="Pesquisar eventos..." onkeyup="filtrarEventos()">
             <hr>
             <div class="tabela-eventos">
+              
+                
                 <!-- Tabela de eventos -->
                 <table>
                     <thead>
                         <tr>
-                            <th>Código do Evento</th>
-                            <th>Nome do Evento</th>
-                            <th>Imagem do Certificado</th>
-                            <th>Ações</th>
+                            <th style="width: 20%">Nome do evento</th>
+                            <th>Pessoas</th>
+                            <th style="width: 15%;">Imagem do Certificado</th>
                         </tr>
                     </thead>
-                    <tbody id="eventos-tbody">
-                        <!-- As linhas serão preenchidas dinamicamente -->
+                    <tbody>
+                        @foreach (var evento in Model)
+                        {
+                        <tr>
+                            <td>evento</td>
+                            <td id="testar">pessoas</td>
+                            <td>@evento.Id</td>
+                            <td>@evento.Nome</td>
+                            <td>
+                                <!-- miniatura da imagem -->
+                                    <img src="@Url.Action("VisualizarImagem", "Home_Organizador", new { Id=evento.Id })"
+                                         alt="imagem do certificado"
+                                         style="width: 60px; height: auto; cursor: pointer;"
+                                         onclick="window.open('@Url.Action("VisualizarImagem", "Home_Organizador", new { Id=evento.Id })')">
+
+                            </td>
+                        </tr>
+                        }
                     </tbody>
                 </table>
             </div>
@@ -360,7 +378,7 @@
             var novaLinha = tabelaEventos.insertRow(-1);
 
             var celulaCodigo = novaLinha.insertCell(0);
-            celulaCodigo.textContent = eventos.length + 1; // Código do evento (pode ser incrementado ou gerado conforme necessário)
+            celulaCodigo.textContent = eventos.length + 1; 
 
             var celulaNome = novaLinha.insertCell(1);
             celulaNome.textContent = nomeEvento;
@@ -429,8 +447,12 @@
             formData.append('Nome', nomeEvento);
             formData.append('ImagemCertificado', arquivoCertificado);
 
+            // Transformar dadosTabela em JSON e adicionar ao FormData como um campo string
+            formData.append('DadosTabela', JSON.stringify(dadosTabela));
+
             var xhr = new XMLHttpRequest();
             xhr.open('POST', '/Home_Organizador/NovoEvento');
+            xhr.setRequestHeader('RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]').value);
             xhr.onload = function () {
                 if (xhr.status === 200) {
                     alert('Evento cadastrado com sucesso!');
@@ -441,6 +463,38 @@
             };
             xhr.send(formData);
         }
+
+        // // Função para enviar os dados do evento para o controller
+        // function enviarDadosEvento() {
+        //     // Obter o nome do evento
+        //     var nomeEvento = document.getElementById('nomeEvento').value;
+
+        //     // Obter a imagem do certificado
+        //     var arquivoCertificado = document.getElementById('arteCertificadoFile').files[0];
+
+        //     // Construir o objeto FormData para enviar os dados
+        //     var formData = new FormData();
+        //     formData.append('Nome', nomeEvento);
+        //     formData.append('ImagemCertificado', arquivoCertificado);
+
+        //     // Adicionar o token antifalsificação à solicitação
+        //     formData.append('__RequestVerificationToken', token);
+
+        //     // Enviar os dados para o controller usando AJAX
+        //     var xhr = new XMLHttpRequest();
+        //     xhr.open('POST', '/Home_Organizador/NovoEvento');
+        //     xhr.onload = function () {
+        //         // Tratar a resposta do servidor, se necessário
+        //         if (xhr.status === 200) {
+        //             alert('Evento cadastrado com sucesso!');
+        //             // Redirecionar para a página inicial, por exemplo
+        //             window.location.href = '/Home_Organizador/Index';
+        //         } else {
+        //             alert('Erro ao cadastrar o evento. Por favor, tente novamente.');
+        //         }
+        //     };
+        //     xhr.send(formData);
+        // }
 
         function filtrarEventos() {
             var input = document.getElementById('campo-pesquisa');
