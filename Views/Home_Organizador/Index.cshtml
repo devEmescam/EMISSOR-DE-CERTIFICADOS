@@ -62,19 +62,13 @@
             <div class="upload-container">
                 <!-- Botão de importar EXCEL -->
                 <input type="file" id="excelFile" accept=".xlsx" style="display:none" onchange="importarExcel()">
-                <label for="excelFile" class="custom-file-upload">
-                    Importar Pessoas
-                </label>
-                <span id="fileName" style="margin-left: 10px;"></span>
-
+                <label for="excelFile" class="custom-file-upload">Importar Pessoas</label>
+                <span id="fileName"></span> <!-- Texto do nome do arquivo aparece aqui -->
                 <!-- Botão de importar Certificado -->
                 <input type="file" id="arteCertificadoFile" accept=".jpeg, .jpg" style="display:none" onchange="importarCertificado()">
-                <label for="arteCertificadoFile" class="custom-file-upload">
-                    Importar Certificado
-                </label>
-                <span id="certificadoFileName" style="margin-left: 10px;"></span>
+                <label for="arteCertificadoFile" class="custom-file-upload">Importar Certificado</label>
+                <span id="certificadoFileName"></span> <!-- Texto do nome do arquivo aparece aqui -->
             </div>
-
             <button id="CadastrarEvento" onclick="cadastrarEvento()">Cadastrar Evento</button>
         </div>
 
@@ -86,39 +80,39 @@
             <input type="text" id="campo-pesquisa" placeholder="Pesquisar eventos..." onkeyup="filtrarEventos()">
             <hr>
             <div class="tabela-eventos">
-              
-                
-                <!-- Tabela de eventos -->
                 <table>
                     <thead>
                         <tr>
-                            <th style="width: 20%">Nome do evento</th>
-                            <th>Pessoas</th>
+                            <th style="width: 20%">ID</th>
+                            <th>Nome do Evento</th>
                             <th style="width: 15%;">Imagem do Certificado</th>
+                            <th>Ações</th> <!-- Adicionada nova coluna de Ações -->
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var evento in Model)
                         {
-                        <tr>
-                            <td>evento</td>
-                            <td id="testar">pessoas</td>
-                            <td>@evento.Id</td>
-                            <td>@evento.Nome</td>
-                            <td>
-                                <!-- miniatura da imagem -->
+                            <tr>
+                                
+                                <td>@evento.Id</td>
+                                <td>@evento.Nome</td>
+                                <td>
                                     <img src="@Url.Action("VisualizarImagem", "Home_Organizador", new { Id=evento.Id })"
                                          alt="imagem do certificado"
                                          style="width: 60px; height: auto; cursor: pointer;"
                                          onclick="window.open('@Url.Action("VisualizarImagem", "Home_Organizador", new { Id=evento.Id })')">
-
-                            </td>
-                        </tr>
+                                </td>
+                                <td>
+                                    <button class="btn btn-emitir" onclick="emitirCertificado('@evento.Nome')">Emitir Certificado</button>
+                                    <button class="btn btn-atualizar" onclick="atualizarEvento('@evento.Id')">Atualizar</button>
+                                </td>
+                            </tr>
                         }
                     </tbody>
                 </table>
             </div>
         </div>
+
 
         <div id="card-buscar-pessoas" class="card">
             <div>
@@ -326,8 +320,8 @@
                 alert('Por favor, selecione um arquivo Excel.');
                 return;
             }
-
             var file = input.files[0];
+            document.getElementById('fileName').textContent = file.name; // Exibe o nome do arquivo
             var reader = new FileReader();
 
             reader.onload = function (e) {
@@ -365,6 +359,16 @@
                 destacarDuplicatas(); // Destaca duplicatas após carregar os dados
             };
             reader.readAsArrayBuffer(file);
+        }
+
+        function importarCertificado() {
+            var input = document.getElementById('arteCertificadoFile');
+            if (!input.files || input.files.length === 0) {
+                alert('Por favor, selecione um arquivo de certificado.');
+                return;
+            }
+            var file = input.files[0];
+            document.getElementById('certificadoFileName').textContent = file.name; // Exibe o nome do arquivo
         }
 
         function cadastrarEvento() {
@@ -714,9 +718,9 @@
     }
 
     #nomeEvento {
-        width: 96%;
+        width: 97.7%;
         margin-bottom: 2px;
-        margin-left: 3.7%
+        margin-left: 2.5%
     }
 
     .dados-form {
@@ -909,5 +913,13 @@
         font-size: 14px;
         color: #333;
     }
+
+    #fileName, #certificadoFileName {
+        display: block; /* Faz com que cada span se comporte como um bloco, ocupando toda a largura disponível abaixo do botão */
+        font-size: 12px; /* Mantém o tamanho de fonte reduzido */
+        margin-top: 5px; /* Espaçamento no topo para separar ligeiramente do botão */
+        text-align: center; /* Centraliza o texto abaixo do botão */
+    }
+
 
 </style>
