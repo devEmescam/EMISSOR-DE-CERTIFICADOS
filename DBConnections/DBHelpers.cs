@@ -22,6 +22,7 @@ namespace EMISSOR_DE_CERTIFICADOS.DBConnections
 
             return connection;
         }
+
         //Executa a consulta retornado um datatable do resultado
         public DataTable ExecuteQuery(string query, string connectionName = "CertificadoConnection")
         {
@@ -60,7 +61,6 @@ namespace EMISSOR_DE_CERTIFICADOS.DBConnections
                 }
             }
         }
-
 
         public byte[] ExecuteQueryArrayBytes(string query, int id, string connectionName = "CertificadoConnection")
         {

@@ -128,7 +128,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                     sSQL = $"SELECT ID FROM USUARIO WHERE USUARIO = '{usuario}' AND SENHA = '{senha}' AND ADMINISTRATIVO = '{administrativo}'";
                 }
 
-                oDT = _dbHelper.ExecuteQuery(sSQL, "CertificadoConnection");
+                oDT = _dbHelper.ExecuteQuery(sSQL);
 
                 if (oDT != null && oDT.Rows.Count > 0)
                 {

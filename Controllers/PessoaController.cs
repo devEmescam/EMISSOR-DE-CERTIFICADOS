@@ -169,16 +169,19 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 var dataTable = _dbHelper.ExecuteQuery(query);
                 var pessoas = new List<PessoaModel>();
 
-                foreach (DataRow row in dataTable.Rows)
+                if (dataTable != null && dataTable.Rows.Count > 0)
                 {
-                    pessoas.Add(new PessoaModel
+                    foreach (DataRow row in dataTable.Rows)
                     {
-                        Id = Convert.ToInt32(row["ID"]),
-                        Nome = Convert.ToString(row["NOME"]),
-                        CPF = Convert.ToString(row["CPF"]),
-                        Email = Convert.ToString(row["EMAIL"])
-                    });
-                }
+                        pessoas.Add(new PessoaModel
+                        {
+                            Id = Convert.ToInt32(row["ID"]),
+                            Nome = Convert.ToString(row["NOME"]),
+                            CPF = Convert.ToString(row["CPF"]),
+                            Email = Convert.ToString(row["EMAIL"])
+                        });
+                    }
+                }               
 
                 return pessoas;
             }
