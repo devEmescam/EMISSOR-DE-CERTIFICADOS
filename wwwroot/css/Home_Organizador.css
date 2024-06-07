@@ -1,13 +1,16 @@
-#logoEmescam {}
+#logoEmescam {
+}
+
 #logo {
     width: 20%;
     position: fixed;
-    top: 0%;
+    top: -1%;
     left: 11%;
     transform: translateX(-50%);
     margin-top: 0;
     text-align: center;
 }
+
 body {
     margin: 0;
     padding: 0;
@@ -15,13 +18,13 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background: linear-gradient(135deg, #01f949, #14086d);
+    background: #14086d;
     font-family: Arial, sans-serif;
 }
 
 .cartao-menu {
     background-color: rgba(250, 235, 215, 0.5);
-    border-radius: 15px;
+    border-radius: 5px;
     box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.2);
     padding: 5%;
     width: 18%;
@@ -32,7 +35,7 @@ body {
     top: 55%;
     left: 10%;
     transform: translate(-50%, -50%);
-    background-color:white;
+    background-color: white;
 }
 
     .cartao-menu a {
@@ -51,6 +54,29 @@ body {
             border-color: #ff0000;
         }
 
+
+
+.nav-link {
+    display: block;
+    text-decoration: none;
+    color: #000;
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid transparent;
+    transition: color 0.3s, border-color 0.3s;
+    border-color: #14086D;
+    font-size: calc(8px + 0.5vw);
+}
+
+    .nav-link:hover {
+        color: #ff0000;
+        border-color: #ff0000;
+    }
+
+
+
+
+
 .card {
     background-color: rgba(250, 235, 215, 0.5);
     padding: 5%;
@@ -60,30 +86,87 @@ body {
     position: fixed;
     top: 0;
     left: 103%;
-    border-radius: 15px;
+    border-radius: 5px;
     display: none; /* Oculta o card por padrão */
+    background-color: white;
 }
 
-
-
-#campo-pesquisa {
-    margin-bottom: 10px;
-    width: 30%;
-    padding: 5px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
+#card-evento {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background-color: white;
 }
 
-.eventos {
-    background-color: #fff;
+#nomeEvento {
+    width: 94%;
+    margin-bottom: 2px;
+    margin-left: 5.5%;
+}
+
+.dados-form {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 100%;
+}
+
+    .dados-form input, .dados-form textarea {
+        margin-bottom: 10px;
+    }
+
+    .dados-form input {
+        width: calc(70% - 10px);
+    }
+
+#textareaTexto {
+    width: 100%;
+    height: 150px;
     padding: 10px;
-    border: 5px solid #ccc;
+    margin-left: -40px;
+    border: 1px solid #ccc;
     border-radius: 5px;
-    width: 1300px;
+    box-sizing: border-box;
 }
 
-.eventos1 {
-    background-color: #f9f9f9;
+#tabela {
+    width: 100%;
+    border-collapse: collapse;
+    max-height: 300px;
+}
+
+    #tabela th {
+        background-color: #f2f2f2;
+    }
+
+    #tabela tbody tr {
+        border-bottom: 1px solid black;
+    }
+
+        #tabela tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        #tabela tbody tr:nth-child(odd) {
+            background-color: white;
+        }
+
+.tabela-container {
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+button.btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    text-transform: uppercase;
+    color: white;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    margin: 5px;
+    transition: background-color 0.3s;
 }
 
 .botao-adicionar {
@@ -117,94 +200,376 @@ body {
             color: black;
         }
 
-#card-evento {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-#divDados{
-    float:left;
-    margin-left:-3.5%;
-}
-.dados-form {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: space-between; /* Distribui os itens uniformemente */
-    width: 100%;
+
+button.btn-emitir {
+    background-color: #4CAF50; /* Verde */
+    padding: 5px 10px; /* Ajusta o preenchimento para reduzir o tamanho */
+    font-size: 14px; /* Reduz a fonte se necessário */
 }
 
-#textareaTexto {
-    width: 200%; 
-    height: 150px; 
-    padding: 10px;
-    margin-left: -40px; /* Adiciona um espaço entre o textarea e os inputs */
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box;
+    button.btn-emitir:hover {
+        background-color: #45a049;
+    }
+
+button.btn-atualizar {
+    background-color: #008CBA; /* Azul */
+    padding: 5px 10px; /* Ajusta o preenchimento para reduzir o tamanho */
+    font-size: 14px; /* Reduz a fonte se necessário */
 }
 
-.dados-form input,
-.dados-form textarea {
-    margin-bottom: 10px; /* Adiciona espaço entre os elementos */
+    button.btn-atualizar:hover {
+        background-color: #007B9E;
+    }
+
+#CadastrarEvento {
+    background-color: #4CAF50; /* Verde */
+    color: white;
+    padding: 5px 10px;
+    text-align: center;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 2px;
 }
 
-.dados-form input {
-    width: calc(70% - 10px); /* Ajuste conforme necessário */
-}
+    #CadastrarEvento:hover {
+        background-color: #008CBA; /* Azul */
+    }
 
 .upload-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1%;
+    position: relative;
+    width: 100%;
+    height: 60px; /* Ajuste a altura conforme necessário */
+    background-color: transparent;
 }
 
-    .upload-container input[type="file"] {
-        margin-right: 0.3%;
+.custom-file-upload {
+    display: inline-block;
+    padding: 3px 6px;
+    cursor: pointer;
+    background-color: #007bff; /* Cor azul */
+    color: white;
+    border: none;
+    border-radius: 2px; /* Bordas arredondadas */
+    position: relative; /* Posicionamento alterado para relativo */
+    margin: 10px 5px 10px 5px; /* Margens adicionadas para espaçamento */
+}
+
+#excelFile + .custom-file-upload {
+    float: left; /* Posiciona o botão de Excel à esquerda */
+    margin-right: 300px; /* Aumenta a margem à direita */
+}
+
+#arteCertificadoFile + .custom-file-upload {
+    float: right; /* Posiciona o botão de Certificado à direita */
+    margin-left: 300px; /* Aumenta a margem à esquerda */
+}
+
+span {
+    position: relative; /* Ajuste de posicionamento */
+    display: inline-block; /* Tornando inline para alinhamento */
+    vertical-align: middle; /* Alinhamento vertical */
+    margin-left: 10px; /* Espaçamento após o botão */
+    background-color: #fff; /* Mantendo o fundo branco */
+    border-radius: 5px; /* Bordas levemente arredondadas */
+    padding: 2px 5px;
+}
+
+hr {
+    margin-top: 1px;
+    margin-bottom: 3px;
+}
+
+.btn.table-btn {
+    background-color: #007bff; /* Fundo azul para o botão */
+    color: white; /* Texto rosa */
+    border: none; /* Sem borda */
+    padding: 2px; /* Espaçamento interno mínimo */
+    font-size: 10px; /* Tamanho de fonte reduzido */
+    text-align: center; /* Centraliza o texto dentro do botão */
+    border-radius: 3px; /* Bordas levemente arredondadas */
+    cursor: pointer; /* Cursor do mouse como ponteiro para indicar ação */
+    margin: 1px; /* Margem mínima entre botões */
+    transition: background-color 0.3s, color 0.3s; /* Transição suave para hover */
+    width: 70px; /* Largura fixa para todos os botões */
+}
+
+    .btn.table-btn:hover {
+        background-color: #007bff; /* Cor de fundo ao passar o mouse */
+        color: white; /* Cor do texto ao passar o mouse */
     }
 
+#botaoAcao {
+    background-color: #007bff; /* Cor de fundo do botão */
+    color: white; /* Cor da fonte */
+    border: none; /* Sem borda */
+    padding: 3px 6px; /* Espaçamento interno para aumentar a área de clique */
+    font-size: 13px; /* Tamanho da fonte */
+    cursor: pointer; /* Cursor em forma de ponteiro quando passar o mouse sobre o botão */
+    border-radius: 2px; /* Bordas retangulares sem arredondamento */
+}
+
+.duplicado {
+    background-color: yellow !important; /* Adiciona !important para garantir aplicação */
+}
+
+#resultadosBusca div {
+    cursor: pointer;
+    padding: 5px;
+    margin-top: 2px;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+}
+
+    #resultadosBusca div:hover {
+        background-color: #e9e9e9;
+    }
+
+#detalhesPessoa p {
+    font-size: 14px;
+    color: #333;
+}
+
+#fileName {
+    position: absolute; /* Posicionamento absoluto dentro de seu container */
+    left: 0; /* Alinha ao lado esquerdo do container */
+    bottom: -20px; /* Posiciona abaixo do botão */
+    color: #333; /* Cor do texto */
+    font-size: 12px; /* Tamanho da fonte */
+    float: right; /* Posiciona o botão de Certificado à direita */
+    margin-left: 0px; /* Aumenta a margem à esquerda */
+}
+
+#certificadoFileName {
+    position: absolute; /* Posicionamento absoluto dentro de seu container */
+    right: 0; /* Alinha ao lado direito do container */
+    bottom: -20px; /* Posiciona abaixo do botão */
+    color: #333; /* Cor do texto */
+    font-size: 12px; /* Tamanho da fonte */
+    float: left; /* Posiciona o botão de Certificado à direita */
+    margin-right: 0px; /* Aumenta a margem à esquerda */
+}
 
 
-    .upload-container button {
-        background-color: green;
+
+/*Estilo do card "Buscar Pessoas"*/
+#searchInput {
+    width: 80%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 3px;
+    background-color: #007BFF;
+    color: white;
+    cursor: pointer;
+}
+
+    button:hover {
+        background-color: #0056b3;
+    }
+
+#resultList {
+    margin-top: 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #f0f0f0;
+    font-weight: bold;
+}
+
+.result-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+    .result-item:hover {
+        background-color: #f0f0f0;
+    }
+
+.detalhes-inline {
+    font-size: 0.8em; /* Define a fonte menor */
+    color: #bababa; /* Define uma cor mais clara para os detalhes */
+    display: block; /* Para garantir que o texto se encaixe bem */
+    background-color: transparent;
+}
+
+.col-id {
+    width: 5%;
+    background-color: transparent;
+}
+
+.col-nome {
+    width: 80%;
+    cursor: pointer; /* Adiciona o cursor pointer para indicar clique */
+    background-color: transparent;
+}
+
+.col-acoes {
+    width: 15%;
+    background-color: transparent;
+}
+
+.acoes-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.acoes-dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f0f0f0;
+    min-width: 140px; /* Diminui a largura mínima */
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    left: -60px; /* Ajusta a posição para a esquerda */
+}
+
+    .acoes-dropdown-content button {
+        color: black;
+        padding: 8px 12px; /* Diminui o padding */
+        font-size: 12px; /* Diminui o tamanho da fonte */
+        text-decoration: none;
+        display: block;
+        width: 100%;
+        text-align: left;
+        background-color: white;
         border: none;
-        color: white;
-        padding: 3px 15px;
-        border-radius: 5px;
         cursor: pointer;
-        transition: background-color 0.3s;
     }
 
-        .upload-container button:hover {
-            background-color: deepskyblue;
+        .acoes-dropdown-content button:hover {
+            background-color: #f1f1f1;
         }
 
-
-/* Estilos para a tabela */
-#tabela {
-    width: 100%;
-    border-collapse: collapse;
-    max-height: 300px;
+.acoes-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    padding: 5px 10px;
 }
 
-    #tabela th {
-        background-color: #f2f2f2; /* Cor de fundo do cabeçalho */
-    }
-    #tabela tbody tr {
-        border-bottom: 1px solid black;
+    .acoes-btn:hover {
+        background-color: #218838;
     }
 
-    /* Estilos para linhas alternadas */
-    #tabela tbody tr:nth-child(even) {
-        background-color: #f9f9f9; /* Cor de fundo para linhas pares */
-        
-    }
-    #tabela tbody tr:nth-child(odd) {
-        background-color: white; /* Cor de fundo para linhas ímpares */
-    }
-
-.tabela-container {
-    max-height: 320px; 
-    overflow-y: auto; 
+.certificado-link {
+    color: green;
+    cursor: pointer;
+    border: none !important; /* Força a não exibição de borda */
+    display: inline; /* Garante que o link esteja na mesma linha */
 }
+
+    .certificado-link:hover {
+        text-decoration: underline;
+    }
+
+.certificado {
+    display: none;
+    font-size: 0.8em;
+    color: #666;
+    margin-top: 5px;
+    border-bottom: 2px solid green; /* Adiciona uma linha rosa abaixo */
+}
+
+
+
+
+
+
+
+
+/* Estilo do card "Meus Eventos" */
+#card-meus-eventos {
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: white;
+}
+
+    #card-meus-eventos h4 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    #card-meus-eventos .tabela-eventos {
+        margin-top: 20px;
+        text-align: left;
+    }
+
+    #card-meus-eventos table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: center;
+    }
+
+    #card-meus-eventos th, #card-meus-eventos td {
+        padding: 10px;
+        border: 1px solid #ccc;
+        text-align: center;
+    }
+
+    #card-meus-eventos th {
+        background-color: #f0f0f0;
+        text-align: center;
+    }
+
+    #card-meus-eventos tr:hover {
+        background-color: #f0f0f0;
+
+    }
+
+    #card-meus-eventos .botao-adicionar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: deepskyblue;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        position: absolute;
+        top: 20px;
+        right: 10px;
+        overflow: hidden;
+    }
+
+        #card-meus-eventos .botao-adicionar::after {
+            content: "+";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #card-meus-eventos .botao-adicionar:hover {
+            background-color: green;
+        }
+
+            #card-meus-eventos .botao-adicionar:hover::after {
+                color: black;
+            }
+
+    #card-meus-eventos input#campo-pesquisa {
+        width: 80%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        text-align: center;
+    }
