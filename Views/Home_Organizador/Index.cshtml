@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emissor de Certificados</title>
     <link rel="stylesheet" href="/css/Home_Organizador.css">
-    <script src="~/js/Home_Organizador.js"></script>
+    <script src="/js/Home_Organizador.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
-    <img id="logo" src="/logoemescam.png">
 </head>
 <body>
+    <img id="logo" src="/logoemescam.png">
     <div class="cartao-menu">
         <div style="font-size:larger">Bem-Vindo! "ORGANIZADOR"</div>
         <form>
@@ -24,52 +24,70 @@
         <div id="card-evento" class="card">
             <h3>Novo Evento</h3>
             <hr>
-            <!-- Input para o nome do evento -->
-            <input type="text" id="nomeEvento" placeholder="Nome do Evento">
-            <hr>
-            <!--Aqui preenchem os dados-->
-            <div class="dados-form">
-                <div id="divDados">
-                    <input type="text" id="inputNome" placeholder="Nome">
-                    <input type="text" id="inputCPF" placeholder="CPF">
-                    <input type="text" id="inputEmail1" placeholder="Email">
-                    <input type="text" id="tipoPessoa" placeholder="Tipo Pessoa">
+
+            <form id="formEvento" asp-controller="Home_Organizador" asp-action="NovoEvento" method="post" enctype="multipart/form-data">
+
+                <!-- Input para o nome do evento -->
+                <input type="text" id="nomeEvento" name="nomeEvento" placeholder="Nome do Evento" required>
+                <hr>
+                <!--Aqui preenchem os dados-->
+                <div class="dados-form">
+                    <div id="divDados">
+                        <input type="text" id="inputNome" placeholder="Nome">
+                        <input type="text" id="inputCPF" placeholder="CPF">
+                        <input type="text" id="inputEmail1" placeholder="Email">
+                        <input type="text" id="tipoPessoa" placeholder="Tipo Pessoa">
+                    </div>
+                    <textarea id="textareaTexto" placeholder="Texto"></textarea>
                 </div>
-                <textarea id="textareaTexto" placeholder="Texto"></textarea>
-            </div>
-            <button id="botaoAcao" onclick="atualizarDados()">Adicionar Dados</button>
-            <hr>
 
-            <!--Tabela que será preenchida-->
-            <div class="tabela-container">
-                <table id="tabela" class="display">
-                    <thead>
-                        <tr>
-                            <th style="width: 20%">Nome</th>
-                            <th style="width: 10%">CPF</th>
-                            <th style="width: 15%">Email</th>
-                            <th style="width: 10%">Tipo Pessoa</th>
-                            <th style="width: 40%">Texto</th>
-                            <th style="width: 5%">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Os dados serão inseridos dinamicamente aqui -->
-                    </tbody>
-                </table>
-            </div>
+                @*Se o type não for definido em um button é atribuido a ele como default o type=submit*@
+                @*é recomendável explicitar sempre o type quando o form tiver butões com finalizadades diferentes*@
+                <button type="button" id="botaoAcao" onclick="atualizarDados()">Adicionar Dados</button>
+                <hr>
 
-            <div class="upload-container">
-                <!-- Botão de importar EXCEL -->
-                <input type="file" id="excelFile" accept=".xlsx" style="display:none" onchange="importarExcel()">
-                <label for="excelFile" class="custom-file-upload">Importar Pessoas</label>
-                <span id="fileName"></span> <!-- Texto do nome do arquivo aparece aqui -->
-                <!-- Botão de importar Certificado -->
-                <input type="file" id="arteCertificadoFile" accept=".jpeg, .jpg" style="display:none" onchange="importarCertificado()">
-                <label for="arteCertificadoFile" class="custom-file-upload">Importar Certificado</label>
-                <span id="certificadoFileName"></span> <!-- Texto do nome do arquivo aparece aqui -->
-            </div>
-            <button id="CadastrarEvento" onclick="cadastrarEvento()">Cadastrar Evento</button>
+                <!--Tabela que será preenchida-->
+                <div class="tabela-container">
+                    <table id="tabela" class="display">
+                        <thead>
+                            <tr>
+                                <th style="width: 20%">Nome</th>
+                                <th style="width: 10%">CPF</th>
+                                <th style="width: 15%">Email</th>
+                                <th style="width: 10%">Tipo Pessoa</th>
+                                <th style="width: 40%">Texto</th>
+                                <th style="width: 5%">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="eventos-tbody">
+                            <!-- Os dados serão inseridos dinamicamente aqui -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="upload-container">
+                    <!-- Botão de importar EXCEL -->
+                    <input type="file" id="excelFile" accept=".xlsx" style="display:none" onchange="importarExcel()">
+                    <label for="excelFile" class="custom-file-upload">
+                        Importar Pessoas
+                    </label>
+                    <span id="fileName" style="margin-left: 10px;"></span>
+                    <br>
+                    <!-- Novo input text ao lado esquerdo do botão "Importar Certificado" -->
+                    <input type="text" id="novoInputText" name="novoInputText" placeholder="Selecione o arquivo" required>
+                    <!-- Botão de importar Certificado -->
+                    <input type="file" id="arteCertificadoFile" name="arteCertificadoFile" accept=".jpeg, .jpg" style="display:none">
+                    <label for="arteCertificadoFile" class="custom-file-upload">
+                        Selecionar Certificado
+                    </label>
+                    <span id="certificadoFileName" style="margin-left: 10px;"></span>
+
+                </div>
+                <input type="hidden" id="tableData" name="tableData">
+                <button type="submit" id="CadastrarEvento" onclick="return processarDadosTabela(event)">Cadastrar Evento</button>
+
+            </form>
+
         </div>
 
         <div id="card-meus-eventos" class="card">
@@ -83,26 +101,26 @@
                 <table>
                     <thead>
                         <tr>
-                            <th style="width: 20%">ID</th>
-                            <th>Nome do Evento</th>
-                            <th style="width: 15%;">Imagem do Certificado</th>
-                            <th>Ações</th> <!-- Adicionada nova coluna de Ações -->
+                            <th style="width:5%; text-align: center;">ID</th>
+                            <th style="width:55%; text-align: center;">Nome do Evento</th>
+                            <th style="width:15%; text-align: center;">Imagem do Certificado</th>
+                            <th style="width:25%; text-align: center;">Ações</th> 
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var evento in Model)
                         {
                             <tr>
-                                
-                                <td>@evento.Id</td>
-                                <td>@evento.Nome</td>
-                                <td>
+
+                                <td style="text-align: center;">@evento.Id</td>
+                                <td style="text-align: center;">@evento.Nome</td>
+                                <td style="text-align: center;">
                                     <img src="@Url.Action("VisualizarImagem", "Home_Organizador", new { Id=evento.Id })"
                                          alt="imagem do certificado"
                                          style="width: 60px; height: auto; cursor: pointer;"
                                          onclick="window.open('@Url.Action("VisualizarImagem", "Home_Organizador", new { Id=evento.Id })')">
                                 </td>
-                                <td>
+                                <td style="text-align: center;">
                                     <button class="btn btn-emitir" onclick="emitirCertificado('@evento.Nome')">Emitir Certificado</button>
                                     <button class="btn btn-atualizar" onclick="atualizarEvento('@evento.Id')">Atualizar</button>
                                 </td>
@@ -115,14 +133,23 @@
 
 
         <div id="card-buscar-pessoas" class="card">
+            <h4>Buscar Pessoas</h4>
             <div>
                 <input type="text" id="searchInput" placeholder="Digite o nome da pessoa">
                 <button onclick="buscarPessoas()">Buscar</button>
-                <div id="resultList"></div>
+                <hr>
+                <div id="resultList">
+                    <div class="header">
+                        <span style="width:5%" class="col-id">ID</span>
+                        <span style="width:84%" class="col-nome">Nome</span>
+                        <span style="width:6%" class="col-acoes">Ações</span>
+                    </div>
+                </div>
                 <div class="details" id="details"></div>
             </div>
-
         </div>
+
+
 
 
     </div>
@@ -158,11 +185,7 @@
             }
         }
 
-        var eventos = [
-            { id: 20376, nome: "CAAL 2020 - CAAL Convida: SUS, História e Desafios", data: "09/11/2020", imagem: "path/to/image1.png" },
-            { id: 20373, nome: "CAAL 2020 - CAAL Convida: Crises Sanitárias e Negacionismo", data: "09/11/2020", imagem: "path/to/image2.png" },
-            { id: 20372, nome: "CAAL 2020 - CAAL Convida: Efeito Werther e Suicídio", data: "09/11/2020", imagem: "path/to/image3.png" }
-        ];
+       
 
         function preencherTabelaEventos() {
             var tabelaEventos = document.getElementById('eventos-tbody');
@@ -224,7 +247,8 @@
             var botaoExcluir = document.createElement("button");
             botaoExcluir.textContent = "Excluir";
             botaoExcluir.className = 'btn table-btn';
-            botaoExcluir.onclick = function () {
+            botaoExcluir.onclick = function (event) {
+                event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
                 excluirLinha(linha);
                 destacarCPFsInvalidos();
             };
@@ -233,7 +257,8 @@
             var botaoAtualizar = document.createElement("button");
             botaoAtualizar.textContent = "Atualizar";
             botaoAtualizar.className = 'btn table-btn';
-            botaoAtualizar.onclick = function () {
+            botaoAtualizar.onclick = function (event) {
+                event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
                 carregarDadosParaEditar(linha);
             };
             colunaAcoes.appendChild(botaoAtualizar);
@@ -594,6 +619,11 @@
             return resultado == parseInt(digitos.charAt(1));
         }
 
+
+
+
+
+
         function buscarPessoas() {
             var termo = $("#searchInput").val();
             if (termo.length >= 3) { // Buscar apenas se o nome tiver 3 ou mais caracteres
@@ -603,18 +633,34 @@
                     data: { termo: termo },
                     success: function (data) {
                         var resultList = $("#resultList");
-                        resultList.empty(); // Limpar resultados anteriores
+                        resultList.find(".result-item, .detalhes").remove(); // Limpar resultados anteriores
 
                         data.forEach(function (pessoa) {
+                            var detalhesInline = "<span class='detalhes-inline'> " +
+                                pessoa.cpf + " &#x2714; " + pessoa.email + "</span>";
                             var item = $("<div class='result-item'></div>")
-                                .text(pessoa.nome)  // Certifique-se de que "pessoa.nome" está correto
-                                .data("id", pessoa.id)  // Certifique-se de que "pessoa.id" está correto
+                                .append("<span class='col-id'>" + pessoa.id + "</span>")
+                                .append("<span class='col-nome'>" + pessoa.nome + detalhesInline + "</span>")
+                                .append(`
+                                    <div class="acoes-dropdown">
+                                        <button class='acoes-btn' onclick="toggleDropdown(this)">Ações</button>
+                                        <div class="acoes-dropdown-content">
+                                            <button onclick="exibirCertificado(this)">Exibir Certificado</button>
+                                            <button onclick="acao2()">Reenviar Instruções</button>
+                                            <button onclick="acao3()">Corrigir E-mail</button>
+                                        </div>
+                                    </div>
+                                `)
+                                .data("id", pessoa.id)
                                 .data("cpf", pessoa.cpf)
                                 .data("email", pessoa.email)
-                                .on("click", function () {
-                                    exibirDetalhes($(this).data("id"), $(this).text(), $(this).data("cpf"), $(this).data("email"));
-                                });
-                            resultList.append(item);
+                                .data("certificado", pessoa.certificado);
+
+                            var certificado = pessoa.certificado ? pessoa.certificado : "undefined";
+                            var certificadoDiv = $("<div class='certificado'></div>")
+                                .append("<a class='certificado-link' href='#' onclick='abrirCertificado(\"" + pessoa.certificado + "\")'>" + certificado + "</a>")
+
+                            resultList.append(item).append(certificadoDiv);
                         });
                     },
                     error: function () {
@@ -623,6 +669,40 @@
                 });
             }
         }
+
+        function toggleDropdown(button) {
+            $(button).next(".acoes-dropdown-content").toggle();
+        }
+
+        function exibirCertificado(button) {
+            var item = $(button).closest('.result-item');
+            item.next(".certificado").slideToggle("slow"); // Aplica o efeito de deslizamento lento
+        }
+
+        function abrirCertificado(certificadoUrl) {
+            if (certificadoUrl && certificadoUrl !== "undefined") {
+                window.open(certificadoUrl, '_blank');
+            } else {
+                alert("Certificado não disponível");
+            }
+        }
+
+        function acao2() {
+            alert("Ação 2 executada");
+        }
+
+        function acao3() {
+            alert("Ação 3 executada");
+        }
+
+
+
+
+
+
+
+
+
 
         function exibirDetalhes(id, nome, cpf, email) {
             var details = $("#details");
@@ -634,292 +714,53 @@
             details.append("<p>Email: " + email + "</p>");
         }
 
+
+
+
+
+        //Define conteudo do input da imagem do certificado
+        document.getElementById('arteCertificadoFile').addEventListener('change', function () {
+            var fileInput = document.getElementById('arteCertificadoFile');
+            var novoInputText = document.getElementById('novoInputText');
+            if (fileInput.files.length > 0) {
+                novoInputText.value = fileInput.files[0].name;
+            } else {
+                novoInputText.value = '';
+            }
+        });
+
+        function processarDadosTabela(event) {
+            var tableData = [];
+            var rows = document.querySelectorAll('#eventos-tbody tr');
+
+            // Verifica se há mais de uma linha antes de excluir a última linha
+            if (rows.length > 1) {
+
+                // Remove a última linha da lista de linhas
+                rows = Array.from(rows).slice(0, -1);
+
+                rows.forEach(row => {
+                    var cells = row.querySelectorAll('td');
+                    var rowData = {
+                        nome: cells[0].textContent,
+                        cpf: cells[1].textContent,
+                        email: cells[2].textContent,
+                        tipoPessoa: cells[3].textContent,
+                        texto: cells[4].textContent
+                    };
+                    tableData.push(rowData);
+                });
+                document.getElementById('tableData').value = JSON.stringify(tableData);
+            } else {
+                // Se não houver dados suficientes na tabela, exibe um alerta
+                alert('Por favor, importe uma planilha com registros válidos.');
+                event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
+                return false;
+            }
+        }
+
     </script>
 
 </body>
 </html>
 
-<style>
-    #logoEmescam {
-    }
-
-    #logo {
-        width: 20%;
-        position: fixed;
-        top: 0%;
-        left: 11%;
-        transform: translateX(-50%);
-        margin-top: 0;
-        text-align: center;
-    }
-
-    body {
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background: #14086d;
-        font-family: Arial, sans-serif;
-    }
-
-    .cartao-menu {
-        background-color: rgba(250, 235, 215, 0.5);
-        border-radius: 5px;
-        box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.2);
-        padding: 5%;
-        width: 18%;
-        max-width: 50%;
-        height: 80%;
-        text-align: center;
-        position: fixed;
-        top: 55%;
-        left: 10%;
-        transform: translate(-50%, -50%);
-        background-color: white;
-    }
-
-        .cartao-menu a {
-            display: block;
-            text-decoration: none;
-            color: #000;
-            margin: 10px 0;
-            padding: 10px;
-            border: 1px solid transparent;
-            transition: color 0.3s, border-color 0.3s;
-            border-color: #14086D;
-        }
-
-            .cartao-menu a:hover {
-                color: #ff0000;
-                border-color: #ff0000;
-            }
-
-    .card {
-        background-color: rgba(250, 235, 215, 0.5);
-        padding: 5%;
-        width: 442%;
-        height: 100%;
-        text-align: center;
-        position: fixed;
-        top: 0;
-        left: 103%;
-        border-radius: 5px;
-        display: none; /* Oculta o card por padrão */
-        background-color: white;
-    }
-
-    #card-evento {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        background-color: white;
-    }
-
-    #nomeEvento {
-        width: 97.7%;
-        margin-bottom: 2px;
-        margin-left: 2.5%
-    }
-
-    .dados-form {
-        display: flex;
-        flex-direction: row;
-        align-items: flex-start;
-        justify-content: space-between;
-        width: 100%;
-    }
-
-        .dados-form input, .dados-form textarea {
-            margin-bottom: 10px;
-        }
-
-        .dados-form input {
-            width: calc(70% - 10px);
-        }
-
-    #textareaTexto {
-        width: 100%;
-        height: 150px;
-        padding: 10px;
-        margin-left: -40px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        box-sizing: border-box;
-    }
-
-    #tabela {
-        width: 100%;
-        border-collapse: collapse;
-        max-height: 300px;
-    }
-
-        #tabela th {
-            background-color: #f2f2f2;
-        }
-
-        #tabela tbody tr {
-            border-bottom: 1px solid black;
-        }
-
-            #tabela tbody tr:nth-child(even) {
-                background-color: #f9f9f9;
-            }
-
-            #tabela tbody tr:nth-child(odd) {
-                background-color: white;
-            }
-
-    .tabela-container {
-        max-height: 320px;
-        overflow-y: auto;
-    }
-
-    button.btn {
-        padding: 10px 20px;
-        font-size: 16px;
-        text-transform: uppercase;
-        color: white;
-        border: none;
-        border-radius: 2px;
-        cursor: pointer;
-        margin: 5px;
-        transition: background-color 0.3s;
-    }
-
-    button.btn-emitir {
-        background-color: #4CAF50; /* Verde */
-    }
-
-        button.btn-emitir:hover {
-            background-color: #45a049;
-        }
-
-    button.btn-atualizar {
-        background-color: #008CBA; /* Azul */
-    }
-
-        button.btn-atualizar:hover {
-            background-color: #007B9E;
-        }
-
-    #CadastrarEvento {
-        background-color: #4CAF50; /* Verde */
-        color: white;
-        padding: 5px 10px;
-        text-align: center;
-        display: inline-block;
-        font-size: 16px;
-        margin: 4px 2px;
-        cursor: pointer;
-        border-radius: 2px;
-    }
-
-        #CadastrarEvento:hover {
-            background-color: #008CBA; /* Azul */
-        }
-
-    .upload-container {
-        position: relative;
-        width: 100%;
-        height: 60px; /* Ajuste a altura conforme necessário */
-        background-color: transparent;
-    }
-
-    .custom-file-upload {
-        display: inline-block;
-        padding: 3px 6px;
-        cursor: pointer;
-        background-color: #007bff; /* Cor azul */
-        color: white;
-        border: none;
-        border-radius: 2px; /* Bordas arredondadas */
-        position: relative; /* Posicionamento alterado para relativo */
-        margin: 10px 5px 10px 5px; /* Margens adicionadas para espaçamento */
-    }
-
-    #excelFile + .custom-file-upload {
-        float: left; /* Posiciona o botão de Excel à esquerda */
-        margin-right: 300px; /* Aumenta a margem à direita */
-    }
-
-    #arteCertificadoFile + .custom-file-upload {
-        float: right; /* Posiciona o botão de Certificado à direita */
-        margin-left: 300px; /* Aumenta a margem à esquerda */
-    }
-
-    span {
-        position: relative; /* Ajuste de posicionamento */
-        display: inline-block; /* Tornando inline para alinhamento */
-        vertical-align: middle; /* Alinhamento vertical */
-        margin-left: 10px; /* Espaçamento após o botão */
-        background-color: #fff; /* Mantendo o fundo branco */
-        border-radius: 5px; /* Bordas levemente arredondadas */
-        padding: 2px 5px;
-    }
-
-    hr {
-        margin-top: 1px;
-        margin-bottom: 3px;
-    }
-
-    .btn.table-btn {
-        background-color: #007bff; /* Fundo azul para o botão */
-        color: white; /* Texto rosa */
-        border: none; /* Sem borda */
-        padding: 2px; /* Espaçamento interno mínimo */
-        font-size: 10px; /* Tamanho de fonte reduzido */
-        text-align: center; /* Centraliza o texto dentro do botão */
-        border-radius: 3px; /* Bordas levemente arredondadas */
-        cursor: pointer; /* Cursor do mouse como ponteiro para indicar ação */
-        margin: 1px; /* Margem mínima entre botões */
-        transition: background-color 0.3s, color 0.3s; /* Transição suave para hover */
-        width: 70px; /* Largura fixa para todos os botões */
-    }
-
-        .btn.table-btn:hover {
-            background-color: #007bff; /* Cor de fundo ao passar o mouse */
-            color: white; /* Cor do texto ao passar o mouse */
-        }
-
-    #botaoAcao {
-        background-color: #007bff; /* Cor de fundo do botão */
-        color: white; /* Cor da fonte */
-        border: none; /* Sem borda */
-        padding: 3px 6px; /* Espaçamento interno para aumentar a área de clique */
-        font-size: 13px; /* Tamanho da fonte */
-        cursor: pointer; /* Cursor em forma de ponteiro quando passar o mouse sobre o botão */
-        border-radius: 2px; /* Bordas retangulares sem arredondamento */
-    }
-
-    .duplicado {
-        background-color: yellow !important; /* Adiciona !important para garantir aplicação */
-    }
-
-    #resultadosBusca div {
-        cursor: pointer;
-        padding: 5px;
-        margin-top: 2px;
-        background-color: #f0f0f0;
-        border: 1px solid #ddd;
-    }
-
-        #resultadosBusca div:hover {
-            background-color: #e9e9e9;
-        }
-
-    #detalhesPessoa p {
-        font-size: 14px;
-        color: #333;
-    }
-
-    #fileName, #certificadoFileName {
-        display: block; /* Faz com que cada span se comporte como um bloco, ocupando toda a largura disponível abaixo do botão */
-        font-size: 12px; /* Mantém o tamanho de fonte reduzido */
-        margin-top: 5px; /* Espaçamento no topo para separar ligeiramente do botão */
-        text-align: center; /* Centraliza o texto abaixo do botão */
-    }
-
-
-</style>
