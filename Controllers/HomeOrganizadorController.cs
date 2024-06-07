@@ -6,7 +6,7 @@ using EMISSOR_DE_CERTIFICADOS.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.SqlClient;
-using DocumentFormat.OpenXml.Office2010.Excel;
+using Newtonsoft.Json;
 
 namespace EMISSOR_DE_CERTIFICADOS.Controllers
 {
@@ -44,51 +44,44 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         public IActionResult NovoEvento()
         {
             return View();
-        }
-
-        // POST: /Home_Organizador/NovoEvento
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult NovoEvento(string TextoFrenteCertificado, EventoModel evento)
-        {
-            try
-            {
-                if (ModelState.IsValid)
-                {
-                    // Insere o evento no banco de dados
-                    InserirEvento(TextoFrenteCertificado, evento);
-                    return RedirectToAction(nameof(Index));
-                }
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Ocorreu um erro em Home_OrganizadorController.NovoEvento. Erro: {ex.Message}");
-            }
-            return View(evento);
-        }
+        }       
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult NovoEvento([FromForm] IFormFile ImagemCertificado, [FromBody] List<List<string>> DadosTabela, string Nome)
+        public IActionResult NovoEvento(string nomeEvento, IFormFile arteCertificadoFile, string tableData)
         {
             EventoModel evento = new EventoModel();
+
             try
             {
                 evento = new EventoModel
                 {
-                    Nome = Nome,
-                    ImagemCertificado = ImagemCertificado
+                    Nome = nomeEvento,
+                    ImagemCertificado = arteCertificadoFile
                 };
+                
+                if (!string.IsNullOrEmpty(tableData))
+                {
+                    var tabelaDataList = JsonConvert.DeserializeObject<List<TabelaData>>(tableData);
+                    
+                    // Registra o evento no banco de dados
+                    InserirEvento(evento, tabelaDataList);
+                }
+                else 
+                {
+                    throw new Exception("Não foi possivel identificar os registros de participantes.");
+                }
 
-                // Chamar o método privado InserirEvento para inserir o evento no banco de dados
-                InserirEvento(evento, DadosTabela);
+                //// Para este exemplo, apenas retornaremos uma mensagem de confirmação
+                //ViewBag.NomeEvento = nomeEvento;
+                //return View("Confirmacao");
 
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Ocorreu um erro em Home_OrganizadorController.NovoEvento. Erro: {ex.Message}");
-            }
+            }           
         }
 
         // POST: /Home_Organizador/LerPlanilha
@@ -291,34 +284,17 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             {
                 throw new Exception($"Ocorreu um erro em [Home_OrganizadorController.BuscarEventoPorId] Erro: {ex.Message}");
             }
-        }
-        private void InserirEvento(string TextoFrenteCertificado, EventoModel evento)
+        }        
+        private void InserirEvento(EventoModel evento, List<TabelaData>? dadosTabela)
         {
-            using (SqlConnection con = (SqlConnection)_dbHelper.GetConnection())
-            {
-                string queryEvento = "INSERT INTO Eventos (Nome) VALUES (@Nome)";
-                string queryMeusEventos = "INSERT INTO MeusEventos (Nome) VALUES (@Nome)";
-
-                using (SqlCommand cmdEvento = new SqlCommand(queryEvento, con))
-                using (SqlCommand cmdMeusEventos = new SqlCommand(queryMeusEventos, con))
-                {
-                    cmdEvento.Parameters.AddWithValue("@Nome", evento.Nome);
-                    cmdMeusEventos.Parameters.AddWithValue("@Nome", evento.Nome);
-
-                    con.Open();
-                    cmdEvento.ExecuteNonQuery();
-                    cmdMeusEventos.ExecuteNonQuery();
-                }
-            }
-        }
-        private void InserirEvento(EventoModel evento, List<List<string>> dadosTabela)
-        {
-            int idEvento = -1;
-            string sSQL = "";
+            int? idEvento;
+            int? idUsuario;
+            string sSQL = string.Empty;
 
             try
             {
-                byte[] imagemBytes = null; // Inicialize com um valor padrão
+                // Inicializa com um valor padrão
+                byte[] imagemBytes = null;
 
                 // Verifica se o arquivo de imagem foi fornecido
                 if (evento.ImagemCertificado != null && evento.ImagemCertificado.Length > 0)
@@ -330,10 +306,22 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                         imagemBytes = memoryStream.ToArray();
                     }
                 }
+                else 
+                {
+                    throw new Exception("Não foi possivel identificar o arquivo de imagem do certificado.");
+                }
+                
+                //recuperar o ID do usuario logado 
+                idUsuario = HttpContext.Session.GetInt32("UserId");
+
+                if (idUsuario == null)
+                {
+                    throw new Exception("ID do usuário não encontrado na sessão.");
+                }
 
                 // Insira o evento no banco de dados, incluindo a imagem convertida
-                sSQL = $"INSERT INTO EVENTO (NOME, IMAGEM_CERTIFICADO) " +
-                       $"VALUES ('{evento.Nome}', @ImagemCertificado);" +
+                sSQL = $"INSERT INTO EVENTO (NOME, IMAGEM_CERTIFICADO, ID_USUARIO_ADMINISTRATIVO) " +
+                       $"VALUES ('{evento.Nome}', @ImagemCertificado, {idUsuario.Value});" +
                        "SELECT SCOPE_IDENTITY();"; // Obtem o ID do evento inserido
 
                 var parameters = new Dictionary<string, object>
@@ -343,33 +331,32 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
 
                 idEvento = _dbHelper.ExecuteScalar<int>(sSQL, parameters);
 
-                // Processar os dados da tabela
-                foreach (var dadosLinha in dadosTabela)
-                {                    
-                    string nome = dadosLinha[0];
-                    string cpf = dadosLinha[1];
-                    string email = dadosLinha[2];
-                    string tipoPessoa = dadosLinha[3];
-                    string texto = dadosLinha[4];
+                if (idEvento == null)
+                {
+                    throw new Exception("ID do evento não foi definido.");
+                }
 
+                // Processar os dados da tabela
+                foreach (var registro in dadosTabela)
+                {                  
                     // Criar objeto e inserir a pessoa
                     PessoaModel pessoa = new PessoaModel
                     {
-                        Nome = nome.Trim(),
-                        CPF = cpf.Trim(),
-                        Email = email.Trim()
+                        Nome = registro.Nome.Trim(),
+                        CPF = registro.CPF.Trim(),
+                        Email = registro.Email.Trim()
                     };
 
                     // Chama o método InserirPessoa do controlador PessoaController
                     using (PessoaController pessoaController = new PessoaController(_dbHelper))
                     {
-                        pessoaController.InserirPessoa(pessoa);
+                        pessoaController.InserirPessoa(pessoa, idUsuario);
 
                         //Nesse momento o evento já foi cadastrado e a pessoa também
                         //Necessário registrar em banco a relação da pessoa com o evento e seus respectivos textos
                         sSQL = "";
                         sSQL = $"INSERT INTO EVENTO_PESSOA (ID_EVENTO, ID_PESSOA, TEXTO_FRENTE) " +
-                               $"VALUES ({idEvento}, {pessoa.Id}, '{texto}')";
+                               $"VALUES ({idEvento}, {pessoa.Id}, '{registro.Texto.Trim()}')";
                         _dbHelper.ExecuteQuery(sSQL);
                     }
                 }
@@ -457,4 +444,13 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         }
         #endregion
     }
+}
+
+public class TabelaData
+{
+    public string Nome { get; set; }
+    public string CPF { get; set; }
+    public string Email { get; set; }
+    public string TipoPessoa { get; set; }
+    public string Texto { get; set; }
 }

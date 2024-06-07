@@ -3,8 +3,6 @@ using System.Data;
 using EMISSOR_DE_CERTIFICADOS.DBConnections;
 using EMISSOR_DE_CERTIFICADOS.Models;
 using EMISSOR_DE_CERTIFICADOS.Helpers;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace EMISSOR_DE_CERTIFICADOS.Controllers
 {
@@ -218,10 +216,16 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         }
 
         // Método para inserir uma nova pessoa no banco de dados. Publico porque é chamado no momento de inserir novos EVENTOS
-        public string InserirPessoa(PessoaModel pessoa)
+        public string InserirPessoa(PessoaModel pessoa, int? userId = null)
         {
+            int? idUsuario = userId;
             try
             {
+                if (pessoa.Nome == "Maria Cecilia Amarante") 
+                {
+                    string aux = pessoa.Nome;
+                }
+
                 // Valida se a pessoa não existe no banco de dados
                 if (!ExistePessoaComCPF(pessoa.CPF))
                 {
@@ -229,8 +233,18 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                     {
                         if (Util.ValidaEstruturaEmail(pessoa.Email))
                         {
+                            if (idUsuario == null)
+                            {
+                                //recuperar o ID do usuario logado 
+                                idUsuario = HttpContext.Session.GetInt32("UserId");
+                                if (idUsuario == null) 
+                                {
+                                    throw new Exception("ID do usuário não encontrado na sessão.");
+                                }                                    
+                            }
+
                             // Se não existir, insere a nova pessoa
-                            var query = $"INSERT INTO Pessoa (Nome, CPF, Email) VALUES ('{pessoa.Nome}', '{pessoa.CPF}', '{pessoa.Email}')";
+                            var query = $"INSERT INTO Pessoa (Nome, CPF, Email, ID_USUARIO_ADMINISTRATIVO) VALUES ('{pessoa.Nome}', '{pessoa.CPF}', '{pessoa.Email}', {idUsuario})";
 
                             _dbHelper.ExecuteQuery(query);
 
@@ -239,13 +253,14 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                         }
                         else
                         {
-                            return "O e-mail informado não é válido.";
-
+                            //return "O e-mail informado não é válido.";
+                            throw new Exception($"Ocorreu um erro em [PessoaController.InserirPessoa] Erro: O e-mail {pessoa.Email} informado de {pessoa.Nome} não é válido.");
                         }
                     }
                     else
                     {
-                        return "O CPF informado não é válido.";
+                        //return "O CPF informado não é válido.";
+                        throw new Exception($"Ocorreu um erro em [PessoaController.InserirPessoa] Erro: O CPF {pessoa.CPF} informado de {pessoa.Nome} não é válido.");
                     }
                 }
                 else
