@@ -169,27 +169,37 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 // Se ocorrer algum erro, retorna um status 500 (Internal Server Error)
                 return StatusCode(500, $"Ocorreu um erro ao tentar visualizar a imagem: {ex.Message}");
             }
-        }
+        }        
 
-        // POST:/Home_Organizador
+        // POST:/Home_Organizador/EmitirCertificado
         [HttpPost]
         [ValidateAntiForgeryToken]
         //Rotina de Emissão de certificados:
         //percorre os participantes do evento, cria usuario e senha para cada um, gera o certificado (junta texto e certificado), emite email ao participante com instruções e certificado anexo
-        public IActionResult EmitirCeritificado(EventoModel evento) 
+        public IActionResult EmitirCertificado(int id)
         {
             try
             {
-                if(ModelState.IsValid) 
+                EventoModel evento = BuscarEventoPorId(id);
+                //if (evento == null)
+                //{
+                //    return NotFound();
+                //}
+
+                if (ModelState.IsValid)
                 {
-                    GerarCertifcado(evento);
+                    GerarCertificado(evento);
+                }
+                else 
+                {
+                    return NotFound();
                 }
 
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Ocorreu um erro em Home_OrganizadorController.EmitirCeritificado. Erro: {ex.Message}");
+                return StatusCode(500, $"Ocorreu um erro em Home_OrganizadorController.EmitirCertificado. Erro: {ex.Message}");
             }
         }
 
@@ -252,20 +262,25 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 throw new Exception($"Ocorreu um erro em [Home_OrganizadorController.BuscarTodosEventos] Erro: {ex.Message}");
             }
         }
-        // Método para inserir um novo evento no banco de dados.
+
+        // Método para buscar evento no banco de dados.
         private EventoModel BuscarEventoPorId(int id)
         {
             try
             {
-                var query = $"SELECT * FROM EVENTO WHERE ID = {id}";
-                var dataTable = _dbHelper.ExecuteQuery(query);
-                if (dataTable.Rows.Count > 0)
+                var sSQL = $"SELECT * FROM EVENTO WHERE ID = {id}";
+                var oDT = _dbHelper.ExecuteQuery(sSQL);
+
+                if (oDT.Rows.Count > 0)
                 {
-                    var row = dataTable.Rows[0];
+                    var row = oDT.Rows[0];
 
 
-                    // Converte a string base64 para um array de bytes
-                    byte[] imagemBytes = Convert.FromBase64String(Convert.ToString(row["IMAGEM_CERTIFICADO"]));
+                    //// Converte a string base64 para um array de bytes
+                    //byte[] imagemBytes = Convert.FromBase64String(Convert.ToString(row["IMAGEM_CERTIFICADO"]));
+
+                    // Recupera os bytes diretamente do banco de dados
+                    byte[] imagemBytes = (byte[])row["IMAGEM_CERTIFICADO"];
 
                     // Cria um objeto IFormFile a partir do array de bytes
                     IFormFile imagemCertificado = new FormFile(new MemoryStream(imagemBytes), 0, imagemBytes.Length, "ImagemCertificado", "imagem.jpg");
@@ -397,11 +412,12 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 throw new Exception("Erro em [Home_OrganizadorController.BuscarBytesDaImagemNoBancoDeDados]: " + ex.Message);
             }
         }
-        private void GerarCertifcado(EventoModel evento) 
+        private void GerarCertificado(EventoModel evento) 
         {
             string sSQL = "";
             DataTable oDT = new DataTable();
             var usuariosService = new UsuariosService(_dbHelper);
+            var certificadoService = new CertificadosService(_dbHelper);
             int idUsuario = -1;
 
             try
@@ -415,14 +431,14 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                     //Percorre-las
                     foreach (DataRow row in oDT.Rows)
                     {                                                
-                        int idPessoa = Convert.ToInt32(row["ID"]);
+                        int idPessoa = Convert.ToInt32(row["ID_PESSOA"]);
                         string texto = Convert.ToString(row["TEXTO_FRENTE"]);
                         
                         //Só manda gerar se houver texto e imagem
                         if (!string.IsNullOrEmpty(texto) &&  evento.ImagemCertificado != null) 
                         {
                             //Se gerar certificado
-                            if (CertificadosService.GerarCertificado_SEM_NEGRITO(idPessoa, texto, evento.ImagemCertificado)) 
+                            if (certificadoService.GerarCertificado_SEM_NEGRITO(idPessoa, texto, evento.ImagemCertificado)) 
                             {
                                 //Criar usuario e senha da pessoa
                                 idUsuario = usuariosService.GerarUsuario(idPessoa);

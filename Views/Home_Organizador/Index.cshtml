@@ -89,7 +89,7 @@
             </form>
 
         </div>
-
+        <!-- MEUS EVENTOS -->
         <div id="card-meus-eventos" class="card">
             <h4>Meus Eventos</h4>
             <!-- Botão de "Adicionar Evento" -->
@@ -121,7 +121,7 @@
                                          onclick="window.open('@Url.Action("VisualizarImagem", "Home_Organizador", new { Id=evento.Id })')">
                                 </td>
                                 <td style="text-align: center;">
-                                    <button class="btn btn-emitir" onclick="emitirCertificado('@evento.Nome')">Emitir Certificado</button>
+                                    <button class="btn btn-emitir" onclick="emitirCertificado('@evento.Id')">Emitir Certificado</button>
                                     <button class="btn btn-atualizar" onclick="atualizarEvento('@evento.Id')">Atualizar</button>
                                 </td>
                             </tr>
@@ -130,6 +130,12 @@
                 </table>
             </div>
         </div>
+
+        <!-- Formulário oculto para emissão de certificado -->
+        <form id="formEmitirCertificado" asp-controller="Home_Organizador" asp-action="EmitirCertificado" method="post" style="display:none;">
+            <input type="hidden" id="eventoId" name="id">
+            @Html.AntiForgeryToken()
+        </form>
 
 
         <div id="card-buscar-pessoas" class="card">
@@ -231,8 +237,16 @@
             destacarCPFsInvalidos();
         }
 
-        function emitirCertificado(nome) {
-            alert('Emitir certificado para: ' + nome);
+        // function emitirCertificado(nome) {
+        //     alert('Emitir certificado para: ' + nome);
+        // }
+
+        function emitirCertificado(id) {
+            // Preencher o campo do formulário oculto
+            document.getElementById('eventoId').value = id;
+
+            // Submeter o formulário oculto
+            document.getElementById('formEmitirCertificado').submit();
         }
 
         function atualizarEvento(nome) {
