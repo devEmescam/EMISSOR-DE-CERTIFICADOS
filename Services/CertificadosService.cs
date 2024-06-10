@@ -5,74 +5,87 @@ using System.Drawing.Imaging;
 using System.Text;
 using QRCoder;
 using System.IO;
+using EMISSOR_DE_CERTIFICADOS.Controllers;
+using EMISSOR_DE_CERTIFICADOS.DBConnections;
+using Microsoft.AspNetCore.Hosting;
 
 namespace EMISSOR_DE_CERTIFICADOS.Services
 {
     public class CertificadosService
-    {
-        //Essa versão não aplica negrito nas informações necessárias do texto1
-        public static bool GerarCertificado_SEM_NEGRITO(int idPessoa, string texto, IFormFile imagem) //string caminhoCertificado, string nomePessoa, string emailPessoa, string cpfPessoa 
+    {        
+        private readonly DBHelpers _dbHelper;
+
+        public CertificadosService(DBHelpers dbHelper)
         {
-            string texto1 = "";
+            _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelpers não pode ser nulo.");            
+        }
+
+        //Essa versão não aplica negrito nas informações necessárias do texto1       
+        public bool GerarCertificado_SEM_NEGRITO(int idPessoa, string textoOriginal, IFormFile imagem)
+        {
+            string textoCertificado = string.Empty;
             string texto2 = "";
-            string caminhoQRCode = "";
-
-            string caminhoCertificado_TEMP = ""; // TO DO: buscar o array da arte que foi armazenado e 
-
             bool retorno = false;
 
             try
             {
-                texto1 = RetornaTexto1();
-                texto2 = RetornaTexto2(idPessoa);
-                //caminhoQRCode = GerarQRCode();
+                textoCertificado = ProcessarTextoCertificadoPessoa(idPessoa, textoOriginal);
+                texto2 = RetornaTexto2(idPessoa, textoCertificado);
+                // Caminho relativo para a imagem do QR Code no diretório wwwroot
+                string caminhoQRCode = System.IO.Path.Combine("wwwroot", "QRCodeEmescam.png");
 
-                // Carregar o arquivo JPG
-                using (Bitmap certificado = new Bitmap(caminhoCertificado_TEMP))
+                // Carregar o arquivo IFormFile diretamente
+                using (var memoryStream = new MemoryStream())
                 {
-                    // Configurar a fonte e o tamanho do texto1
-                    using (System.Drawing.Font fonteTexto1 = new System.Drawing.Font("Arial", 48, System.Drawing.FontStyle.Regular, GraphicsUnit.Pixel))
+                    imagem.CopyTo(memoryStream);
+                    using (Bitmap certificado = new Bitmap(memoryStream))
                     {
-                        // Criar um objeto de gráficos a partir do certificado
-                        using (Graphics graphics = Graphics.FromImage(certificado))
+                        // Configurar a fonte e o tamanho do texto1
+                        using (System.Drawing.Font fonteTexto1 = new System.Drawing.Font("Arial", 48, System.Drawing.FontStyle.Regular, GraphicsUnit.Pixel))
                         {
-                            // Configurar o alinhamento central horizontal
-                            StringFormat formatoCentralizado = new StringFormat();
-                            formatoCentralizado.Alignment = StringAlignment.Center;
-
-                            // Configurar a região central para o texto1
-                            RectangleF retanguloTexto1 = new RectangleF(certificado.Width / 6, certificado.Height / 2.5f, certificado.Width / 1.5f, certificado.Height / 2); // 2970px X 2100px
-
-                            // Desenhar o texto1 na região central
-                            graphics.DrawString(texto1, fonteTexto1, Brushes.Black, retanguloTexto1, formatoCentralizado);
-
-                            // Configurar a fonte e o tamanho do texto2
-                            using (System.Drawing.Font fonteTexto2 = new System.Drawing.Font("Arial", 24, System.Drawing.FontStyle.Regular, GraphicsUnit.Pixel))
+                            // Criar um objeto de gráficos a partir do certificado
+                            using (Graphics graphics = Graphics.FromImage(certificado))
                             {
-                                // Configurar a região inferior esquerda para o texto2
-                                RectangleF retanguloTexto2 = new RectangleF(10, certificado.Height - 120, 1500, 50);
+                                // Configurar o alinhamento central horizontal
+                                StringFormat formatoCentralizado = new StringFormat
+                                {
+                                    Alignment = StringAlignment.Center
+                                };
 
-                                // Desenhar o texto2 na região inferior esquerda
-                                graphics.DrawString(texto2, fonteTexto2, Brushes.Black, retanguloTexto2);
+                                // Configurar a região central para o texto1
+                                RectangleF retanguloTexto1 = new RectangleF(certificado.Width / 6, certificado.Height / 2.5f, certificado.Width / 1.5f, certificado.Height / 2); // 2970px X 2100px
 
-                                //// Configurar a região inferior direita para o QRCode
-                                //Bitmap qrCodeBitmap = new Bitmap(caminhoQRCode);
-                                //System.Drawing.Rectangle retanguloQRCode = new System.Drawing.Rectangle(certificado.Width - 280, certificado.Height - 260, 180, 180);
+                                // Desenhar o texto1 na região central
+                                graphics.DrawString(textoCertificado, fonteTexto1, Brushes.Black, retanguloTexto1, formatoCentralizado);
 
-                                //// Desenhar o QRCode na região inferior direita
-                                //graphics.DrawImage(qrCodeBitmap, retanguloQRCode);
+                                // Configurar a fonte e o tamanho do texto2
+                                using (System.Drawing.Font fonteTexto2 = new System.Drawing.Font("Arial", 24, System.Drawing.FontStyle.Regular, GraphicsUnit.Pixel))
+                                {
+                                    // Configurar a região inferior esquerda para o texto2
+                                    RectangleF retanguloTexto2 = new RectangleF(10, certificado.Height - 120, 1500, 50);
+
+                                    // Desenhar o texto2 na região inferior esquerda
+                                    graphics.DrawString(texto2, fonteTexto2, Brushes.Black, retanguloTexto2);
+
+                                    // Configurar a região inferior direita para o QRCode
+                                    Bitmap qrCodeBitmap = new Bitmap(caminhoQRCode);
+                                    System.Drawing.Rectangle retanguloQRCode = new System.Drawing.Rectangle(certificado.Width - 280, certificado.Height - 260, 180, 180);
+
+                                    // Desenhar o QRCode na região inferior direita
+                                    graphics.DrawImage(qrCodeBitmap, retanguloQRCode);
+                                }
                             }
                         }
+
+                        // Salvar o certificado editado
+                        string caminhoCertificadoEditado = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "CertificadoEditado.jpg");
+                        certificado.Save(caminhoCertificadoEditado, ImageFormat.Jpeg);
+
+                        retorno = true;
+
+                        // Converter o arquivo JPG para PDF
+                        //ConverterParaPdf(caminhoCertificadoEditado);
                     }
-
-                    // Salvar o certificado editado
-                    string caminhoCertificadoEditado = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(caminhoCertificado_TEMP), "CertificadoEditado.jpg");
-                    certificado.Save(caminhoCertificadoEditado, ImageFormat.Jpeg);
-
-                    retorno = true;
-
-                    // Converter o arquivo JPG para PDF
-                    //ConverterParaPdf(caminhoCertificadoEditado);
                 }
 
                 return retorno;
@@ -288,67 +301,70 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
         //    {
         //        throw new Exception($"Erro em CertificadoEditor.EditarCertificado: {ex.Message}");
         //    }
-        //}
-        private static string RetornaTexto1(int idPessoa, int idEvento)
-        {
-            string texto = "";
+        //}      
+        private string ProcessarTextoCertificadoPessoa(int idPessoa, string texto) 
+        {            
+            string nomePessoa = string.Empty;
+            string cpf = string.Empty;
 
             try
             {
-                //texto = string.Format("Certificamos que <nomePessoa> portador do CPF: <cpfPessoa> apresentou o trabalho O Clima e o Ambiente, durante o evento Concientização da Natureza, realizado no período de 15 a 18 de agosto de 2024, em Vitória, ES, com carga horária de 12 horas.\r\n\r\nSão Paulo, 18 de agosto de 2017");
-                //texto = string.Format("Certificamos que <" + nomePessoa + "> portador do CPF <" + cpfPessoa + "> apresentou o trabalho O Clima e o Ambiente, durante o evento Concientização da Natureza, realizado no período de 15 a 18 de agosto de 2024, em Vitória, ES, com carga horária de 12 horas.\r\n\r\nSão Paulo, 18 de agosto de 2017");
-                //texto = string.Format("Certificamos que <b>{0}</b> portador do CPF <b>{1}</b> apresentou o trabalho O Clima e o Ambiente, durante o evento Concientização da Natureza, realizado no período de 15 a 18 de agosto de 2024, em Vitória, ES, com carga horária de 12 horas.{2}São Paulo, 18 de agosto de 2017", nomePessoa, cpfPessoa, Environment.NewLine + Environment.NewLine);
+                if (!string.IsNullOrEmpty(texto)) 
+                {
+                    using (PessoaController pessoaController = new PessoaController(_dbHelper))
+                    {
+                        nomePessoa = pessoaController.ObterNomePorIdPessoa(idPessoa);
+                        if (!string.IsNullOrEmpty(nomePessoa))
+                        {
+                            texto = texto.Replace("NOME_PESSOA", nomePessoa);
+                        }
+
+                        cpf = pessoaController.ObterCPFPorIdPessoa(idPessoa);
+                        if (!string.IsNullOrEmpty(cpf))
+                        {
+                            texto = texto.Replace("CPF_PESSOA", cpf);
+                        }
+                    }
+                }
+
                 return texto;
             }
             catch (Exception ex)
             {
-                throw new Exception($"Erro em CertificadoEditor.RetornaTexto1: {ex.Message}");
-            }
-        }
-        private static string RetornaTexto1()
-        {
-            string texto = "";
-
-            try
-            {
-                texto = string.Format("Certificamos que <nome> portador do CPF: <cpf> apresentou o trabalho O Clima e o Ambiente, durante o evento Concientização da Natureza, realizado no período de 15 a 18 de agosto de 2024, em Vitória, ES, com carga horária de 12 horas.\r\n\r\nSão Paulo, 18 de agosto de 2017");
-                return texto;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Erro em CertificadoEditor.RetornaTexto1: {ex.Message}");
-            }
-        }
-        private static string RetornaTexto2(int idPessoa) //string cpfPessoa
+                throw new Exception($"Erro em [CertificadoEditor.ProcessarTextoCertificadoPessoa]");
+            }        
+        }      
+        private string RetornaTexto2(int idPessoa, string texto) //string cpfPessoa
         {
             string codigo = "";
             string texto2 = "";
-            string cpfPessoa_TEMP = "";
+            string cpf = "";
 
             try
             {
-
-                // TO DO: criar rotina para retornar CPF pessoa
-
-                codigo = GerarCodigo(cpfPessoa_TEMP.Substring(0, 6)); // Usa os 6 primeiros digitos do CPF para compor o codigo que será gerado
-                texto2 = $"Código do Certificado: {codigo} - Verifique autenticidade em: definirUrl.com.br";
+                using (PessoaController pessoaController = new PessoaController(_dbHelper)) 
+                {
+                    cpf = pessoaController.ObterCPFPorIdPessoa(idPessoa);
+                    codigo = GerarCodigo(cpf + texto); // Usa o CPF e conteudo da variavel texto para compor o codigo que será gerado
+                    texto2 = $"Código do Certificado: {codigo} - Verifique autenticidade em: definirUrl.com.br";
+                }
+                    
                 return texto2;
             }
             catch (Exception ex)
             {
                 throw new Exception($"Erro em CertificadoEditor.RetornaTexto2: {ex.Message}");
             }
-
         }
-        private static string GerarCodigo(string cpf)
+        private static string GerarCodigo(string chave)
         {
             try
             {
                 // Definindo os caracteres permitidos no código alfanumérico
-                const string caracteresPermitidos = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+                const string caracteresPermitidos = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
 
                 // Utilizando o hash do input para garantir a unicidade do código
-                int hashCode = cpf.GetHashCode();
+                int hashCode = chave.GetHashCode();
 
                 // Utilizando um objeto Random para gerar o código
                 Random random = new Random(hashCode);
@@ -370,6 +386,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 throw new Exception($"Erro em CertificadoEditor.GerarCodigo: {ex.Message}");
             }
         }
+        
         //public static string GerarQRCode_OLD()
         //{
         //    string caminhoQRCode = "QRCode.jpg";

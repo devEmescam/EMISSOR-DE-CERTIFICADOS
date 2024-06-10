@@ -119,7 +119,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         }
         #endregion
 
-        #region *** METODOS PRIVADOS ***      
+        #region *** METODOS ***      
 
         // Método para buscar pessoas pelo termo informado
         private IEnumerable<PessoaModel> BuscarPessoasPorNomeOuCpfOuEmail(string termo)
@@ -320,7 +320,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             }
         }
 
-        public int ObterIdPessoaPorCPF(string cpf)
+        private int ObterIdPessoaPorCPF(string cpf)
         {
             try
             {
@@ -334,7 +334,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 }
                 else
                 {
-                    throw new InvalidOperationException("Não foi possível encontrar uma pessoa com o CPF fornecido.");
+                    throw new InvalidOperationException("Não foi possível encontrar o registo com o CPF fornecido.");
                 }
             }
             catch (Exception ex)
@@ -342,7 +342,51 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 throw new Exception($"Ocorreu um erro em [PessoaController.ObterIdPessoaPorCPF] Erro: {ex.Message}");
             }
         }
+        public string ObterCPFPorIdPessoa(int id) 
+        {
+            try
+            {
+                var query = $"SELECT CPF FROM Pessoa WHERE ID = {id}";
+                var result = _dbHelper.ExecuteScalar(query);
 
+                // Se o resultado não for nulo, converte para string e retorna o conteudo
+                if (result != null)
+                {
+                    return Convert.ToString(result);
+                }
+                else
+                {
+                    throw new InvalidOperationException("Não foi possível encontrar o regsitro com o id fornecido.");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em PessoaController.ObterCPFporIdPessoa: {ex.Message}");
+            }
+        }
+        public string ObterNomePorIdPessoa(int id) 
+        {
+            try
+            {
+                var query = $"SELECT NOME FROM Pessoa WHERE ID = {id}";
+                var result = _dbHelper.ExecuteScalar(query);
+
+                // Se o resultado não for nulo, converte para string e retorna o conteudo
+                if (result != null)
+                {
+                    return Convert.ToString(result);
+                }
+                else
+                {
+                    throw new InvalidOperationException("Não foi possível encontrar o regsitro com o id fornecido.");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em PessoaController.ObterNomePorIdPessoa: {ex.Message}");
+            }        
+        }
         #endregion
     }
 }
