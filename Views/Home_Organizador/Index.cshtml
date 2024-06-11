@@ -26,7 +26,6 @@
             <hr>
 
             <form id="formEvento" asp-controller="Home_Organizador" asp-action="NovoEvento" method="post" enctype="multipart/form-data">
-
                 <!-- Input para o nome do evento -->
                 <input type="text" id="nomeEvento" name="nomeEvento" placeholder="Nome do Evento" required>
                 <hr>
@@ -64,7 +63,6 @@
                         </tbody>
                     </table>
                 </div>
-
                 <div class="upload-container">
                     <!-- Botão de importar EXCEL -->
                     <input type="file" id="excelFile" accept=".xlsx" style="display:none" onchange="importarExcel()">
@@ -74,21 +72,20 @@
                     <span id="fileName" style="margin-left: 10px;"></span>
                     <br>
                     <!-- Novo input text ao lado esquerdo do botão "Importar Certificado" -->
-                    <input type="text" id="novoInputText" name="novoInputText" placeholder="Selecione o arquivo" required>
+                    <!-- <input type="text" id="novoInputText" name="novoInputText" placeholder="Selecione o arquivo" required> -->
                     <!-- Botão de importar Certificado -->
                     <input type="file" id="arteCertificadoFile" name="arteCertificadoFile" accept=".jpeg, .jpg" style="display:none">
                     <label for="arteCertificadoFile" class="custom-file-upload">
                         Selecionar Certificado
                     </label>
                     <span id="certificadoFileName" style="margin-left: 10px;"></span>
-
                 </div>
+
                 <input type="hidden" id="tableData" name="tableData">
-                <button type="submit" id="CadastrarEvento" onclick="return processarDadosTabela(event)">Cadastrar Evento</button>
-
+                <button type="submit" id="CadastrarEvento">Cadastrar Evento</button>
             </form>
-
         </div>
+
         <!-- MEUS EVENTOS -->
         <div id="card-meus-eventos" class="card">
             <h4>Meus Eventos</h4>
@@ -104,7 +101,7 @@
                             <th style="width:5%; text-align: center;">ID</th>
                             <th style="width:55%; text-align: center;">Nome do Evento</th>
                             <th style="width:15%; text-align: center;">Imagem do Certificado</th>
-                            <th style="width:25%; text-align: center;">Ações</th> 
+                            <th style="width:25%; text-align: center;">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -137,7 +134,11 @@
             @Html.AntiForgeryToken()
         </form>
 
+        <!-- EVENTOS -->
+        <div id="eventos" class="card">
+        </div>
 
+        <!-- BUSCAR PESSOAS -->
         <div id="card-buscar-pessoas" class="card">
             <h4>Buscar Pessoas</h4>
             <div>
@@ -154,17 +155,32 @@
                 <div class="details" id="details"></div>
             </div>
         </div>
-
-
-
-
     </div>
+
+    
+
 
     <script>
         window.onload = function () {
             mostrarCard('meus-eventos');
             preencherTabelaEventos();
         };
+
+        document.getElementById('formEvento').addEventListener('submit', function (event) {
+            if (!validarAntesDeCadastrar(event)) {
+                event.preventDefault(); // Prevenir a submissão do formulário
+                alert("Existem CPFs inválidos. Corrija antes de cadastrar o evento.");
+                return false;
+            }
+            return true; // Permitir a submissão do formulário
+        });
+
+        function validarAntesDeCadastrar(event) {
+            if (!destacarCPFsInvalidos()) {
+                return false;
+            }
+            return processarDadosTabela(event);
+        }
 
         function mostrarCard(id) {
             var cards = document.querySelectorAll('.card');
@@ -190,8 +206,6 @@
                 cardNovoEvento.scrollIntoView({ behavior: 'smooth' });
             }
         }
-
-       
 
         function preencherTabelaEventos() {
             var tabelaEventos = document.getElementById('eventos-tbody');
@@ -236,10 +250,6 @@
 
             destacarCPFsInvalidos();
         }
-
-        // function emitirCertificado(nome) {
-        //     alert('Emitir certificado para: ' + nome);
-        // }
 
         function emitirCertificado(id) {
             // Preencher o campo do formulário oculto
@@ -360,7 +370,6 @@
                 return;
             }
             var file = input.files[0];
-            document.getElementById('fileName').textContent = file.name; // Exibe o nome do arquivo
             var reader = new FileReader();
 
             reader.onload = function (e) {
@@ -421,7 +430,7 @@
             var novaLinha = tabelaEventos.insertRow(-1);
 
             var celulaCodigo = novaLinha.insertCell(0);
-            celulaCodigo.textContent = eventos.length + 1; 
+            celulaCodigo.textContent = eventos.length + 1;
 
             var celulaNome = novaLinha.insertCell(1);
             celulaNome.textContent = nomeEvento;
@@ -507,48 +516,23 @@
             xhr.send(formData);
         }
 
-        // // Função para enviar os dados do evento para o controller
-        // function enviarDadosEvento() {
-        //     // Obter o nome do evento
-        //     var nomeEvento = document.getElementById('nomeEvento').value;
-
-        //     // Obter a imagem do certificado
-        //     var arquivoCertificado = document.getElementById('arteCertificadoFile').files[0];
-
-        //     // Construir o objeto FormData para enviar os dados
-        //     var formData = new FormData();
-        //     formData.append('Nome', nomeEvento);
-        //     formData.append('ImagemCertificado', arquivoCertificado);
-
-        //     // Adicionar o token antifalsificação à solicitação
-        //     formData.append('__RequestVerificationToken', token);
-
-        //     // Enviar os dados para o controller usando AJAX
-        //     var xhr = new XMLHttpRequest();
-        //     xhr.open('POST', '/Home_Organizador/NovoEvento');
-        //     xhr.onload = function () {
-        //         // Tratar a resposta do servidor, se necessário
-        //         if (xhr.status === 200) {
-        //             alert('Evento cadastrado com sucesso!');
-        //             // Redirecionar para a página inicial, por exemplo
-        //             window.location.href = '/Home_Organizador/Index';
-        //         } else {
-        //             alert('Erro ao cadastrar o evento. Por favor, tente novamente.');
-        //         }
-        //     };
-        //     xhr.send(formData);
-        // }
-
         function filtrarEventos() {
             var input = document.getElementById('campo-pesquisa');
             var filter = input.value.toUpperCase();
-            var tbody = document.getElementById("eventos-tbody");
-            var tr = tbody.getElementsByTagName("tr");
+            var tabelaEventos = document.querySelector('.tabela-eventos tbody');
+            var tr = tabelaEventos.getElementsByTagName("tr");
+
+            console.log('Filtro:', filter); // Verificar o valor do filtro
+            console.log('Número de linhas:', tr.length); // Verificar o número de linhas na tabela
 
             for (var i = 0; i < tr.length; i++) {
                 var td = tr[i].getElementsByTagName("td")[1]; // Index 1 é a coluna do Nome do Evento
+                console.log('Linha:', i, 'Coluna:', td); // Verificar a célula atual
+
                 if (td) {
                     var txtValue = td.textContent || td.innerText;
+                    console.log('Texto da célula:', txtValue); // Verificar o texto da célula
+
                     if (txtValue.toUpperCase().indexOf(filter) > -1) {
                         tr[i].style.display = "";
                     } else {
@@ -595,12 +579,20 @@
         function destacarCPFsInvalidos() {
             var tabela = document.getElementById("tabela");
             var linhas = tabela.getElementsByTagName("tr");
-            for (var i = 0; i < linhas.length; i++) {
+            var temCPFInvalido = false; // Variável para rastrear CPFs inválidos
+
+            for (var i = 1; i < linhas.length; i++) { // Começa do índice 1 para pular o cabeçalho
                 var celulaCPF = linhas[i].getElementsByTagName("td")[1]; // Assume que CPF está na segunda coluna
-                if (celulaCPF && !validarCPF(celulaCPF.textContent)) {
-                    celulaCPF.style.backgroundColor = 'red'; // Pinta de vermelho se o CPF for inválido
+                if (celulaCPF) {
+                    if (!validarCPF(celulaCPF.textContent)) {
+                        celulaCPF.style.backgroundColor = 'red'; // Pinta de vermelho se o CPF for inválido
+                        temCPFInvalido = true; // Marca como inválido
+                    } else {
+                        celulaCPF.style.backgroundColor = ''; // Remove a cor de fundo se o CPF for válido
+                    }
                 }
             }
+            return !temCPFInvalido; // Retorna falso se houver CPFs inválidos
         }
 
         function validarCPF(cpf) {
@@ -633,10 +625,15 @@
             return resultado == parseInt(digitos.charAt(1));
         }
 
-
-
-
-
+        document.getElementById('arteCertificadoFile').addEventListener('change', function () {
+            var fileInput = document.getElementById('arteCertificadoFile');
+            var certificadoFileName = document.getElementById('certificadoFileName');
+            if (fileInput.files.length > 0) {
+                certificadoFileName.textContent = fileInput.files[0].name;
+            } else {
+                certificadoFileName.textContent = '';
+            }
+        });
 
         function buscarPessoas() {
             var termo = $("#searchInput").val();
@@ -656,15 +653,15 @@
                                 .append("<span class='col-id'>" + pessoa.id + "</span>")
                                 .append("<span class='col-nome'>" + pessoa.nome + detalhesInline + "</span>")
                                 .append(`
-                                    <div class="acoes-dropdown">
-                                        <button class='acoes-btn' onclick="toggleDropdown(this)">Ações</button>
-                                        <div class="acoes-dropdown-content">
-                                            <button onclick="exibirCertificado(this)">Exibir Certificado</button>
-                                            <button onclick="acao2()">Reenviar Instruções</button>
-                                            <button onclick="acao3()">Corrigir E-mail</button>
-                                        </div>
-                                    </div>
-                                `)
+                                            <div class="acoes-dropdown">
+                                                <button class='acoes-btn' onclick="toggleDropdown(this)">Ações</button>
+                                                <div class="acoes-dropdown-content">
+                                                    <button onclick="exibirCertificado(this)">Exibir Certificado</button>
+                                                    <button onclick="acao2()">Reenviar Instruções</button>
+                                                    <button onclick="acao3()">Corrigir E-mail</button>
+                                                </div>
+                                            </div>
+                                        `)
                                 .data("id", pessoa.id)
                                 .data("cpf", pessoa.cpf)
                                 .data("email", pessoa.email)
@@ -709,15 +706,6 @@
             alert("Ação 3 executada");
         }
 
-
-
-
-
-
-
-
-
-
         function exibirDetalhes(id, nome, cpf, email) {
             var details = $("#details");
             details.empty(); // Limpar detalhes anteriores
@@ -728,11 +716,6 @@
             details.append("<p>Email: " + email + "</p>");
         }
 
-
-
-
-
-        //Define conteudo do input da imagem do certificado
         document.getElementById('arteCertificadoFile').addEventListener('change', function () {
             var fileInput = document.getElementById('arteCertificadoFile');
             var novoInputText = document.getElementById('novoInputText');
@@ -749,7 +732,6 @@
 
             // Verifica se há mais de uma linha antes de excluir a última linha
             if (rows.length > 1) {
-
                 // Remove a última linha da lista de linhas
                 rows = Array.from(rows).slice(0, -1);
 
@@ -765,16 +747,14 @@
                     tableData.push(rowData);
                 });
                 document.getElementById('tableData').value = JSON.stringify(tableData);
+                return true; // Permitir a submissão do formulário
             } else {
                 // Se não houver dados suficientes na tabela, exibe um alerta
                 alert('Por favor, importe uma planilha com registros válidos.');
                 event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
-                return false;
+                return false; // Prevenir a submissão do formulário
             }
         }
-
     </script>
-
 </body>
 </html>
-

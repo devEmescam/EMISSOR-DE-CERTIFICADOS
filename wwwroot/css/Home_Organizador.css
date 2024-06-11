@@ -264,6 +264,7 @@ button.btn-atualizar {
 #arteCertificadoFile + .custom-file-upload {
     float: right; /* Posiciona o botão de Certificado à direita */
     margin-left: 300px; /* Aumenta a margem à esquerda */
+    margin-top:-15px;
 }
 
 span {
@@ -572,4 +573,29 @@ button {
         border: 1px solid #ccc;
         border-radius: 3px;
         text-align: center;
+    }
+
+
+.tabela-eventos {
+    max-height: 550px; /* Altura fixa para o contêiner */
+    overflow-y: auto; /* Habilitar a rolagem vertical */
+    border-collapse: collapse;
+}
+
+    .tabela-eventos table {
+        width: 100%; /* Garantir que a tabela ocupe 100% do contêiner */
+        border-collapse: collapse;
+    }
+
+    .tabela-eventos th, .tabela-eventos td {
+        text-align: center; /* Centralizar o texto */
+        padding: 8px;
+        border: 1px solid #ddd; /* Adiciona borda às células */
+    }
+
+    .tabela-eventos thead th {
+        position: sticky;
+        top: 0;
+        background: #f9f9f9; /* Cor de fundo para o cabeçalho */
+        z-index: 1; /* Garante que o cabeçalho fique acima das células */
     }
