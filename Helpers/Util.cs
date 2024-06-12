@@ -4,6 +4,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Helpers
 {
     public class Util
     {
+        //GERAL: Esses metodos não realizam operações de I/O não há necessidade de serem assincronos
+
         public static bool ValidaCPF(string cpf)
         {
             try
