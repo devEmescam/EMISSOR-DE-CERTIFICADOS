@@ -264,7 +264,7 @@ button.btn-atualizar {
 #arteCertificadoFile + .custom-file-upload {
     float: right; /* Posiciona o botão de Certificado à direita */
     margin-left: 300px; /* Aumenta a margem à esquerda */
-    margin-top:-15px;
+    margin-top: -15px;
 }
 
 span {
@@ -354,7 +354,8 @@ hr {
 
 
 
-/*Estilo do card "Buscar Pessoas"*/
+/*Estilo do card "
+    "*/
 #searchInput {
     width: 80%;
     padding: 10px;
@@ -413,7 +414,6 @@ button {
 
 .col-nome {
     width: 80%;
-    cursor: pointer; /* Adiciona o cursor pointer para indicar clique */
     background-color: transparent;
 }
 
@@ -532,7 +532,6 @@ button {
 
     #card-meus-eventos tr:hover {
         background-color: #f0f0f0;
-
     }
 
     #card-meus-eventos .botao-adicionar {
@@ -599,3 +598,110 @@ button {
         background: #f9f9f9; /* Cor de fundo para o cabeçalho */
         z-index: 1; /* Garante que o cabeçalho fique acima das células */
     }
+
+
+
+
+/* Estilo do card "EMITIR CERTIFICADO" */
+
+#card-emitir-certificado h4 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.certificado-info {
+    display: flex;
+    align-items: center; /* Alinha verticalmente os itens */
+    justify-content: space-between; /* Espaça os itens para que fiquem nos cantos opostos */
+    gap: 20px; /* Espaço entre os itens */
+}
+
+.certificado-imagem {
+    flex-shrink: 0; /* Previne que o div encolha */
+    position: absolute; /* Posiciona o div */
+    right: 10px; /* Alinha à direita da página */
+}
+
+.certificado-detalhes {
+    flex-grow: 1; /* Permite que este div cresça para preencher o espaço restante */
+    display: flex;
+    flex-direction: column;
+}
+
+    .certificado-detalhes label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .certificado-detalhes input {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        display: block;
+    }
+
+#imagemCertificado {
+    max-width: 200px; /* Ajusta a largura máxima para 300px */
+    height: auto; /* Ajusta a altura automaticamente */
+    border: 1px solid #ccc; /* Borda */
+    border-radius: 4px; /* Bordas arredondadas */
+    margin-top: 100px; /* Espaço abaixo da imagem */
+    margin-right:2px;
+}
+
+.tabela-certificados {
+    max-height: 460px; /* Ajuste conforme necessário */
+    overflow-y: auto;
+    border-collapse: collapse;
+    margin-top:130px;
+}
+
+    .tabela-certificados table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .tabela-certificados th, .tabela-certificados td {
+        text-align: center;
+        padding: 8px;
+        border: 1px solid #ddd;
+    }
+
+    .tabela-certificados thead th {
+        position: sticky;
+        top: 0;
+        background: #f4f4f4; /* Cor de fundo para o cabeçalho */
+        z-index: 1; /* Garante que o cabeçalho fique acima das células */
+    }
+
+#nomeDoEvento {
+    font-size: 14px; /* Ajuste o tamanho da fonte conforme necessário */
+    border: none; /* Remove a borda */
+    background: none; /* Remove o fundo */
+    outline: none; /* Remove o contorno quando selecionado */
+    padding: 0; /* Remove o preenchimento interno */
+    margin: 0; /* Remove a margem */
+    color: #000; /* Cor do texto */
+    width: auto; /* Ajuste a largura conforme necessário */
+    margin-bottom: 10px; /* Espaço abaixo do campo */
+}
+
+.btn-emitir {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-top: 20px;
+    background-color: #007bff;
+    color: #fff;
+    text-align: center;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+    .btn-emitir:hover {
+        background-color: #0056b3;
+    }
+
