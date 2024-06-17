@@ -267,5 +267,49 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 throw new Exception($"Erro em [UsuariosService.RetornarIdAsync]: {ex.Message}");
             }
         }
+
+        public async Task<UsuarioSenha> ObterUsuarioESenhaAsync(int idEventoPessoa)
+        {
+            try
+            {                
+                var sSQL = "SELECT U.USUARIO, U.SENHA" +
+                           " FROM EVENTO_PESSOA EP" +
+                           " JOIN PESSOA P ON (EP.ID_PESSOA = P.ID)" +
+                           " JOIN USUARIO U ON (P.CPF = U.USUARIO)" +
+                           " WHERE EP.ID = @IdEventoPessoa";
+                
+                var parameters = new Dictionary<string, object>
+                {
+                    { "@IdEventoPessoa", idEventoPessoa }
+                };
+
+                // Executar a consulta
+                DataTable result = await _dbHelper.ExecuteQueryAsync(sSQL, parameters);
+
+                if (result.Rows.Count == 0)
+                {
+                    throw new Exception("Nenhum usuário encontrado para o idEventoPessoa fornecido.");
+                }
+
+                // Extrair os dados da primeira linha retornada
+                DataRow row = result.Rows[0];
+                var usuarioSenha = new UsuarioSenha
+                {
+                    Usuario = Convert.ToString(row["USUARIO"]),
+                    Senha = Convert.ToString(row["SENHA"])
+                };
+
+                return usuarioSenha;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [UsuariosService.ObterUsuarioESenhaAsync]: {ex.Message}");
+            }
+        }
+    }
+    public class UsuarioSenha
+    {
+        public string Usuario { get; set; }
+        public string Senha { get; set; }
     }
 }
