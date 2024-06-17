@@ -318,7 +318,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
 
                 if (ModelState.IsValid)
                 {
-                  await  GerarCertificadoAsync(evento);
+                  await EmitirCertificadoAsync(evento);
                 }
                 else 
                 {
@@ -786,7 +786,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         }
 
         // VERSÃO ASYNC: Metodo que gerar certificado, cria usuario e emite email a pessoa do evento
-        private async Task GerarCertificadoAsync(EventoModel evento)
+        private async Task EmitirCertificadoAsync(EventoModel evento)
         {
             string sSQL = "";
             DataTable oDT = new DataTable();
@@ -826,7 +826,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                                 if (idUsuario > 0)
                                 {
                                     //Enviar email com os dados do usuario e certificado anexo
-                                    //emailService.EnviarEmail(login, senha, idEventoPessoa);
+                                    emailService.EnviarEmailAsync(login, senha, idEventoPessoa);
 
                                 }
                             }
