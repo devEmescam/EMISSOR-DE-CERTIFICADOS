@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Data;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using EMISSOR_DE_CERTIFICADOS.DBConnections;
 using EMISSOR_DE_CERTIFICADOS.Repositories;
 using Newtonsoft.Json;
@@ -15,6 +17,11 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
         private string _token;
         private string _evento;
         private readonly DBHelpers _dbHelper;
+
+        public EmailService(DBHelpers dbHelper)
+        {
+            _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelper não pode ser nulo.");
+        }
 
         public async Task<(bool success, string retorno)> EnviarEmailAsync(string login, string senha, int idEventoPessoa)
         {
@@ -32,15 +39,24 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
 
             try
             {
-                // Buscar as informações do email
+                // Buscar as configurações do email
                 var emailConfigList = await emailConfigRepo.CarregarDadosAsync();
-
-                if (emailConfigList == null || emailConfigList.Count == 0) 
+                if (emailConfigList == null || emailConfigList.Count == 0)
                 {
                     throw new Exception("Nenhuma configuração de e-mail encontrada.");
                 }
-                
-                var emailConfig = emailConfigList.First();               
+                var emailConfig = emailConfigList.First();
+
+                //Buscar destinatario
+                destinatario = await ObterEmailPessoaAsync(idEventoPessoa);
+                if (string.IsNullOrEmpty(destinatario))
+                {
+                    throw new Exception("Nenhum email de destinatário encontrado para o idEventoPessoa fornecido.");
+                }
+
+                //Buscar CC
+                //TO DO: PROVAVELMENTE ISSO SERÁ TRATADO TAMBÉM PELA CONFIGURAÇÃO DE EMAIL
+
 
                 // Buscar os dados do usuario
                 var usuarioService = new UsuariosService(_dbHelper);
@@ -53,11 +69,18 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 }
 
                 // Buscar textoAssunto do email
-                assunto = await BuscarTextoAssuntoAsync();
+                //assunto = await ObterTextoAssuntoAsync();
+                assunto = $"Emissão do Certificado de Participação - {_evento}";
+
                 // Buscar textoCorpo do email
+                corpo = await ObterTextoCorpoAsync(idEventoPessoa, dadosUsuario.Usuario, dadosUsuario.Senha);
 
                 // Buscar o certificado
-                corpo = await BuscarTextoCorpoAsync(idEventoPessoa, dadosUsuario.Usuario, dadosUsuario.Senha);
+                anexoImagem = await ObterCertificadoAsync(idEventoPessoa);
+                if (anexoImagem == null)
+                {
+                    throw new Exception("Nenhum certificado encontrado para o idEventoPessoa fornecido.");
+                }
 
                 // Obter o token de autenticação
                 await ObterToken(login, senha);
@@ -66,8 +89,10 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                     throw new Exception("Falha ao obter token de autenticação.");
                 }
 
-                // Chamar método independente para enviar o email
-                return await EnviarEmail(emailConfig, destinatario, assunto, corpo, cc, anexoImagem, assinaturaImagem);
+                // Chamar método para enviar o email
+                //return await EnviarEmail(emailConfig, destinatario, assunto, corpo, cc, anexoImagem, assinaturaImagem);
+                var resultadoEnvio = await EnviarEmail(emailConfig, destinatario, assunto, corpo, cc, anexoImagem, assinaturaImagem);
+                return resultadoEnvio;
             }
             catch (Exception ex)
             {
@@ -75,26 +100,26 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             }
         }
 
-        private async Task<string> BuscarTextoAssuntoAsync()
-        {
-            string retorno = string.Empty;  
-            string evento  = string.Empty;
-            string sSQL = string.Empty; 
+        //private async Task<string> ObterTextoAssuntoAsync()
+        //{
+        //    string retorno = string.Empty;  
+        //    string evento  = string.Empty;
+        //    string sSQL = string.Empty; 
 
-            try
-            {              
+        //    try
+        //    {              
 
-                return $"Emissão do Certificado de Participação - {_evento}";                 
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Erro em [EmailService.BuscarTextoAssuntoAsync]: {ex.Message}");
-            }
-        }
+        //        return $"Emissão do Certificado de Participação - {_evento}";                 
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw new Exception($"Erro em [EmailService.BuscarTextoAssuntoAsync]: {ex.Message}");
+        //    }
+        //}
 
         private async Task ObterNomeEventoAsync(int idEventoPessoa)
         {
-            string sSQL = string.Empty;           
+            string sSQL = string.Empty;
 
             try
             {
@@ -107,7 +132,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                     { "@IdEventoPessoa", idEventoPessoa }
                 };
 
-                _evento = await _dbHelper.ExecuteScalarAsync<string>(sSQL, parameters);                           
+                _evento = await _dbHelper.ExecuteScalarAsync<string>(sSQL, parameters);
             }
             catch (Exception ex)
             {
@@ -115,39 +140,41 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             }
         }
 
-        private async Task<string> BuscarTextoCorpoAsync(int idEventoPessoa, string usuario, string senha)
-        {            
+        private async Task<string> ObterTextoCorpoAsync(int idEventoPessoa, string usuario, string senha)
+        {
             string nome = string.Empty;
-            string sSQL = string.Empty;
             string textoCorpo = string.Empty;
 
             try
             {
-               nome = await ObterNomePessoaAsync(idEventoPessoa);
+                nome = await ObterNomePessoaAsync(idEventoPessoa);
 
-                textoCorpo = $"Prezado(a) {nome}, " + Environment.NewLine + Environment.NewLine +
-                             $" Esperamos que esta mensagem o (a) encontre bem." + Environment.NewLine + Environment.NewLine +
-                             $" Temos o prazer de informar que o certificado de participação no evento {_evento} foi " + Environment.NewLine +
-                             $" emitido com sucesso. Para sua conveniência, criamos um USUÁRIO e SENHA para que você possa" + Environment.NewLine +
-                             $" acessar nosso site e visualizar ou baixar o seu certificado emitido." + Environment.NewLine + Environment.NewLine +
-                             $" Para acessar o seu certificado, siga os passos abaixo:" + Environment.NewLine + Environment.NewLine +
-                             $" 1. Acesse o site através do seguinte endereço: https://emescam.certificados.edu/participante" + Environment.NewLine +
-                             $" 2. Utilize as seguintes credenciais para fazer o login:" + Environment.NewLine +
-                             $" Usuário: {usuario}" + Environment.NewLine +
-                             $" Senha: {senha}" + Environment.NewLine + Environment.NewLine +
-                             $" Caso encontre qualquer dificuldade ou tenha dúvidas, por favor, não hesite em entrar em contato " + Environment.NewLine +
-                             $" conosco através deste e-mail ou pelo telefone" + Environment.NewLine + Environment.NewLine +
-                             $" Agradecemos pela sua participação e esperamos vê-lo (a) em nossos próximos eventos.";
+                textoCorpo = $@"
+                                <p>Prezado(a) {nome},</p>
+                                <p>Esperamos que esta mensagem o (a) encontre bem.</p>
+                                <p>Temos o prazer de informar que o certificado de participação no evento {_evento} foi emitido com sucesso. Para sua conveniência, criamos um USUÁRIO e SENHA para que você possa acessar nosso site e visualizar ou baixar o seu certificado emitido.</p>
+                                <p>Para acessar o seu certificado, siga os passos abaixo:</p>
+                                <ol>
+                                    <li>Acesse o site através do seguinte endereço: <a href='https://emescam.certificados.edu/participante'>https://emescam.certificados.edu/participante</a></li>
+                                    <li>Utilize as seguintes credenciais para fazer o login:</li>
+                                    <ul style='list-style-type: none;'>
+                                        <li><b>Usuário:</b> {usuario}</li>
+                                        <li><b>Senha:</b> {senha}</li>
+                                    </ul>
+                                </ol>
+                                <p>Caso encontre qualquer dificuldade ou tenha dúvidas, por favor, não hesite em entrar em contato conosco através deste e-mail ou pelo telefone.</p>
+                                <p>Agradecemos pela sua participação e esperamos vê-lo (a) em nossos próximos eventos.</p>
+                            ";
 
                 return textoCorpo;
             }
             catch (Exception ex)
             {
-                throw new Exception($"Erro em [EmailService.BuscarTextoCorpoAsync]: {ex.Message}");
+                throw new Exception($"Erro em [EmailService.ObterTextoCorpoAsync]: {ex.Message}");
             }
         }
 
-        private async Task<string> ObterNomePessoaAsync(int idEventoPessoa) 
+        private async Task<string> ObterNomePessoaAsync(int idEventoPessoa)
         {
             string sSQL = string.Empty;
             string retorno = string.Empty;
@@ -170,7 +197,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                     throw new Exception("Nenhum nomePessoa encontrado para o idEventoPessoa fornecido.");
                 }
 
-                return retorno; 
+                return retorno;
             }
             catch (Exception ex)
             {
@@ -178,11 +205,63 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             }
         }
 
+        private async Task<string> ObterEmailPessoaAsync(int idEventoPessoa)
+        {
+            string sSQL = string.Empty;
+            string retorno = string.Empty;
+
+            try
+            {
+
+                sSQL = "SELECT P.EMAIL FROM EVENTO_PESSOA EP" +
+                    " JOIN PESSOA P ON (EP.ID_PESSOA = P.ID)" +
+                    " WHERE EP.ID = @IdEventoPessoa";
+
+                var parameters = new Dictionary<string, object>
+                {
+                    { "@IdEventoPessoa", idEventoPessoa }
+                };
+
+                retorno = await _dbHelper.ExecuteScalarAsync<string>(sSQL, parameters);
+
+                if (string.IsNullOrEmpty(retorno))
+                {
+                    throw new Exception("Nenhum nomePessoa encontrado para o idEventoPessoa fornecido.");
+                }
+
+                return retorno;
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [EmailService.ObterEmailPessoaAsync]: {ex.Message}");
+            }
+        }
+
+        private async Task<byte[]> ObterCertificadoAsync(int idEventoPessoa)
+        {
+            try
+            {
+                // Comando SQL para selecionar a imagem do evento com o ID fornecido
+                string sql = "SELECT IMAGEM_CERTIFICADO FROM EVENTO_PESSOA WHERE ID = @Id";
+
+                byte[] imagemBytes = await _dbHelper.ExecuteQueryArrayBytesAsync(sql, idEventoPessoa);
+
+                return imagemBytes;
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [EmailService.ObterCertificadoAsync]: {ex.Message}");
+            }
+        }
+
         private async Task ObterToken(string login, string senha)
-        {          
+        {
             try
             {
                 var url = "https://apps.emescam.br/site/comunicador/api/auth/login";
+                //var url = "https://localhost:7056/api/auth/login";
                 var httpClient = new HttpClient();
 
                 var payload = new
@@ -213,22 +292,28 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             }
         }
 
-        private async Task<(bool success, string retorno)> EnviarEmail(EmailConfigRepository emailConfig, string destinatario, string assunto, string corpo,  string[] cc, byte[] anexo, byte[] assinatura)
+        private async Task<(bool success, string retorno)> EnviarEmail(EmailConfigRepository emailConfig, string destinatario, string assunto, string corpo, string[] cc, byte[] anexo, byte[] assinatura)
         {
             try
             {
                 var url = "https://apps.emescam.br/site/comunicador/api/email/enviar";
+                //var url = "https://localhost:7056/api/email/enviar";
                 var httpClient = new HttpClient();
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
 
-                var form = new MultipartFormDataContent();
+                var form = new MultipartFormDataContent
+                {
+                    // Adicionar campos obrigatórios ao formulário
+                    { new StringContent(destinatario), "Destinatario" },
+                    { new StringContent(assunto), "Assunto" },
+                    { new StringContent(corpo), "Corpo" },
+                    { new StringContent(emailConfig.Email), "Remetente" },
+                    { new StringContent(emailConfig.Senha), "Senha" },
+                    { new StringContent(emailConfig.ServidorSMTP), "ServidorSMTP" },
+                    { new StringContent(emailConfig.Porta), "Porta" },
+                    { new StringContent(emailConfig.SSL), "SSL" }
+                };
 
-                // Adicionar campos obrigatórios ao formulário
-                form.Add(new StringContent(destinatario), "Destinatario");
-                form.Add(new StringContent(assunto), "Assunto");
-                form.Add(new StringContent(corpo), "Corpo");
-                //form.Add(new StringContent(remetente), "Remetente");
-                //form.Add(new StringContent(senhaEmail), "Senha");
 
                 // Adicionar campos opcionais
                 if (cc != null && cc.Length > 0)
@@ -271,7 +356,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             {
                 throw new Exception($"Erro em [EmailService.EnviarEmail]: {ex.Message}");
             }
-           
+
         }
 
         private class TokenResponse
