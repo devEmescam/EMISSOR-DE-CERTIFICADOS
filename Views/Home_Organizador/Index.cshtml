@@ -19,8 +19,6 @@
                 @* <a class="nav-link text-dark" href="#" onclick="mostrarCard('emitir-certificado')">Emitir Certificado</a> *@
                 <a class="nav-link text-dark" href="#" onclick="mostrarCard('configuraçoes')">Configurações</a>
                 @* <a class="nav-link text-dark" href="#" onclick="mostrarCard('atualizar-evento')">Atualizar Evento</a> *@
-
-
                 <a id="sair-link" class="nav-link text-dark" asp-action="Login" asp-controller="Organizador">Sair</a>
             </div>
         </form>
@@ -123,7 +121,8 @@
                                          onclick="window.open('@Url.Action("VisualizarImagem", "Home_Organizador", new { Id = evento.Id })')">
                                 </td>
                                 <td style="text-align: center;">
-                                    <button class="btn btn-emitir" onclick="abrirCardEmitirCertificado('@evento.Nome', '@Url.Action("VisualizarImagem", "Home_Organizador", new { Id = evento.Id })')">Emitir Certificado</button>
+                                    @* <button class="btn btn-emitir" onclick="abrirCardEmitirCertificado('@evento.Nome', '@Url.Action("VisualizarImagem", "Home_Organizador", new { Id = evento.Id })')">Emitir Certificado</button> *@
+                                    <button class="btn btn-emitir" onclick="emitirCertificado('@evento.Id')">Emitir Certificado</button>
                                     <button class="btn btn-atualizar" onclick="atualizarEvento('@evento.Id', '@evento.Nome')">Atualizar</button>
                                 </td>
                             </tr>
@@ -133,9 +132,9 @@
             </div>
         </div>
 
-        <!-- Formulário oculto para emissão de certificado -->
-        <form id="formEmitirCertificado" asp-controller="Home_Organizador" asp-action="EmitirCertificado" method="post" style="display:none;">
-            <input type="hidden" id="eventoId" name="id">
+        <!-- Formulário oculto para obter DetalhesEventoPessoas -->
+        <form id="formEmitirCertificado" asp-controller="Home_Organizador" asp-action="DetalhesEventoPessoas" method="post" style="display:none;">
+            <input type="hidden" id="eventoId" name="idEvento">
             @Html.AntiForgeryToken()
         </form>
 
@@ -193,8 +192,6 @@
 
             <button id="emitirCertificado" class="btn btn-emitir">Emitir Certificado</button>
         </div>
-
-
 
         <!-- ATUALIZAR EVENTO -->
         <div id="card-atualizar-evento" class="card" style="display: none;">
@@ -260,9 +257,6 @@
             </form>
         </div>
 
-
-
-
         <!-- BUSCAR PESSOAS -->
         <div id="card-buscar-pessoas" class="card">
             <h4>Buscar Pessoas</h4>
@@ -280,6 +274,7 @@
                 <div class="details" id="details"></div>
             </div>
         </div>
+
     </div>
 
     <script>
@@ -381,7 +376,6 @@
             document.getElementById('formEmitirCertificado').submit();
         }
 
-
         function atualizarEvento(id, nome) {
 
             // Ocultar todos os cards
@@ -401,8 +395,6 @@
             nomeEventoInput.value = nome;
             nomeEventoInput.readOnly = true;
         }
-
-
 
         var modoAdicionar = true;
         var linhaEditavel;
@@ -430,7 +422,6 @@
             };
             colunaAcoes.appendChild(botaoAtualizar);
         }
-
 
         function atualizarDados() {
             if (modoAdicionar) {
@@ -858,8 +849,6 @@
             }
         }
 
-
-
         function toggleDropdown(button) {
             $(button).next(".acoes-dropdown-content").toggle();
         }
@@ -934,7 +923,6 @@
                 return false; // Prevenir a submissão do formulário
             }
         }
-
 
         function abrirCardEmitirCertificado(nomeEvento, imagemUrl) {
             // Preencher o campo do nome do evento

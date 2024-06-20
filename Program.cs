@@ -6,6 +6,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+builder.Logging.AddConsole();
+// Configura o nível mínimo de logging para Debug
+builder.Logging.SetMinimumLevel(LogLevel.Debug);
+
 // Add IHttpContextAccessor to the services
 builder.Services.AddHttpContextAccessor();
 
@@ -23,7 +27,7 @@ builder.Services.AddScoped<ISessao, Sessao>();
 //Configurar os Cookies da Sessão
 builder.Services.AddSession(o =>
 {
-    o.IdleTimeout = TimeSpan.FromMinutes(5); 
+    o.IdleTimeout = TimeSpan.FromMinutes(5);
     o.Cookie.HttpOnly = true;
     o.Cookie.IsEssential = true;
 });

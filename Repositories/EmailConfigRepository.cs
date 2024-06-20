@@ -7,11 +7,11 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
     public class EmailConfigRepository
     {
         public int Id { get; set; }
-        public string Email { get; set; } 
+        public string Email { get; set; }
         public string Senha { get; set; }
-        public string ServidorSMTP {  get; set; }
-        public int Porta {  get; set; }
-        public bool SSL { get; set; }
+        public string ServidorSMTP { get; set; }
+        public string Porta { get; set; }
+        public string SSL { get; set; }
 
         private readonly DBHelpers _dbHelper;
         public EmailConfigRepository(DBHelpers dbHelper)
@@ -23,7 +23,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
             try
             {
                 var sSQL = "SELECT * FROM EMAIL_CONFIG";
-                return await _dbHelper.ExecuteQueryAsync(sSQL); // Ajuste para chamada assíncrona
+                return await _dbHelper.ExecuteQueryAsync(sSQL);
             }
             catch (Exception ex)
             {
@@ -42,12 +42,12 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                 {
                     var emailConfig = new EmailConfigRepository(_dbHelper)
                     {
-                        Id = Convert.ToInt32(row["Id"]),
-                        Email = Convert.ToString(row["Email"]),
-                        Senha = Convert.ToString(row["Senha"]),
-                        ServidorSMTP = Convert.ToString(row["ServidorSMTP"]),
-                        Porta = Convert.ToInt32(row["Porta"]),
-                        SSL = Convert.ToBoolean(row["SSL"])
+                        Id = Convert.ToInt32(row["ID"]),
+                        Email = Convert.ToString(row["EMAIL"]),
+                        Senha = Convert.ToString(row["SENHA"]),
+                        ServidorSMTP = Convert.ToString(row["SERVIDOR_SMTP"]),
+                        Porta = Convert.ToString(row["PORTA"]),
+                        SSL = Convert.ToString(row["SSL"])
                     };
 
                     emailConfigList.Add(emailConfig);
