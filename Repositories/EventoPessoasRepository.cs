@@ -28,10 +28,10 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
 
                 var evento = new Evento
                 {
-                    Id = Convert.ToInt32(row["ID"]),
-                    Nome = Convert.ToString(row["NOME"]),
-                    ImagemCertificado = ConvertByteArrayToFormFile((byte[])row["IMAGEM_CERTIFICADO"], "certificado.png"),
-                    DataCadastro = Convert.ToString(row["DATA_CADASTRO"]),
+                    Id = row["ID"] != DBNull.Value ? Convert.ToInt32(row["ID"]) : 0,
+                    Nome = row["NOME"] != DBNull.Value ? Convert.ToString(row["NOME"]) : string.Empty,
+                    ImagemCertificado = row["IMAGEM_CERTIFICADO"] != DBNull.Value ? ConvertByteArrayToFormFile((byte[])row["IMAGEM_CERTIFICADO"], "certificado.png") : null,
+                    DataCadastro = row["DATA_CADASTRO"] != DBNull.Value ? Convert.ToString(row["DATA_CADASTRO"]) : null,
                     PessoasEventos = await CarregarPessoasEventoAsync(idEvento)
                 };
 
@@ -79,12 +79,24 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
 
         private IFormFile ConvertByteArrayToFormFile(byte[] byteArray, string fileName)
         {
-            var stream = new MemoryStream(byteArray);
-            return new FormFile(stream, 0, byteArray.Length, fileName, fileName)
+            try
             {
-                Headers = new HeaderDictionary(),
-                ContentType = "application/octet-stream"
-            };
+                if (byteArray == null || byteArray.Length == 0)
+                {
+                    return null;
+                }
+
+                var stream = new MemoryStream(byteArray);
+                return new FormFile(stream, 0, byteArray.Length, "file", fileName)
+                {
+                    Headers = new HeaderDictionary(),
+                    ContentType = "application/octet-stream"
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [EventoPessoasRepository.ConvertByteArrayToFormFile]: {ex.Message}");
+            }            
         }
     }
 
