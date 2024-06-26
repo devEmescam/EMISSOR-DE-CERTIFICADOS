@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emissor de Certificados</title>
-    <link rel="stylesheet" href="/css/Home_Organizador.css">
-    <script src="/js/Home_Organizador.js"></script>
+    <link rel="stylesheet" href="~/css/Home_Organizador.css" asp-append-version="true">
+    <script src="~/js/Home_Organizador.js" asp-append-version="true"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
 </head>
 <body>
-    <img id="logo" src="/logoemescam.png">
+    <img id="logo" src="/logoemescam.png" alt="Logo Emescam">
+
     <div class="cartao-menu">
         <div style="font-size:larger">Bem-Vindo! "ORGANIZADOR"</div>
         <form>
@@ -19,8 +20,6 @@
                 @* <a class="nav-link text-dark" href="#" onclick="mostrarCard('emitir-certificado')">Emitir Certificado</a> *@
                 <a class="nav-link text-dark" href="#" onclick="mostrarCard('configuraçoes')">Configurações</a>
                 @* <a class="nav-link text-dark" href="#" onclick="mostrarCard('atualizar-evento')">Atualizar Evento</a> *@
-
-
                 <a id="sair-link" class="nav-link text-dark" asp-action="Login" asp-controller="Organizador">Sair</a>
             </div>
         </form>
@@ -117,7 +116,11 @@
                                          onclick="window.open('@Url.Action("VisualizarImagem", "Home_Organizador", new { Id = evento.Id })')">
                                 </td>
                                 <td style="text-align: center;">
-                                    <button class="btn btn-emitir" onclick="abrirCardEmitirCertificado('@evento.Nome', '@Url.Action("VisualizarImagem", "Home_Organizador", new { Id = evento.Id })')">Emitir Certificado</button>
+                                    @* <button class="btn btn-emitir" onclick="abrirCardEmitirCertificado('@evento.Nome', '@Url.Action("VisualizarImagem", "Home_Organizador", new { Id = evento.Id })')">Emitir Certificado</button> *@
+@*                                     <button class="btn btn-emitir" onclick="buscarEPreencherCertificados('@evento.Nome', '@Url.Action("VisualizarImagem", "Home_Organizador", new { Id = evento.Id })')">Emitir Certificado</button>
+ *@                                    <button class="btn btn-emitir" onclick="buscarEPreencherCertificados('@evento.Id')">Emitir Certificado</button>
+
+
                                     <button class="btn btn-atualizar" onclick="atualizarEvento('@evento.Id', '@evento.Nome')">Atualizar</button>
                                 </td>
                             </tr>
@@ -127,9 +130,9 @@
             </div>
         </div>
 
-        <!-- Formulário oculto para emissão de certificado -->
-        <form id="formEmitirCertificado" asp-controller="Home_Organizador" asp-action="EmitirCertificado" method="post" style="display:none;">
-            <input type="hidden" id="eventoId" name="id">
+        <!-- Formulário oculto para obter DetalhesEventoPessoas -->
+        <form id="formEmitirCertificado" asp-controller="Home_Organizador" asp-action="DetalhesEventoPessoas" method="post" style="display:none;">
+            <input type="hidden" id="eventoId" name="idEvento">
             @Html.AntiForgeryToken()
         </form>
 
@@ -155,40 +158,17 @@
                         </tr>
                     </thead>
                     <tbody id="certificados-tbody">
-                        <tr>
-                            <td style="text-align: center;">1</td>
-                            <td style="text-align: center;">João Silva</td>
-                            <td style="text-align: center;">joao.silva@email.com</td>
-                            <td style="text-align: center;">
-                                <input type="checkbox">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="text-align: center;">2</td>
-                            <td style="text-align: center;">Maria Oliveira</td>
-                            <td style="text-align: center;">maria.oliveira@email.com</td>
-                            <td style="text-align: center;">
-                                <input type="checkbox">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="text-align: center;">3</td>
-                            <td style="text-align: center;">Carlos Pereira</td>
-                            <td style="text-align: center;">carlos.pereira@email.com</td>
-                            <td style="text-align: center;">
-                                <input type="checkbox">
-                            </td>
-                        </tr>
+                       
+                        <!-- As pessoas serão preenchidas aqui -->
+
                     </tbody>
                 </table>
             </div>
 
-          
+
 
             <button id="emitirCertificado" class="btn btn-emitir">Emitir Certificado</button>
         </div>
-
-
 
         <!-- ATUALIZAR EVENTO -->
         <div id="card-atualizar-evento" class="card" style="display: none;">
@@ -254,9 +234,6 @@
             </form>
         </div>
 
-
-
-
         <!-- BUSCAR PESSOAS -->
         <div id="card-buscar-pessoas" class="card">
             <h4>Buscar Pessoas</h4>
@@ -274,6 +251,7 @@
                 <div class="details" id="details"></div>
             </div>
         </div>
+
     </div>
 
     <script>
@@ -285,7 +263,7 @@
         document.getElementById('formEvento').addEventListener('submit', function (event) {
             if (!validarAntesDeCadastrar(event)) {
                 event.preventDefault(); // Prevenir a submissão do formulário
-               // alert("Por favor, corrija os erros antes de cadastrar o evento.");
+                // alert("Por favor, corrija os erros antes de cadastrar o evento.");
                 return false;
             }
             return true; // Permitir a submissão do formulário
@@ -393,7 +371,6 @@
             document.getElementById('formEmitirCertificado').submit();
         }
 
-
         function atualizarEvento(id, nome) {
 
             // Ocultar todos os cards
@@ -416,7 +393,8 @@
 
 
 
-        let linhaEditavel = null;
+        var modoAdicionar = true;
+        var linhaEditavel;
 
         function adicionarLinha() {
             var nome = document.getElementById("inputNome").value.trim();
@@ -476,8 +454,6 @@
             celulaAcoes.style.textAlign = "center"; // Centralizar os botões na célula
             destacarCPFsInvalidos(); // Verificar CPFs da nova linha
         }
-
-
 
 
         function atualizarDados() {
@@ -600,7 +576,8 @@
                             }
                         }
 
-                        adicionarBotoesLinha(newRow);
+                        var celulaAcoes = newRow.insertCell(cellIndex); // Adicionar célula para ações
+                        adicionarBotoesLinha(celulaAcoes, newRow); // Chamar a função para adicionar botões
                     }
                 });
 
@@ -901,7 +878,7 @@
             var termo = $("#searchInput").val();
             if (termo.length >= 3) { // Buscar apenas se o nome tiver 3 ou mais caracteres
                 $.ajax({
-                    url: '/Pessoa/BuscarPessoas',
+                    url: 'Pessoa/BuscarPessoas',
                     type: 'GET',
                     data: { termo: termo },
                     success: function (data) {
@@ -914,16 +891,16 @@
                             var item = $("<div class='result-item'></div>")
                                 .append("<span class='col-id'>" + pessoa.id + "</span>")
                                 .append("<span class='col-nome'>" + pessoa.nome + detalhesInline + "</span>")
-                                .append(`
-                                    <div class="acoes-dropdown">
-                                        <button class='acoes-btn' onclick="toggleDropdown(this)">Ações</button>
-                                        <div class="acoes-dropdown-content">
-                                            <button onclick="exibirCertificado(this)">Exibir Certificado</button>
-                                            <button onclick="acao2()">Reenviar Instruções</button>
-                                            <button onclick="acao3()">Corrigir E-mail</button>
-                                        </div>
-                                    </div>
-                                `)
+                                .append(
+                                    $("<div class='acoes-dropdown'>")
+                                        .append("<button class='acoes-btn' onclick='toggleDropdown(this)'>Ações</button>")
+                                        .append(
+                                            $("<div class='acoes-dropdown-content'>")
+                                                .append("<button onclick='exibirCertificado(this)'>Exibir Certificado</button>")
+                                                .append("<button onclick='acao2()'>Reenviar Instruções</button>")
+                                                .append("<button onclick='acao3()'>Corrigir E-mail</button>")
+                                        )
+                                )
                                 .data("id", pessoa.id)
                                 .data("cpf", pessoa.cpf)
                                 .data("email", pessoa.email)
@@ -931,18 +908,18 @@
 
                             var certificado = pessoa.certificado ? pessoa.certificado : "undefined";
                             var certificadoDiv = $("<div class='certificado'></div>")
-                                .append("<a class='certificado-link' href='#' onclick='abrirCertificado(\"" + pessoa.certificado + "\")'>" + certificado + "</a>")
+                                .append("<a class='certificado-link' href='#' onclick='abrirCertificado(\"" + pessoa.certificado + "\")'>" + certificado + "</a>");
 
                             resultList.append(item).append(certificadoDiv);
                         });
                     },
-                    error: function () {
-                        alert("Erro ao buscar pessoas.");
+                    error: function (xhr, status, error) {
+                        console.error("Erro ao buscar pessoas:", error);
+                        alert("Erro ao buscar pessoas. Consulte o console para mais detalhes.");
                     }
                 });
             }
         }
-
 
 
         function toggleDropdown(button) {
@@ -1012,25 +989,65 @@
             return true; // Permitir a submissão do formulário
         }
 
+      
+        
 
-        function abrirCardEmitirCertificado(nomeEvento, imagemUrl) {
-            // Preencher o campo do nome do evento
-            document.getElementById('nomeDoEvento').value = nomeEvento;
+        function buscarEPreencherCertificados(eventoId) {
+            // Configurar o formulário oculto
+            document.getElementById('eventoId').value = eventoId;
 
-            // Preencher a imagem do certificado
-            document.getElementById('imagemCertificado').src = imagemUrl;
+            // Enviar o formulário
+            const form = document.getElementById('formEmitirCertificado');
+            const formData = new FormData(form);
 
-            // Mostrar o card de emissão de certificado
-            var cards = document.querySelectorAll('.card');
-            cards.forEach(function (card) {
-                card.style.display = 'none';
-            });
-
-            var cardEmitirCertificado = document.getElementById('card-emitir-certificado');
-            if (cardEmitirCertificado) {
-                cardEmitirCertificado.style.display = 'block';
-            }
+            // Realizar a requisição AJAX para obter os dados do evento e das pessoas
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data) {
+                        preencherTabelaCertificados(data);
+                    } else {
+                        alert('Evento não encontrado.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao obter os dados do evento:', error);
+                });
         }
+
+        function preencherTabelaCertificados(evento) {
+            const tbody = document.getElementById('certificados-tbody');
+            tbody.innerHTML = ''; // Limpar a tabela antes de preencher
+
+            // Preencher a tabela com os dados das pessoas do evento
+            evento.pessoas.forEach(pessoa => {
+                const tr = document.createElement('tr');
+
+                // Nome
+                const tdNome = document.createElement('td');
+                tdNome.textContent = pessoa.nome;
+                tr.appendChild(tdNome);
+
+                // Outro Dado (adicione mais colunas conforme necessário)
+                const tdOutroDado = document.createElement('td');
+                tdOutroDado.textContent = pessoa.outroDado; // Substitua por outros dados conforme necessário
+                tr.appendChild(tdOutroDado);
+
+                tbody.appendChild(tr);
+            });
+        }
+
+
+
+
+
+
         let allSelected = false;
 
         function toggleSelectAll() {
@@ -1044,6 +1061,12 @@
         function permitirApenasNumeros(input) {
             input.value = input.value.replace(/\D/g, '');
         }
+
+
+
+
+
+
     </script>
 </body>
 </html>

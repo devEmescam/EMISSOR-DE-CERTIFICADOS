@@ -4,15 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>login Organizador</title>
-    <div id="logoEmescam"><img src="/LogoEmescam.png" alt="logo"></div>
+    <title>Login Organizador</title>
+    <link rel="stylesheet" href="~/css/[SeuArquivoCSS].css" asp-append-version="true" /> <!-- Ajuste o caminho do CSS -->
 </head>
 <body>
+    <div id="logoEmescam"><img src="/logoemescam.png" alt="logo" asp-append-version="true" /></div>
 
     <div>
         <div class="cartao-login">
-            <h3 style="white;">LOGIN</h3>
-            <h7 style="white;">PARTICIPANTES</h7>
+            <h3 style="color: white;">LOGIN</h3>
+            <h7 style="color: white;">PARTICIPANTES</h7>
 
             <!-- Exibir mensagens de erro -->
             <div asp-validation-summary="All" class="text-danger"></div>
@@ -28,6 +29,7 @@
     </div>
 </body>
 </html>
+
 <style>
 
     #logoEmescam {
