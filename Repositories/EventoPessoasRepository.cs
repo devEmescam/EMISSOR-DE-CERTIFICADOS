@@ -59,11 +59,11 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                 {
                     var pessoaEvento = new PessoaEvento
                     {
-                        Id = Convert.ToInt32(row["ID"]),
-                        Nome = Convert.ToString(row["NOME"]),
-                        CertificadoEmitido = Convert.ToBoolean(row["CERTIFICADO_EMITIDO"]),
-                        DataEmissao = row["DATA_EMISSAO"] == DBNull.Value ? null : Convert.ToString(row["DATA_EMISSAO"]),
-                        MensagemRetornoEmail = Convert.ToString(row["MENSAGEM_RETORNO_EMAIL"])
+                        Id = row["ID"] != DBNull.Value ? Convert.ToInt32(row["ID"]) : 0,
+                        Nome = row["NOME"] != DBNull.Value ? Convert.ToString(row["NOME"]) : string.Empty,
+                        CertificadoEmitido = row["CERTIFICADO_EMITIDO"] != DBNull.Value && Convert.ToBoolean(row["CERTIFICADO_EMITIDO"]),
+                        DataEmissao = row["DATA_EMISSAO"] != DBNull.Value ? Convert.ToString(row["DATA_EMISSAO"]) : null,
+                        MensagemRetornoEmail = row["MENSAGEM_RETORNO_EMAIL"] != DBNull.Value ? Convert.ToString(row["MENSAGEM_RETORNO_EMAIL"]) : string.Empty
                     };
 
                     pessoasEventoList.Add(pessoaEvento);
