@@ -12,6 +12,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
         public string ServidorSMTP { get; set; }
         public string Porta { get; set; }
         public string SSL { get; set; }
+        public IFormFile ImagemAssinatura { get; set; }
 
         private readonly DBHelpers _dbHelper;
         public EmailConfigRepository(DBHelpers dbHelper)

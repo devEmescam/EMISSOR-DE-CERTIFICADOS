@@ -184,7 +184,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         //Rotina de Emissão de certificados        
-        public async Task<IActionResult> EmitirCertificado(int id)
+        public async Task<IActionResult> EmitirCertificado_OLD(int id)
         {
             try
             {
@@ -192,7 +192,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    await EmitirCertificadoAsync(evento);
+                    await EmitirCertificadoAsync_OLD(evento);
                 }
                 else
                 {
@@ -209,8 +209,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        //Rotina de Emissão de certificados        
-        public async Task<IActionResult> NOVA_VERSAO_EmitirCertificado(int id, List<int> idPessoas)
+        //Rotina de Emissão de certificados das pessoas selecionadas em tela        
+        public async Task<IActionResult> EmitirCertificado(int id, List<int> idPessoas)
         {
             try
             {
@@ -218,7 +218,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    await EmitirCertificadoAsync(evento);
+                    await EmitirCertificadoAsync(evento, idPessoas);
                 }
                 else
                 {
@@ -480,7 +480,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         }
 
         // VERSÃO ASYNC: Metodo que gera certificado, cria usuario e emite email a pessoa do evento
-        private async Task EmitirCertificadoAsync(EventoModel evento)
+        private async Task EmitirCertificadoAsync_OLD(EventoModel evento)
         {
             DataTable oDT = new DataTable();
             var usuariosService = new UsuariosService(_dbHelper);
@@ -552,13 +552,15 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 throw new Exception("Erro em [Home_OrganizadorController.EmitirCertificadoAsync]: " + ex.Message);
             }
         }
-        private async Task NOVA_VERSAO_EmitirCertificadoAsync(EventoModel evento, List<int> listaIdPessoas)
+        
+        // VERSÃO ASYNC: Metodo que gera certificado, cria usuario e emite email das pessoas selecionadas do evento
+        private async Task EmitirCertificadoAsync(EventoModel evento, List<int> listaIdPessoas)
         {
             DataTable oDT = new DataTable();
             var usuariosService = new UsuariosService(_dbHelper);
             var certificadoService = new CertificadosService(_dbHelper);
             var emailService = new EmailService(_dbHelper);
-            string sSQL = "";
+            string sSQL = string.Empty;
             int idUsuario = -1;
             string loginUsuarioADM = string.Empty;
             string senhaUsuarioADM = string.Empty;
@@ -610,12 +612,14 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                                     if (success)
                                     {
                                         // Atualizar EVENTO_PESSOA registrando resultado do processo e data 
+                                        sSQL = string.Empty;
                                         sSQL = $"UPDATE EVENTO_PESSOA SET CERTIFICADO_EMITIDO = 1, DATA_EMISSAO = GETDATE()  WHERE ID = {idEventoPessoa}";
                                         await _dbHelper.ExecuteQueryAsync(sSQL);
                                     }
                                     else
                                     {
                                         // Atualizar EVENTO_PESSOA registrando resultado do processo e data e mensagem retornada 
+                                        sSQL = string.Empty;
                                         sSQL = $"UPDATE EVENTO_PESSOA SET CERTIFICADO_EMITIDO = 1, DATA_EMISSAO = GETDATE(), MENSAGEM_RETORNO_EMAIL = '{retorno}' WHERE ID = {idEventoPessoa}";
                                         await _dbHelper.ExecuteQueryAsync(sSQL);
                                     }

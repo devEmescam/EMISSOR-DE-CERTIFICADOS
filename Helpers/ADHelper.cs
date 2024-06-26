@@ -53,30 +53,29 @@ namespace EMISSOR_DE_CERTIFICADOS.Helpers
         }
         public bool VerificaUsuario(string username, string password)
         {
-            using (PrincipalContext context = new PrincipalContext(ContextType.Domain, strDomainName, strLoginAdmin, strSenhaAdmin))
+            try
             {
-                // Tenta encontrar o usuário pelo nome de usuário (sAMAccountName)
-                UserPrincipal user = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, username);
-
-                try
+                using (PrincipalContext context = new PrincipalContext(ContextType.Domain, strDomainName, strLoginAdmin, strSenhaAdmin))
                 {
+                    // Tenta encontrar o usuário pelo nome de usuário (sAMAccountName)
+                    UserPrincipal user = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, username);
+
                     if (user != null)
                     {
                         // Se o usuário for encontrado, tenta validar as credenciais
                         return context.ValidateCredentials(username, password);
                     }
-
-                    // Usuário não encontrado no LDAP
-                    return false;
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception($"Ops, não foi possível realizar o acesso. Detalhe do erro: {ex.Message}", ex);
-                    //TempData["MensagemErro"] = $"Ops, não foi possível realizar o acesso. Detalhe do erro: {erro.Message}";
-                    return false;
+                    else
+                    {
+                        // Usuário não encontrado no LDAP
+                        return false;
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [ADHelper.VerificaUsuario]: {ex.Message}", ex);
+            }
         }
-
     }
 }
