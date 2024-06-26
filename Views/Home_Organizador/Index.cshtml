@@ -19,36 +19,35 @@
                 @* <a class="nav-link text-dark" href="#" onclick="mostrarCard('emitir-certificado')">Emitir Certificado</a> *@
                 <a class="nav-link text-dark" href="#" onclick="mostrarCard('configuraçoes')">Configurações</a>
                 @* <a class="nav-link text-dark" href="#" onclick="mostrarCard('atualizar-evento')">Atualizar Evento</a> *@
+
+
                 <a id="sair-link" class="nav-link text-dark" asp-action="Login" asp-controller="Organizador">Sair</a>
             </div>
         </form>
 
         <!--CADASTRAR EVENTO-->
+        <!-- Formulário para cadastro de evento -->
         <div id="card-evento" class="card">
             <h3>Novo Evento</h3>
             <hr>
-
             <form id="formEvento" asp-controller="Home_Organizador" asp-action="NovoEvento" method="post" enctype="multipart/form-data">
                 <!-- Input para o nome do evento -->
                 <input type="text" id="nomeEvento" name="nomeEvento" placeholder="Nome do Evento" required>
                 <hr>
-                <!--Aqui preenchem os dados-->
+                <!-- Campos de entrada para dados -->
                 <div class="dados-form">
                     <div id="divDados">
                         <input type="text" id="inputNome" placeholder="Nome">
-                        <input type="text" id="inputCPF" placeholder="CPF">
+                        <input type="text" id="inputCPF" placeholder="CPF" oninput="permitirApenasNumeros(this)">
                         <input type="text" id="inputEmail1" placeholder="Email">
                         <input type="text" id="tipoPessoa" placeholder="Tipo Pessoa">
                     </div>
                     <textarea id="textareaTexto" placeholder="Texto"></textarea>
                 </div>
-
-                @*Se o type não for definido em um button é atribuido a ele como default o type=submit*@
-                @*é recomendável explicitar sempre o type quando o form tiver butões com finalizadades diferentes*@
-                <button type="button" id="botaoAcao" onclick="atualizarDados()">Adicionar Dados</button>
+                <button type="button" id="botaoAcao" onclick="adicionarLinha()">Adicionar Dados</button>
+                <button type="button" id="confirmarAtualizacaoBtn" onclick="confirmarAtualizacao()" style="display:none;">Confirmar Atualização</button>
                 <hr>
-
-                <!--Tabela que será preenchida-->
+                <!-- Tabela que será preenchida -->
                 <div class="tabela-container">
                     <table id="tabela" class="display">
                         <thead>
@@ -74,8 +73,6 @@
                     </label>
                     <span id="fileName" style="margin-left: 10px;"></span>
                     <br>
-                    <!-- Novo input text ao lado esquerdo do botão "Importar Certificado" -->
-                    <!-- <input type="text" id="novoInputText" name="novoInputText" placeholder="Selecione o arquivo" required> -->
                     <!-- Botão de importar Certificado -->
                     <input type="file" id="arteCertificadoFile" name="arteCertificadoFile" accept=".jpeg, .jpg" style="display:none">
                     <label for="arteCertificadoFile" class="custom-file-upload">
@@ -83,12 +80,11 @@
                     </label>
                     <span id="certificadoFileName" style="margin-left: 10px;"></span>
                 </div>
-
                 <input type="hidden" id="tableData" name="tableData">
                 <button type="submit" id="CadastrarEvento">Cadastrar Evento</button>
-
             </form>
         </div>
+
 
         <!-- MEUS EVENTOS -->
         <div id="card-meus-eventos" class="card">
@@ -121,8 +117,7 @@
                                          onclick="window.open('@Url.Action("VisualizarImagem", "Home_Organizador", new { Id = evento.Id })')">
                                 </td>
                                 <td style="text-align: center;">
-                                    @* <button class="btn btn-emitir" onclick="abrirCardEmitirCertificado('@evento.Nome', '@Url.Action("VisualizarImagem", "Home_Organizador", new { Id = evento.Id })')">Emitir Certificado</button> *@
-                                    <button class="btn btn-emitir" onclick="emitirCertificado('@evento.Id')">Emitir Certificado</button>
+                                    <button class="btn btn-emitir" onclick="abrirCardEmitirCertificado('@evento.Nome', '@Url.Action("VisualizarImagem", "Home_Organizador", new { Id = evento.Id })')">Emitir Certificado</button>
                                     <button class="btn btn-atualizar" onclick="atualizarEvento('@evento.Id', '@evento.Nome')">Atualizar</button>
                                 </td>
                             </tr>
@@ -132,9 +127,9 @@
             </div>
         </div>
 
-        <!-- Formulário oculto para obter DetalhesEventoPessoas -->
-        <form id="formEmitirCertificado" asp-controller="Home_Organizador" asp-action="DetalhesEventoPessoas" method="post" style="display:none;">
-            <input type="hidden" id="eventoId" name="idEvento">
+        <!-- Formulário oculto para emissão de certificado -->
+        <form id="formEmitirCertificado" asp-controller="Home_Organizador" asp-action="EmitirCertificado" method="post" style="display:none;">
+            <input type="hidden" id="eventoId" name="id">
             @Html.AntiForgeryToken()
         </form>
 
@@ -193,6 +188,8 @@
             <button id="emitirCertificado" class="btn btn-emitir">Emitir Certificado</button>
         </div>
 
+
+
         <!-- ATUALIZAR EVENTO -->
         <div id="card-atualizar-evento" class="card" style="display: none;">
             <h3>Atualizar Evento</h3>
@@ -219,7 +216,7 @@
                 <hr>
 
                 <!--Tabela que será preenchida-->
-                <div class="tabela-container">
+                <div class="tabela-containe***r">
                     <table id="tabelaAtualizar" class="display">
                         <thead>
                             <tr>
@@ -257,6 +254,9 @@
             </form>
         </div>
 
+
+
+
         <!-- BUSCAR PESSOAS -->
         <div id="card-buscar-pessoas" class="card">
             <h4>Buscar Pessoas</h4>
@@ -274,7 +274,6 @@
                 <div class="details" id="details"></div>
             </div>
         </div>
-
     </div>
 
     <script>
@@ -286,18 +285,36 @@
         document.getElementById('formEvento').addEventListener('submit', function (event) {
             if (!validarAntesDeCadastrar(event)) {
                 event.preventDefault(); // Prevenir a submissão do formulário
-                alert("Existem CPFs inválidos. Corrija antes de cadastrar o evento.");
+               // alert("Por favor, corrija os erros antes de cadastrar o evento.");
                 return false;
             }
             return true; // Permitir a submissão do formulário
         });
 
         function validarAntesDeCadastrar(event) {
-            if (!destacarCPFsInvalidos()) {
+            var tabela = document.getElementById('tabela');
+            var linhas = tabela.getElementsByTagName('tr');
+            var temLinhaPreenchida = linhas.length > 1; // Verificar se há mais de uma linha (incluindo o cabeçalho)
+
+            if (!temLinhaPreenchida) {
+                alert('A tabela deve ter pelo menos uma linha preenchida.');
                 return false;
             }
+
+            if (!destacarCPFsInvalidos()) {
+                alert('Existem CPFs inválidos na tabela.');
+                return false;
+            }
+
+            var certificadoFile = document.getElementById('arteCertificadoFile').files.length > 0;
+            if (!certificadoFile) {
+                alert('Por favor, selecione uma imagem para o certificado.');
+                return false;
+            }
+
             return processarDadosTabela(event);
         }
+
 
         function mostrarCard(id) {
             var cards = document.querySelectorAll('.card');
@@ -376,6 +393,7 @@
             document.getElementById('formEmitirCertificado').submit();
         }
 
+
         function atualizarEvento(id, nome) {
 
             // Ocultar todos os cards
@@ -396,11 +414,44 @@
             nomeEventoInput.readOnly = true;
         }
 
-        var modoAdicionar = true;
-        var linhaEditavel;
 
-        function adicionarBotoesLinha(linha) {
-            var colunaAcoes = linha.insertCell(-1);
+
+        let linhaEditavel = null;
+
+        function adicionarLinha() {
+            var nome = document.getElementById("inputNome").value.trim();
+            var cpf = document.getElementById("inputCPF").value.trim();
+            var email = document.getElementById("inputEmail1").value.trim();
+            var tipoPessoa = document.getElementById("tipoPessoa").value.trim();
+            var texto = document.getElementById("textareaTexto").value.trim();
+
+            if (nome === "" || cpf === "" || email === "" || tipoPessoa === "" || texto === "") {
+                alert("Por favor, preencha todos os campos.");
+                return;
+            }
+
+            var tabela = document.getElementById("tabela").getElementsByTagName("tbody")[0];
+            var novaLinha = tabela.insertRow(-1);
+
+            var celulaNome = novaLinha.insertCell(0);
+            var celulaCPF = novaLinha.insertCell(1);
+            var celulaEmail = novaLinha.insertCell(2);
+            var celulaTipoPessoa = novaLinha.insertCell(3);
+            var celulaTexto = novaLinha.insertCell(4);
+            var celulaAcoes = novaLinha.insertCell(5); // Ações sempre como última coluna
+
+            celulaNome.textContent = nome;
+            celulaCPF.textContent = cpf;
+            celulaEmail.textContent = email;
+            celulaTipoPessoa.textContent = tipoPessoa;
+            celulaTexto.textContent = texto;
+
+            adicionarBotoesLinha(celulaAcoes, novaLinha); // Passa a célula de ações como parâmetro
+            limparCampos();
+            destacarCPFsInvalidos();
+        }
+
+        function adicionarBotoesLinha(celulaAcoes, linha) {
             var botaoExcluir = document.createElement("button");
             botaoExcluir.textContent = "Excluir";
             botaoExcluir.className = 'btn table-btn';
@@ -411,7 +462,7 @@
                     destacarCPFsInvalidos();
                 }
             };
-            colunaAcoes.appendChild(botaoExcluir);
+            celulaAcoes.appendChild(botaoExcluir);
 
             var botaoAtualizar = document.createElement("button");
             botaoAtualizar.textContent = "Atualizar";
@@ -420,8 +471,14 @@
                 event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
                 carregarDadosParaEditar(linha);
             };
-            colunaAcoes.appendChild(botaoAtualizar);
+            celulaAcoes.appendChild(botaoAtualizar);
+
+            celulaAcoes.style.textAlign = "center"; // Centralizar os botões na célula
+            destacarCPFsInvalidos(); // Verificar CPFs da nova linha
         }
+
+
+
 
         function atualizarDados() {
             if (modoAdicionar) {
@@ -481,7 +538,9 @@
             document.getElementById("textareaTexto").value = celulas[4].textContent;
 
             linhaEditavel = linha;
-            alternarModo();
+
+            document.getElementById("botaoAcao").style.display = 'none';
+            document.getElementById("confirmarAtualizacaoBtn").style.display = 'inline-block';
         }
 
         function alternarModo() {
@@ -497,6 +556,8 @@
             document.getElementById("tipoPessoa").value = "";
             document.getElementById("textareaTexto").value = "";
         }
+
+
 
         function importarExcel() {
             var input = document.getElementById('excelFile');
@@ -525,24 +586,31 @@
                 }
 
                 var table = document.getElementById('tabela').getElementsByTagName('tbody')[0];
-                table.innerHTML = ''; // Limpa a tabela antes de adicionar novas linhas
-
                 var rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, range: 1 });
-                rows.forEach(function (row, rowIndex) {
-                    var newRow = table.insertRow(-1);
-                    row.forEach(function (cellContent) {
-                        var cell = newRow.insertCell();
-                        cell.textContent = cellContent;
-                    });
-                    // Adiciona botões de ação a cada linha, exceto se for a última linha do arquivo
-                    if (rowIndex < rows.length - 1) {
+
+                rows.forEach(function (row) {
+                    if (row.every(cellContent => cellContent !== "")) { // Verificar se todos os dados da linha estão preenchidos
+                        var newRow = table.insertRow(-1);
+                        var cellIndex = 0;
+
+                        for (const key in row) {
+                            if (row.hasOwnProperty(key)) {
+                                var cell = newRow.insertCell(cellIndex++);
+                                cell.textContent = row[key];
+                            }
+                        }
+
                         adicionarBotoesLinha(newRow);
                     }
                 });
-                destacarDuplicatas(); // Destaca duplicatas após carregar os dados
+
+                destacarCPFsInvalidos(); // Verifica CPFs inválidos após adicionar novas linhas
             };
             reader.readAsArrayBuffer(file);
         }
+
+
+
 
         function importarCertificado() {
             var input = document.getElementById('arteCertificadoFile');
@@ -711,6 +779,35 @@
             });
         }
 
+
+        function confirmarAtualizacao() {
+            if (!linhaEditavel) return;
+
+            var nome = document.getElementById("inputNome").value.trim();
+            var cpf = document.getElementById("inputCPF").value.trim();
+            var email = document.getElementById("inputEmail1").value.trim();
+            var tipoPessoa = document.getElementById("tipoPessoa").value.trim();
+            var texto = document.getElementById("textareaTexto").value.trim();
+
+            if (nome === "" || cpf === "" || email === "" || tipoPessoa === "" || texto === "") {
+                alert("Por favor, preencha todos os campos.");
+                return;
+            }
+
+            var celulas = linhaEditavel.getElementsByTagName("td");
+            celulas[0].textContent = nome;
+            celulas[1].textContent = cpf;
+            celulas[2].textContent = email;
+            celulas[3].textContent = tipoPessoa;
+            celulas[4].textContent = texto;
+
+            linhaEditavel = null;
+
+            document.getElementById("botaoAcao").style.display = 'inline-block';
+            document.getElementById("confirmarAtualizacaoBtn").style.display = 'none';
+            limparCampos();
+            destacarCPFsInvalidos();
+        }
         function destacarCPFsInvalidos() {
             var tabela = document.getElementById("tabela");
             var linhas = tabela.getElementsByTagName("tr");
@@ -719,7 +816,7 @@
             for (var i = 1; i < linhas.length; i++) { // Começa do índice 1 para pular o cabeçalho
                 var celulaCPF = linhas[i].getElementsByTagName("td")[1]; // Assume que CPF está na segunda coluna
                 if (celulaCPF) {
-                    if (!validarCPF(celulaCPF.textContent)) {
+                    if (!validarCPF(celulaCPF.textContent.trim())) {
                         celulaCPF.style.backgroundColor = 'red'; // Pinta de vermelho se o CPF for inválido
                         temCPFInvalido = true; // Marca como inválido
                     } else {
@@ -730,35 +827,32 @@
             return !temCPFInvalido; // Retorna falso se houver CPFs inválidos
         }
 
+
+
         function validarCPF(cpf) {
             cpf = cpf.replace(/[^\d]+/g, '');
-            if (cpf.length != 11) {
+            if (cpf.length !== 11 || /^(\d)\1*$/.test(cpf)) {
                 return false;
             }
 
-            var numeros = cpf.substring(0, 9);
-            var digitos = cpf.substring(9);
-            var soma = 0;
-            var resultado;
-
-            for (var i = 10; i > 1; i--) {
-                soma += numeros.charAt(10 - i) * i;
+            let soma = 0;
+            let resto;
+            for (let i = 1; i <= 9; i++) {
+                soma += parseInt(cpf.substring(i - 1, i)) * (11 - i);
             }
-
-            resultado = (soma % 11) < 2 ? 0 : 11 - (soma % 11);
-            if (resultado != parseInt(digitos.charAt(0))) {
-                return false;
-            }
+            resto = (soma * 10) % 11;
+            if ((resto === 10) || (resto === 11)) resto = 0;
+            if (resto !== parseInt(cpf.substring(9, 10))) return false;
 
             soma = 0;
-            numeros = cpf.substring(0, 10);
-            for (i = 11; i > 1; i--) {
-                soma += numeros.charAt(11 - i) * i;
+            for (let i = 1; i <= 10; i++) {
+                soma += parseInt(cpf.substring(i - 1, i)) * (12 - i);
             }
-
-            resultado = (soma % 11) < 2 ? 0 : 11 - (soma % 11);
-            return resultado == parseInt(digitos.charAt(1));
+            resto = (soma * 10) % 11;
+            if ((resto === 10) || (resto === 11)) resto = 0;
+            return resto === parseInt(cpf.substring(10, 11));
         }
+
 
         document.getElementById('arteCertificadoFile').addEventListener('change', function () {
             var fileInput = document.getElementById('arteCertificadoFile');
@@ -849,6 +943,8 @@
             }
         }
 
+
+
         function toggleDropdown(button) {
             $(button).next(".acoes-dropdown-content").toggle();
         }
@@ -896,33 +992,26 @@
 
         function processarDadosTabela(event) {
             var tableData = [];
-            var rows = document.querySelectorAll('#eventos-tbody tr');
+            var rows = document.querySelectorAll('#tabela tbody tr');
 
-            // Verifica se há mais de uma linha antes de excluir a última linha
-            if (rows.length > 1) {
-                // Remove a última linha da lista de linhas
-                rows = Array.from(rows).slice(0, -1);
-
-                rows.forEach(row => {
-                    var cells = row.querySelectorAll('td');
-                    var rowData = {
-                        nome: cells[0].textContent,
-                        cpf: cells[1].textContent,
-                        email: cells[2].textContent,
-                        tipoPessoa: cells[3].textContent,
-                        texto: cells[4].textContent
-                    };
+            rows.forEach(row => {
+                var cells = row.querySelectorAll('td');
+                var rowData = {
+                    nome: cells[0].textContent.trim(),
+                    cpf: cells[1].textContent.trim(),
+                    email: cells[2].textContent.trim(),
+                    tipoPessoa: cells[3].textContent.trim(),
+                    texto: cells[4].textContent.trim()
+                };
+                if (rowData.nome && rowData.cpf && rowData.email && rowData.tipoPessoa && rowData.texto) { // Verificar se todos os campos estão preenchidos
                     tableData.push(rowData);
-                });
-                document.getElementById('tableData').value = JSON.stringify(tableData);
-                return true; // Permitir a submissão do formulário
-            } else {
-                // Se não houver dados suficientes na tabela, exibe um alerta
-                alert('Por favor, importe uma planilha com registros válidos.');
-                event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
-                return false; // Prevenir a submissão do formulário
-            }
+                }
+            });
+
+            document.getElementById('tableData').value = JSON.stringify(tableData);
+            return true; // Permitir a submissão do formulário
         }
+
 
         function abrirCardEmitirCertificado(nomeEvento, imagemUrl) {
             // Preencher o campo do nome do evento
@@ -950,6 +1039,10 @@
                 checkbox.checked = !allSelected;
             });
             allSelected = !allSelected;
+        }
+
+        function permitirApenasNumeros(input) {
+            input.value = input.value.replace(/\D/g, '');
         }
     </script>
 </body>

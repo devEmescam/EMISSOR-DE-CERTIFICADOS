@@ -157,6 +157,11 @@ body {
     overflow-y: auto;
 }
 
+    .tabela-container table td {
+        vertical-align: middle; /* Centraliza verticalmente o conteúdo das células */
+        text-align: center; /* Centraliza horizontalmente o conteúdo das células */
+    }
+
 button.btn {
     padding: 10px 20px;
     font-size: 16px;
@@ -311,10 +316,6 @@ hr {
     border-radius: 2px; /* Bordas retangulares sem arredondamento */
 }
 
-.duplicado {
-    background-color: yellow !important; /* Adiciona !important para garantir aplicação */
-}
-
 #resultadosBusca div {
     cursor: pointer;
     padding: 5px;
@@ -354,8 +355,7 @@ hr {
 
 
 
-/*Estilo do card "
-    "*/
+/*Estilo do card*/
 #searchInput {
     width: 80%;
     padding: 10px;
