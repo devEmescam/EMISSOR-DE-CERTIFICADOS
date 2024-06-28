@@ -168,17 +168,18 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 // Validação do retorno
                 if (evento == null)
                 {
-                    return NotFound("Evento não encontrado.");
+                    return NotFound(new { message = "Evento não encontrado." });
                 }
 
-                // Retornar os detalhes para a view
-                return View(evento);
+                // Retornar os detalhes como JSON
+                return Json(evento);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.DetalhesEventoPessoas]. Erro: {ex.Message}");
+                return StatusCode(500, new { message = $"Ocorreu um erro em [Home_OrganizadorController.DetalhesEventoPessoas]. Erro: {ex.Message}" });
             }
         }
+
 
         // POST:/Home_Organizador/EmitirCertificado
         [HttpPost]

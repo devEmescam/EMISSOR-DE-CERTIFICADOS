@@ -642,13 +642,13 @@ button {
         display: block;
     }
 
-#imagemCertificado {
+.certificado-imagem img {
     max-width: 200px; /* Ajusta a largura máxima para 300px */
     height: auto; /* Ajusta a altura automaticamente */
     border: 1px solid #ccc; /* Borda */
     border-radius: 4px; /* Bordas arredondadas */
     margin-top: 100px; /* Espaço abaixo da imagem */
-    margin-right:2px;
+    margin-right: 2px;
 }
 
 .tabela-certificados {
@@ -677,15 +677,16 @@ button {
     }
 
 #nomeDoEvento {
-    font-size: 14px; /* Ajuste o tamanho da fonte conforme necessário */
+    font-size: 20px; /* Ajuste o tamanho da fonte conforme necessário */
     border: none; /* Remove a borda */
     background: none; /* Remove o fundo */
     outline: none; /* Remove o contorno quando selecionado */
     padding: 0; /* Remove o preenchimento interno */
     margin: 0; /* Remove a margem */
-    color: #000; /* Cor do texto */
+    color: #777; /* Cor do texto */
     width: auto; /* Ajuste a largura conforme necessário */
     margin-bottom: 10px; /* Espaço abaixo do campo */
+    text-align: center; /* Centraliza o texto dentro do input */
 }
 
 .btn-emitir {
@@ -705,3 +706,6 @@ button {
         background-color: #0056b3;
     }
 
+#card-emitir-certificado {
+    display: none;
+}
