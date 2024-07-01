@@ -12,7 +12,7 @@
     <img id="logo" src="/logoemescam.png" alt="Logo Emescam">
 
     <div class="cartao-menu">
-        <div style="font-size:larger">Bem-Vindo! "ORGANIZADOR"</div>
+        <div style="font-size:larger">Bem-Vindo! @ViewBag.Login</div>
         <form>
             <div>
                 <a class="nav-link text-dark" href="#" onclick="mostrarCard('meus-eventos')">Meus Eventos</a>
@@ -147,7 +147,8 @@
                         <tr>
                             <th style="width:5%; text-align: center;">Código</th>
                             <th style="width:50%; text-align: center;">Nome</th>
-                            <th style="width:5%; text-align: center;">Email</th>
+                            <th style="width:5%; text-align: center;">Certificado Emitido</th>
+                            <th style="width:5%; text-align: center;">Retorno Email</th>
                             <th style="width:5%; text-align: center; cursor: pointer;" onclick="toggleSelectAll()">Selecionar</th>
                         </tr>
                     </thead>
@@ -1038,7 +1039,7 @@
                     // Código
                     const tdCodigo = document.createElement('td');
                     tdCodigo.style.textAlign = 'center';
-                    tdCodigo.textContent = pessoa.id; // Supondo que cada pessoa tenha um ID
+                    tdCodigo.textContent = pessoa.id;
                     tr.appendChild(tdCodigo);
 
                     // Nome
@@ -1047,13 +1048,19 @@
                     tdNome.textContent = pessoa.nome;
                     tr.appendChild(tdNome);
 
-                    // Email
-                    const tdEmail = document.createElement('td');
-                    tdEmail.style.textAlign = 'center';
-                    tdEmail.textContent = pessoa.email; // Adicione um campo de email se disponível
-                    tr.appendChild(tdEmail);
+                    // Certificado Emitido
+                    const tdCertificado = document.createElement('td');
+                    tdCertificado.style.textAlign = 'center';
+                    tdCertificado.textContent = pessoa.certificadoEmitido ? 'Sim' : 'Não';
+                    tr.appendChild(tdCertificado);
 
-                    // Checkbox "Todos"
+                    // Retorno Email
+                    const tdRetornoEmail = document.createElement('td');
+                    tdRetornoEmail.style.textAlign = 'center';
+                    tdRetornoEmail.textContent = pessoa.mensagemRetornoEmail || 'N/A';
+                    tr.appendChild(tdRetornoEmail);
+
+                    // Checkbox "Selecionar"
                     const tdCheckbox = document.createElement('td');
                     tdCheckbox.style.textAlign = 'center';
                     const checkbox = document.createElement('input');
