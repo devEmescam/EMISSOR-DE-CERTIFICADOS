@@ -17,7 +17,7 @@
             <div>
                 <a class="nav-link text-dark" href="#" onclick="mostrarCard('meus-eventos')">Meus Eventos</a>
                 <a class="nav-link text-dark" href="#" onclick="mostrarCard('buscar-pessoas')">Buscar Pessoas</a>
-                @* <a class="nav-link text-dark" href="#" onclick="mostrarCard('emitir-certificado')">Emitir Certificado</a> *@
+                <a class="nav-link text-dark" href="#" onclick="mostrarCard('emitir-certificado')">Emitir Certificado</a> 
                 <a class="nav-link text-dark" href="#" onclick="mostrarCard('configuraçoes')">Configurações</a>
                 @* <a class="nav-link text-dark" href="#" onclick="mostrarCard('atualizar-evento')">Atualizar Evento</a> *@
                 <a id="sair-link" class="nav-link text-dark" asp-action="Login" asp-controller="Organizador">Sair</a>
@@ -88,9 +88,7 @@
         <!-- MEUS EVENTOS -->
         <div id="card-meus-eventos" class="card">
             <h4>Meus Eventos</h4>
-            <!-- Botão de "Adicionar Evento" -->
             <button class="botao-adicionar" onclick="exibirFormularioAdicionar()"></button>
-            <!-- Campo de pesquisa -->
             <input type="text" id="campo-pesquisa" placeholder="Pesquisar eventos..." onkeyup="filtrarEventos()">
             <hr>
             <div class="tabela-eventos">
@@ -116,11 +114,7 @@
                                          onclick="window.open('@Url.Action("VisualizarImagem", "Home_Organizador", new { Id = evento.Id })')">
                                 </td>
                                 <td style="text-align: center;">
-                                    @* <button class="btn btn-emitir" onclick="abrirCardEmitirCertificado('@evento.Nome', '@Url.Action("VisualizarImagem", "Home_Organizador", new { Id = evento.Id })')">Emitir Certificado</button> *@
-@*                                     <button class="btn btn-emitir" onclick="buscarEPreencherCertificados('@evento.Nome', '@Url.Action("VisualizarImagem", "Home_Organizador", new { Id = evento.Id })')">Emitir Certificado</button>
- *@                                    <button class="btn btn-emitir" onclick="buscarEPreencherCertificados('@evento.Id')">Emitir Certificado</button>
-
-
+                                    <button class="btn btn-emitir" onclick="abrirCardEmitirCertificado('@evento.Id')">Emitir Certificado</button>
                                     <button class="btn btn-atualizar" onclick="atualizarEvento('@evento.Id', '@evento.Nome')">Atualizar</button>
                                 </td>
                             </tr>
@@ -137,14 +131,14 @@
         </form>
 
         <!-- EMITIR CERTIFICADO -->
-        <div id="card-emitir-certificado" class="card">
+        <div id="card-emitir-certificado" class="card" style="display: none;">
             <h4>Emitir Certificado</h4>
             <div class="certificado-info">
                 <div class="certificado-detalhes">
                     <input type="text" id="nomeDoEvento" name="nomeDoEvento" readonly>
                 </div>
                 <div class="certificado-imagem">
-                    <img id="imagemCertificado" src="/path/to/certificado.png" alt="Imagem do Certificado">
+                    <img id="imagemCertificado" src="undefined" alt="Imagem do Certificado" style="width: 250px; height: auto; margin-right: 50px;">
                 </div>
             </div>
             <div class="tabela-certificados">
@@ -153,22 +147,19 @@
                         <tr>
                             <th style="width:5%; text-align: center;">Código</th>
                             <th style="width:50%; text-align: center;">Nome</th>
-                            <th style="width:40%; text-align: center;">Email</th>
-                            <th style="width:5%; text-align: center; cursor: pointer;" onclick="toggleSelectAll()">Todos</th>
+                            <th style="width:5%; text-align: center;">Email</th>
+                            <th style="width:5%; text-align: center; cursor: pointer;" onclick="toggleSelectAll()">Selecionar</th>
                         </tr>
                     </thead>
                     <tbody id="certificados-tbody">
-                       
                         <!-- As pessoas serão preenchidas aqui -->
-
                     </tbody>
                 </table>
             </div>
-
-
-
             <button id="emitirCertificado" class="btn btn-emitir">Emitir Certificado</button>
         </div>
+
+
 
         <!-- ATUALIZAR EVENTO -->
         <div id="card-atualizar-evento" class="card" style="display: none;">
@@ -989,18 +980,26 @@
             return true; // Permitir a submissão do formulário
         }
 
-      
-        
 
-        function buscarEPreencherCertificados(eventoId) {
-            // Configurar o formulário oculto
+
+
+        function abrirCardEmitirCertificado(eventoId) {
+            // Configurar o formulário oculto com o evento ID
             document.getElementById('eventoId').value = eventoId;
 
-            // Enviar o formulário
+            // Mostrar o card "Emitir Certificado"
+            const cardEmitirCertificado = document.getElementById('card-emitir-certificado');
+            cardEmitirCertificado.style.display = 'block';
+
+            // Chamar função para buscar e preencher certificados
+            buscarEPreencherCertificados(eventoId);
+        }
+
+        function buscarEPreencherCertificados(eventoId) {
+            document.getElementById('eventoId').value = eventoId;
             const form = document.getElementById('formEmitirCertificado');
             const formData = new FormData(form);
 
-            // Realizar a requisição AJAX para obter os dados do evento e das pessoas
             fetch(form.action, {
                 method: 'POST',
                 body: formData,
@@ -1012,6 +1011,11 @@
                 .then(data => {
                     if (data) {
                         preencherTabelaCertificados(data);
+                        // Abrir automaticamente o card "Emitir Certificado"
+                        document.getElementById('card-emitir-certificado').style.display = 'block';
+                        // Preencher os detalhes do evento
+                        document.getElementById('nomeDoEvento').value = data.nome;
+                        document.getElementById('imagemCertificado').src = `/Home_Organizador/VisualizarImagem/${data.id}`;
                     } else {
                         alert('Evento não encontrado.');
                     }
@@ -1022,29 +1026,96 @@
         }
 
         function preencherTabelaCertificados(evento) {
+            console.log('Dados do evento recebidos:', evento);
+
             const tbody = document.getElementById('certificados-tbody');
             tbody.innerHTML = ''; // Limpar a tabela antes de preencher
 
-            // Preencher a tabela com os dados das pessoas do evento
-            evento.pessoas.forEach(pessoa => {
-                const tr = document.createElement('tr');
+            if (evento && evento.pessoasEventos) {
+                evento.pessoasEventos.forEach(pessoa => {
+                    const tr = document.createElement('tr');
 
-                // Nome
-                const tdNome = document.createElement('td');
-                tdNome.textContent = pessoa.nome;
-                tr.appendChild(tdNome);
+                    // Código
+                    const tdCodigo = document.createElement('td');
+                    tdCodigo.style.textAlign = 'center';
+                    tdCodigo.textContent = pessoa.id; // Supondo que cada pessoa tenha um ID
+                    tr.appendChild(tdCodigo);
 
-                // Outro Dado (adicione mais colunas conforme necessário)
-                const tdOutroDado = document.createElement('td');
-                tdOutroDado.textContent = pessoa.outroDado; // Substitua por outros dados conforme necessário
-                tr.appendChild(tdOutroDado);
+                    // Nome
+                    const tdNome = document.createElement('td');
+                    tdNome.style.textAlign = 'center';
+                    tdNome.textContent = pessoa.nome;
+                    tr.appendChild(tdNome);
 
-                tbody.appendChild(tr);
-            });
+                    // Email
+                    const tdEmail = document.createElement('td');
+                    tdEmail.style.textAlign = 'center';
+                    tdEmail.textContent = pessoa.email; // Adicione um campo de email se disponível
+                    tr.appendChild(tdEmail);
+
+                    // Checkbox "Todos"
+                    const tdCheckbox = document.createElement('td');
+                    tdCheckbox.style.textAlign = 'center';
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    tdCheckbox.appendChild(checkbox);
+                    tr.appendChild(tdCheckbox);
+
+                    tbody.appendChild(tr);
+                });
+            } else {
+                console.error('Dados do evento ou pessoas não estão definidos corretamente.');
+            }
         }
 
 
 
+
+
+        //APONTA NO CONSOLE O RETORNO DO JSON DA CONTROLLER
+
+        // function preencherTabelaCertificados(evento) {
+        //     console.log('Dados do evento recebidos:', evento);
+
+        //     const tbody = document.getElementById('certificados-tbody');
+        //     tbody.innerHTML = ''; // Limpar a tabela antes de preencher
+
+        //     if (evento && evento.pessoas) {
+        //         evento.pessoas.forEach(pessoa => {
+        //             const tr = document.createElement('tr');
+
+        //             // Código
+        //             const tdCodigo = document.createElement('td');
+        //             tdCodigo.style.textAlign = 'center';
+        //             tdCodigo.textContent = pessoa.id; // Supondo que cada pessoa tenha um ID
+        //             tr.appendChild(tdCodigo);
+
+        //             // Nome
+        //             const tdNome = document.createElement('td');
+        //             tdNome.style.textAlign = 'center';
+        //             tdNome.textContent = pessoa.nome;
+        //             tr.appendChild(tdNome);
+
+        //             // Email
+        //             const tdEmail = document.createElement('td');
+        //             tdEmail.style.textAlign = 'center';
+        //             tdEmail.textContent = pessoa.email;
+        //             tr.appendChild(tdEmail);
+
+        //             // Checkbox "Todos"
+        //             const tdCheckbox = document.createElement('td');
+        //             tdCheckbox.style.textAlign = 'center';
+        //             const checkbox = document.createElement('input');
+        //             checkbox.type = 'checkbox';
+        //             tdCheckbox.appendChild(checkbox);
+        //             tr.appendChild(tdCheckbox);
+
+        //             tbody.appendChild(tr);
+        //         });
+        //     } else {
+        //         console.error('Dados do evento ou pessoas não estão definidos corretamente.');
+        //     }
+        // }
 
 
 
