@@ -184,7 +184,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         //Rotina de Emissão de certificados        
-        public async Task<IActionResult> EmitirCertificado(int id)
+        public async Task<IActionResult> EmitirCertificado_OLD(int id)
         {
             try
             {
@@ -192,7 +192,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    await EmitirCertificadoAsync(evento);
+                    await EmitirCertificadoAsync_OLD(evento);
                 }
                 else
                 {
@@ -210,7 +210,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         //Rotina de Emissão de certificados        
-        public async Task<IActionResult> NOVA_VERSAO_EmitirCertificado(int id, List<int> idPessoas)
+        public async Task<IActionResult> EmitirCertificado(int id, List<int> idPessoas)
         {
             try
             {
@@ -218,14 +218,18 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    await EmitirCertificadoAsync(evento);
+                    await EmitirCertificadoAsync(evento, idPessoas);                    
                 }
                 else
                 {
                     return NotFound();
                 }
 
-                return RedirectToAction(nameof(Index));
+                // Obter um objeto atualizado com os dados do processo de emissão que foi realizado
+                var eventoPessoas = await ObterEventoPessoas(id);
+
+                //return RedirectToAction(nameof(Index));
+                return View(eventoPessoas);
             }
             catch (Exception ex)
             {
@@ -480,7 +484,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         }
 
         // VERSÃO ASYNC: Metodo que gera certificado, cria usuario e emite email a pessoa do evento
-        private async Task EmitirCertificadoAsync(EventoModel evento)
+        private async Task EmitirCertificadoAsync_OLD(EventoModel evento)
         {
             DataTable oDT = new DataTable();
             var usuariosService = new UsuariosService(_dbHelper);
@@ -552,7 +556,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 throw new Exception("Erro em [Home_OrganizadorController.EmitirCertificadoAsync]: " + ex.Message);
             }
         }
-        private async Task NOVA_VERSAO_EmitirCertificadoAsync(EventoModel evento, List<int> listaIdPessoas)
+        private async Task EmitirCertificadoAsync(EventoModel evento, List<int> listaIdPessoas)
         {
             DataTable oDT = new DataTable();
             var usuariosService = new UsuariosService(_dbHelper);
