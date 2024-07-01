@@ -31,54 +31,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         }        
 
         [HttpPost]
-        public IActionResult LoginOrganizador_OLD(LoginModel loginModel)
-        {
-            try
-            {
-                if (ModelState.IsValid)
-                {
-                    // Tenta buscar o ID do usuario                    
-                    loginModel.Id = RetornarIdUsuario(loginModel.Login, "", true);
-
-                    //Valida se retornou algo
-                    if (loginModel.Id > 0)
-                    {
-                        //Usuário encontrado no banco de dados da aplicação, agora verificar login e senha no AD
-                        if (_adHelper.VerificaUsuario(loginModel.Login, loginModel.Senha))
-                        {
-                            _sessao.CriarSessaoDoUsuario(loginModel);
-                            
-                            // Armazena o Id do usuário na sessão
-                            HttpContext.Session.SetInt32("UserId", loginModel.Id);
-                            // Armazenar o Login do usuário na sessão
-                            HttpContext.Session.SetString("Login", loginModel.Login);
-                            // Armazenar a Senha do usuário na sessão
-                            HttpContext.Session.SetString("Senha", loginModel.Senha);
-
-                            return RedirectToAction("Index", "Home_Organizador");
-                        }
-                        else
-                        {
-                            // Adicionar mensagem de erro ao ModelState
-                            ModelState.AddModelError(string.Empty, "Usuário ou senha inválidos.");
-                        }
-                    }
-                    else
-                    {
-                        // Adicionar mensagem de erro ao ModelState
-                        ModelState.AddModelError(string.Empty, "Usuário não localilzado.");
-                    }
-                }
-                // Se chegar aqui não foi possivel buscar o Usuário, volta para tela de login para nova tentativa
-                return View("~/Views/Login_Organizador/Login_organizador.cshtml", loginModel);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Ocorreu um erro em [LoginController.LoginOrganizador] Erro: {ex.Message}");
-            }
-        }
-
-        [HttpPost]
         public async Task<IActionResult> LoginOrganizador(LoginModel loginModel)
         {
             try
@@ -124,40 +76,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             {
                 throw new Exception($"Ocorreu um erro em [LoginController.LoginOrganizador] Erro: {ex.Message}");
             }
-        }
-
-        [HttpPost]
-        public IActionResult LoginParticipante_OLD(LoginModel loginModel)
-        {
-            try
-            {
-                if (ModelState.IsValid)
-                {
-                    // Tenta buscar o ID do usuario
-                    loginModel.Id = RetornarIdUsuario(loginModel.Login, loginModel.Senha, false);
-
-                    //Valida se retornou algo
-                    if (loginModel.Id > 0)
-                    {
-                        _sessao.CriarSessaoDoUsuario(loginModel);
-                        //return RedirectToAction("Login", "Home_Participante");
-                        return RedirectToAction("Index", "Home_Participante");
-                    }
-                    else
-                    {
-                        // Adicionar mensagem de erro ao ModelState
-                        ModelState.AddModelError(string.Empty, "Usuário ou senha inválidos.");
-                    }
-                }
-
-                // Se chegar aqui não foi possivel buscar o Usuário, volta para tela de login para nova tentativa
-                return View("~/Views/Login_Participante/Login_participante.cshtml", loginModel);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Ocorreu um erro em [LoginController.LoginParticipante] Erro: {ex.Message}");
-            }
-        }
+        }       
 
         [HttpPost]
         public async Task<IActionResult> LoginParticipante(LoginModel loginModel)
@@ -193,38 +112,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         }
 
         #region *** METODOS ***
-        private int RetornarIdUsuario(string usuario, string senha, bool administrativo)
-        {
-            string sSQL = "";
-            Int32 Id = 0;
-            DataTable oDT = new DataTable();
-
-            try
-            {
-                if (administrativo)
-                {
-                    sSQL = $"SELECT ID FROM USUARIO WHERE USUARIO = '{usuario}' AND ADMINISTRATIVO = '{administrativo}'";
-                }
-                else
-                {
-                    sSQL = $"SELECT ID FROM USUARIO WHERE USUARIO = '{usuario}' AND SENHA = '{senha}' AND ADMINISTRATIVO = '{administrativo}'";
-                }
-
-                oDT = _dbHelper.ExecuteQuery(sSQL);
-
-                if (oDT != null && oDT.Rows.Count > 0)
-                {
-                    Id = oDT.Rows[0].Field<int>("ID");
-                }
-
-                return Id;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Ocorreu um erro em [LoginRepository.RetornarIdUsuario] Erro: {ex.Message}");
-            }
-        }
-
         private async Task<int> RetornarIdUsuarioAsync(string usuario, string senha, bool administrativo)
         {
             string sSQL = "";
