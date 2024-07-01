@@ -611,9 +611,9 @@ button {
 
 .certificado-info {
     display: flex;
-    align-items: center; /* Alinha verticalmente os itens */
-    justify-content: space-between; /* Espaça os itens para que fiquem nos cantos opostos */
-    gap: 20px; /* Espaço entre os itens */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .certificado-imagem {
@@ -686,7 +686,6 @@ button {
     color: #777; /* Cor do texto */
     width: auto; /* Ajuste a largura conforme necessário */
     margin-bottom: 10px; /* Espaço abaixo do campo */
-    text-align: center; /* Centraliza o texto dentro do input */
 }
 
 .btn-emitir {
