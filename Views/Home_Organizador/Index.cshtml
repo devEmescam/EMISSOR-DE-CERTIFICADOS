@@ -157,7 +157,7 @@
                     </tbody>
                 </table>
             </div>
-            <button id="emitirCertificado" class="btn btn-emitir">Emitir Certificado</button>
+            <button id="emitirCertificado">Emitir Certificado</button>
         </div>
 
 
@@ -1026,6 +1026,8 @@
                 });
         }
 
+      
+
         function preencherTabelaCertificados(evento) {
             console.log('Dados do evento recebidos:', evento);
 
@@ -1039,7 +1041,7 @@
                     // Código
                     const tdCodigo = document.createElement('td');
                     tdCodigo.style.textAlign = 'center';
-                    tdCodigo.textContent = pessoa.id;
+                    tdCodigo.textContent = pessoa.id; // Supondo que cada pessoa tenha um ID
                     tr.appendChild(tdCodigo);
 
                     // Nome
@@ -1055,16 +1057,17 @@
                     tr.appendChild(tdCertificado);
 
                     // Retorno Email
-                    const tdRetornoEmail = document.createElement('td');
-                    tdRetornoEmail.style.textAlign = 'center';
-                    tdRetornoEmail.textContent = pessoa.mensagemRetornoEmail || 'N/A';
-                    tr.appendChild(tdRetornoEmail);
+                    const tdEmail = document.createElement('td');
+                    tdEmail.style.textAlign = 'center';
+                    tdEmail.textContent = pessoa.mensagemRetornoEmail;
+                    tr.appendChild(tdEmail);
 
                     // Checkbox "Selecionar"
                     const tdCheckbox = document.createElement('td');
                     tdCheckbox.style.textAlign = 'center';
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
+                    checkbox.dataset.id = pessoa.id; // Adiciona o ID da pessoa ao checkbox
                     tdCheckbox.appendChild(checkbox);
                     tr.appendChild(tdCheckbox);
 
@@ -1142,6 +1145,34 @@
 
 
 
+        document.getElementById('emitirCertificado').addEventListener('click', function () {
+            const eventoId = document.getElementById('eventoId').value;
+            const checkboxes = document.querySelectorAll('#certificados-tbody input[type="checkbox"]:checked');
+            const idPessoas = Array.from(checkboxes).map(checkbox => checkbox.dataset.id);
+
+            const formData = new FormData();
+            formData.append('id', eventoId);
+            idPessoas.forEach(id => formData.append('idPessoas', id));
+
+            fetch('/Home_Organizador/EmitirCertificado', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Certificados emitidos com sucesso!');
+                    } else {
+                        alert('Falha ao emitir certificados.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao emitir certificados:', error);
+                });
+        });
 
 
 
