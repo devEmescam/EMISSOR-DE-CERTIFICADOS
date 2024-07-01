@@ -180,7 +180,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             }
         }
 
-
         // POST:/Home_Organizador/EmitirCertificado
         [HttpPost]
         [ValidateAntiForgeryToken]

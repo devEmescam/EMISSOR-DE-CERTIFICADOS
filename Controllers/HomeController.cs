@@ -17,25 +17,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         {
             return View();
         }
-        //public IActionResult Home_Organizador()
-        //{
-        //    return View();
-        //}
-        //public IActionResult Home_Participantes()
-        //{
-        //    return View();
-        //}
-
-        //public IActionResult login_Organizador()
-        //{
-        //    return View();
-        //}
-        //public IActionResult login_Participante()
-        //{
-        //    return View("login_Participante");
-        //}
-
-
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
