@@ -7,6 +7,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emissor de Certificados</title>
+    <link rel="stylesheet" href="~/css/Index.css">
+
 </head>
 <body>
     <div id="logoEmescam"><img src="/logoemescam.png" alt="logo" asp-append-version="true"></div>
@@ -26,104 +28,3 @@
     </div>
 </body>
 </html>
-
-<style>
-
-    #logoEmescam img {
-        width: 500px;
-        position: fixed;
-        top: -3.5%;
-        left: 50%;
-        transform: translateX(-50%);
-    }
-
-    body {
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background: linear-gradient(135deg, #01f949, #14086d);
-        font-family: Arial, sans-serif;
-        text-align:center;
-    }
-
-    .acessos {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        width: 1000px;
-        height: 700px;
-    }
-
-    .participantes {
-        background-color: transparent; 
-        width: 400px;
-        height: 600px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        border-radius: 20px;
-        border: 2px solid white; 
-        color:white;
-    }
-    
-
-    .organizador {
-        background-color: transparent; 
-        width: 400px;
-        height: 600px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        border-radius: 20px;
-        border: 2px solid white; 
-        color:white;
-    }
-
-  
-
-    #btn-organizador,
-    #btn-participantes {
-        background-color: transparent;
-        width: 150px;
-        height: 50px;
-        border-radius: 20px;
-        border: 2px solid white;
-        color: white !important;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transition: background-color 0.3s, color 0.3s;
-        font-weight: bold;
-    }
-
-        #btn-organizador:hover,
-        #btn-participantes:hover {
-            background-color: white;
-            color: black !important;
-        }
-
-
-    #imgParticipantes{
-        width:250px;
-    }
-    #imgOrganizador{
-        width:210px;
-        margin-bottom:25px;
-    }
-
-    .destaque {
-        font-size: 1.7em; 
-    }
-</style>
-

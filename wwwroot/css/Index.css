@@ -1,0 +1,130 @@
+﻿/* Estilos gerais */
+#logoEmescam img {
+    width: 400px;
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #01f949, #14086d);
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+/* Estilos para a seção de acessos */
+.acessos {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    max-width: 800px; /* Largura máxima */
+    width: 90%; /* Ajuste para largura responsiva */
+    height: 400px; /* Altura fixa */
+}
+
+.participantes,
+.organizador {
+    background-color: transparent;
+    width: 250px; /* Largura fixa */
+    height: 400px; /* Altura fixa */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border-radius: 20px;
+    border: 2px solid white;
+    color: white;
+}
+
+/* Estilos dos botões */
+#btn-organizador,
+#btn-participantes {
+    background-color: transparent;
+    width: 120px; /* Largura fixa */
+    height: 40px; /* Altura fixa */
+    border-radius: 20px;
+    border: 2px solid white;
+    color: white !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s, color 0.3s;
+    font-weight: bold;
+}
+
+    #btn-organizador:hover,
+    #btn-participantes:hover {
+        background-color: white;
+        color: black !important;
+    }
+
+/* Estilos das imagens */
+#imgParticipantes {
+    width: 150px; /* Largura fixa */
+}
+
+#imgOrganizador {
+    width: 130px; /* Largura fixa */
+    margin-bottom: 25px;
+}
+
+/* Media queries para ajustes responsivos */
+@media (max-width: 768px) {
+    .acessos {
+        flex-direction: column;
+        height: auto; /* Altura automática */
+    }
+
+    .participantes,
+    .organizador {
+        width: 90%; /* Largura ajustável */
+        margin-bottom: 20px;
+    }
+
+    #btn-organizador,
+    #btn-participantes {
+        width: 100px; /* Ajuste para botões menores */
+        height: 30px; /* Ajuste para botões menores */
+    }
+
+    #imgParticipantes {
+        width: 120px; /* Ajuste para imagens menores */
+    }
+
+    #imgOrganizador {
+        width: 100px; /* Ajuste para imagens menores */
+    }
+}
+
+@media (max-width: 480px) {
+    .participantes,
+    .organizador {
+        width: 100%; /* Largura total */
+    }
+
+    #imgParticipantes {
+        width: 100px; /* Ajuste para imagens menores */
+    }
+
+    #imgOrganizador {
+        width: 80px; /* Ajuste para imagens menores */
+    }
+
+    #btn-organizador,
+    #btn-participantes {
+        width: 90px; /* Ajuste para botões menores */
+        height: 30px; /* Ajuste para botões menores */
+    }
+}

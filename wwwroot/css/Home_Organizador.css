@@ -375,10 +375,15 @@ button {
 
     button:hover {
         background-color: #0056b3;
+
     }
 
 #resultList {
     margin-top: 20px;
+    max-height: 590px; /* Defina a altura máxima conforme necessário */
+    overflow-y: auto; /* Permite a rolagem vertical */
+    border: 1px solid #ccc; /* Opcional: Adiciona uma borda para visualização */
+    padding: 10px; /* Opcional: Adiciona um padding interno */
 }
 
 .header {
@@ -708,3 +713,102 @@ button {
 #card-emitir-certificado {
     display: none;
 }
+
+
+
+
+
+
+/* Estilo do card "CONFIGURAÇÕES" */
+#configuracoes {
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: white;
+}
+
+    #configuracoes h4 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+.configuracoes-info {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px; /* Espaço entre os elementos */
+    justify-content: space-between;
+}
+
+.configuracao-item {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 120px; /* Tamanho mínimo para caber na linha */
+}
+
+.configuracoes-info input[type="text"],
+.configuracoes-info input[type="password"] {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    color: #777; /* Cor do texto quando não editável */
+}
+
+.configuracoes-info input[type="checkbox"] {
+    margin-top: 10px;
+}
+
+.configuracoes-info.editable input[type="text"],
+.configuracoes-info.editable input[type="password"] {
+    color: black; /* Cor do texto quando editável */
+}
+
+.button-container {
+    display: flex;
+    justify-content: center; /* Centraliza os botões */
+    margin-top: 10px;
+}
+
+    .button-container button {
+        padding: 5px 8px; /* Ajuste menor de padding */
+        background-color: #007bff;
+        color: white;
+        text-align: center;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px; /* Tamanho da fonte menor */
+        max-width: 130px; /* Largura máxima dos botões */
+        margin: 0 5px; /* Espaço entre os botões */
+    }
+
+#salvarRemetente {
+    display: none;
+}
+
+.button-container button:hover {
+    background-color: #0056b3;
+}
+
+.assinatura-digital {
+    margin-top: 20px;
+}
+
+    .assinatura-digital input[type="file"] {
+        display: block;
+        margin-top: 10px;
+    }
+
+#assinaturaDigitalPreview {
+    max-width: 300px; /* Aumenta a largura máxima da imagem */
+    height: auto;
+    margin-top: 10px;
+    display: none; /* Inicialmente oculto */
+}
+
+
+
+
+
