@@ -47,7 +47,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
         {
             try
             {                
-                var sSQL = $"SELECT EP.ID, P.NOME, EP.CERTIFICADO_EMITIDO, FORMAT(EP.DATA_EMISSAO,'dd/MM/yyyy' ) DATA_EMISSAO, EP.MENSAGEM_RETORNO_EMAIL " + 
+                var sSQL = $"SELECT EP.ID_PESSOA, P.NOME, EP.CERTIFICADO_EMITIDO, FORMAT(EP.DATA_EMISSAO,'dd/MM/yyyy' ) DATA_EMISSAO, EP.MENSAGEM_RETORNO_EMAIL " + 
                            $"FROM EVENTO_PESSOA EP " +
                            $"JOIN PESSOA P ON (EP.ID_PESSOA = P.ID) " +
                            $"WHERE ID_EVENTO = {idEvento}";
@@ -59,7 +59,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                 {
                     var pessoaEvento = new PessoaEvento
                     {
-                        Id = row["ID"] != DBNull.Value ? Convert.ToInt32(row["ID"]) : 0,
+                        Id = row["ID_PESSOA"] != DBNull.Value ? Convert.ToInt32(row["ID_PESSOA"]) : 0,
                         Nome = row["NOME"] != DBNull.Value ? Convert.ToString(row["NOME"]) : string.Empty,
                         CertificadoEmitido = row["CERTIFICADO_EMITIDO"] != DBNull.Value && Convert.ToBoolean(row["CERTIFICADO_EMITIDO"]),
                         DataEmissao = row["DATA_EMISSAO"] != DBNull.Value ? Convert.ToString(row["DATA_EMISSAO"]) : null,

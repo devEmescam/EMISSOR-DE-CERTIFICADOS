@@ -214,6 +214,11 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         {
             try
             {
+                if (idPessoas.Count == 0)
+                {
+                    return StatusCode(500, "Nenhuma pessoa selecionada para emissão de certificado.");
+                }
+
                 EventoModel evento = await BuscarEventoPorIdAsync(id);
 
                 if (ModelState.IsValid)
@@ -229,7 +234,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 var eventoPessoas = await ObterEventoPessoas(id);
 
                 //return RedirectToAction(nameof(Index));
-                return View(eventoPessoas);
+                return Json(eventoPessoas);
             }
             catch (Exception ex)
             {
