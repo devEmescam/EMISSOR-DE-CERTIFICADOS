@@ -18,7 +18,7 @@
                 <a class="nav-link text-dark" href="#" onclick="mostrarCard('meus-eventos')">Meus Eventos</a>
                 <a class="nav-link text-dark" href="#" onclick="mostrarCard('buscar-pessoas')">Buscar Pessoas</a>
                 @* <a class="nav-link text-dark" href="#" onclick="mostrarCard('emitir-certificado')">Emitir Certificado</a> *@
-                <a class="nav-link text-dark" href="#" onclick="mostrarCard('configuraçoes')">Configurações</a>
+                <a class="nav-link text-dark" href="#" onclick="mostrarCard('configuracoes')">Configurações</a>
                 @* <a class="nav-link text-dark" href="#" onclick="mostrarCard('atualizar-evento')">Atualizar Evento</a> *@
                 <a id="sair-link" class="nav-link text-dark" asp-action="Login" asp-controller="Organizador">Sair</a>
             </div>
@@ -235,14 +235,61 @@
                 <hr>
                 <div id="resultList">
                     <div class="header">
-                        <span style="width:5%" class="col-id">Código</span>
-                        <span style="width:84%" class="col-nome">Nome</span>
+                        <span style="width:7%" class="col-id">Código</span>
+                        <span style="width:80%" class="col-nome">Nome</span>
                         <span style="width:6%" class="col-acoes">Ações</span>
                     </div>
                 </div>
                 <div class="details" id="details"></div>
             </div>
         </div>
+
+        <!-- CONFIGURAÇÕES -->
+        <div id="configuracoes" class="card">
+            <h4>Configurações</h4>
+            <hr>
+            <h6>Remetente</h6>
+            <div class="configuracoes-info">
+                <div class="configuracao-item">
+                    <label for="configuracoesEmail">Email</label>
+                    <input type="text" id="configuracoesEmail" placeholder="Email">
+                </div>
+                <div class="configuracao-item">
+                    <label for="configuracoesSenha">Senha</label>
+                    <input type="password" id="configuracoesSenha" placeholder="Senha">
+                </div>
+                <div class="configuracao-item">
+                    <label for="configuracoesServidorSMTP">Servidor SMTP</label>
+                    <input type="text" id="configuracoesServidorSMTP" placeholder="Servidor SMTP">
+                </div>
+                <div class="configuracao-item">
+                    <label for="configuracoesPorta">Porta</label>
+                    <input type="text" id="configuracoesPorta" placeholder="Porta">
+                </div>
+                <div class="configuracao-item">
+                    <label for="configuracoesSSL">SSL</label>
+                    <input type="checkbox" id="configuracoesSSL">
+                </div>
+            </div>
+            <div class="button-container">
+                <button id="editarRemetente">Editar Remetente</button>
+                <button id="salvarRemetente">Salvar Remetente</button>
+            </div>
+
+            <hr>
+            <h6>Assinatura Digital</h6>
+            <div class="assinatura-digital">
+                <input type="file" id="assinaturaDigitalInput" accept="image/*">
+                <img id="assinaturaDigitalPreview" src="#" alt="Preview da Assinatura Digital">
+            </div>
+        </div>
+
+
+       
+
+           
+
+
 
     </div>
 
@@ -292,7 +339,7 @@
                 card.style.display = 'none';
             });
 
-            var cardToShow = document.getElementById('card-' + id);
+            var cardToShow = document.getElementById('card-' + id) || document.getElementById(id);
             if (cardToShow) {
                 cardToShow.style.display = 'block';
             }
@@ -1144,11 +1191,15 @@
         }
 
 
-
         document.getElementById('emitirCertificado').addEventListener('click', function () {
             const eventoId = document.getElementById('eventoId').value;
             const checkboxes = document.querySelectorAll('#certificados-tbody input[type="checkbox"]:checked');
             const idPessoas = Array.from(checkboxes).map(checkbox => checkbox.dataset.id);
+
+            if (idPessoas.length === 0) {
+                alert('Por favor, selecione pelo menos uma pessoa.');
+                return;
+            }
 
             const formData = new FormData();
             formData.append('id', eventoId);
@@ -1172,6 +1223,95 @@
                 .catch(error => {
                     console.error('Erro ao emitir certificados:', error);
                 });
+        });
+
+
+
+
+
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Função para carregar dados salvos no local storage
+            function carregarConfiguracoes() {
+                var configuracoes = JSON.parse(localStorage.getItem('configuracoes')) || {};
+
+                document.getElementById('configuracoesEmail').value = configuracoes.email || '';
+                document.getElementById('configuracoesSenha').value = configuracoes.senha || '';
+                document.getElementById('configuracoesServidorSMTP').value = configuracoes.servidor_smtp || '';
+                document.getElementById('configuracoesPorta').value = configuracoes.porta || '';
+                document.getElementById('configuracoesSSL').checked = configuracoes.ssl || false;
+            }
+
+            // Função para salvar dados no local storage
+            function salvarConfiguracoes() {
+                var configuracoes = {
+                    email: document.getElementById('configuracoesEmail').value,
+                    senha: document.getElementById('configuracoesSenha').value,
+                    servidor_smtp: document.getElementById('configuracoesServidorSMTP').value,
+                    porta: document.getElementById('configuracoesPorta').value,
+                    ssl: document.getElementById('configuracoesSSL').checked
+                };
+
+                localStorage.setItem('configuracoes', JSON.stringify(configuracoes));
+            }
+
+            // Função para permitir edição dos campos
+            function editarRemetente() {
+                var configuracoesInfo = document.querySelector('.configuracoes-info');
+                configuracoesInfo.classList.add('editable');
+
+                document.getElementById('configuracoesEmail').readOnly = false;
+                document.getElementById('configuracoesSenha').readOnly = false;
+                document.getElementById('configuracoesServidorSMTP').readOnly = false;
+                document.getElementById('configuracoesPorta').readOnly = false;
+                document.getElementById('configuracoesSSL').disabled = false;
+
+                document.getElementById('editarRemetente').style.display = 'none';
+                document.getElementById('salvarRemetente').style.display = 'inline-block';
+            }
+
+            // Função para salvar os campos editados
+            function salvarRemetente() {
+                salvarConfiguracoes();
+
+                var configuracoesInfo = document.querySelector('.configuracoes-info');
+                configuracoesInfo.classList.remove('editable');
+
+                document.getElementById('configuracoesEmail').readOnly = true;
+                document.getElementById('configuracoesSenha').readOnly = true;
+                document.getElementById('configuracoesServidorSMTP').readOnly = true;
+                document.getElementById('configuracoesPorta').readOnly = true;
+                document.getElementById('configuracoesSSL').disabled = true;
+
+                document.getElementById('editarRemetente').style.display = 'inline-block';
+                document.getElementById('salvarRemetente').style.display = 'none';
+            }
+
+            // Event listeners
+            document.getElementById('editarRemetente').addEventListener('click', editarRemetente);
+            document.getElementById('salvarRemetente').addEventListener('click', salvarRemetente);
+
+            // Chamar a função para carregar as configurações quando a página carregar
+            carregarConfiguracoes();
+        });
+
+
+
+
+
+
+        document.getElementById('assinaturaDigitalInput').addEventListener('change', function (event) {
+            var input = event.target;
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var preview = document.getElementById('assinaturaDigitalPreview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
         });
 
 

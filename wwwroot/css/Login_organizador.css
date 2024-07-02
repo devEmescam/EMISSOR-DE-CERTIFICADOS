@@ -1,0 +1,72 @@
+﻿#logoEmescam {
+    position: absolute;
+    top:0;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 5px;
+    width: 400px; /* largura desejada */
+    height: 175px; /* altura desejada */
+    text-align: center;
+}
+
+    #logoEmescam img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain; /* mantém a proporção da imagem */
+    }
+
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #01f949, #14086d);
+    font-family: Arial, sans-serif;
+}
+
+.cartao-login {
+    background: transparent;
+    border-radius: 15px;
+    padding: 40px;
+    width: 250px;
+    max-width: 90%;
+    text-align: center;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid white;
+}
+
+    .cartao-login h2 {
+        margin-bottom: 20px;
+        color: white;
+    }
+
+    .cartao-login input[type="text"],
+    .cartao-login input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 2px solid white;
+        border-radius: 5px;
+        box-sizing: border-box;
+        outline: none;
+        background: transparent;
+        color: white;
+    }
+
+    .cartao-login button {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        background: linear-gradient(135deg, #01f949, #14086d);
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
