@@ -1073,7 +1073,7 @@
                 });
         }
 
-      
+
 
         function preencherTabelaCertificados(evento) {
             console.log('Dados do evento recebidos:', evento);
@@ -1100,7 +1100,9 @@
                     // Certificado Emitido
                     const tdCertificado = document.createElement('td');
                     tdCertificado.style.textAlign = 'center';
-                    tdCertificado.textContent = pessoa.certificadoEmitido ? 'Sim' : 'Não';
+                    if (pessoa.certificadoEmitido) {
+                        tdCertificado.innerHTML = '&#10004;'; // Marca de seleção (✔)
+                    }
                     tr.appendChild(tdCertificado);
 
                     // Retorno Email
@@ -1112,18 +1114,24 @@
                     // Checkbox "Selecionar"
                     const tdCheckbox = document.createElement('td');
                     tdCheckbox.style.textAlign = 'center';
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.dataset.id = pessoa.id; // Adiciona o ID da pessoa ao checkbox
-                    tdCheckbox.appendChild(checkbox);
-                    tr.appendChild(tdCheckbox);
 
+                    // Verifica se o certificado já foi emitido
+                    if (!pessoa.certificadoEmitido) {
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.dataset.id = pessoa.id; // Adiciona o ID da pessoa ao checkbox
+                        tdCheckbox.appendChild(checkbox);
+                    }
+
+                    tr.appendChild(tdCheckbox);
                     tbody.appendChild(tr);
                 });
             } else {
                 console.error('Dados do evento ou pessoas não estão definidos corretamente.');
             }
         }
+
+
 
 
 
@@ -1174,23 +1182,26 @@
         //     }
         // }
 
-
+    
 
         let allSelected = false;
 
         function toggleSelectAll() {
             const checkboxes = document.querySelectorAll('#certificados-tbody input[type="checkbox"]');
+            const anyUnchecked = Array.from(checkboxes).some(checkbox => !checkbox.checked);
+
             checkboxes.forEach(checkbox => {
-                checkbox.checked = !allSelected;
+                checkbox.checked = anyUnchecked;
             });
-            allSelected = !allSelected;
         }
+
+
 
         function permitirApenasNumeros(input) {
             input.value = input.value.replace(/\D/g, '');
         }
 
-
+  
         document.getElementById('emitirCertificado').addEventListener('click', function () {
             const eventoId = document.getElementById('eventoId').value;
             const checkboxes = document.querySelectorAll('#certificados-tbody input[type="checkbox"]:checked');
