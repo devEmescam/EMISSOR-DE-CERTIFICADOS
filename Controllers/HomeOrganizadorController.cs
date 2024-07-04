@@ -210,7 +210,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Ocorreu um erro em Home_OrganizadorController.EmitirCertificado. Erro: {ex.Message}");
             }
         }
-
         public async Task<IActionResult> EmitirCertificado(int id, List<int> idPessoas)
         {
             try
