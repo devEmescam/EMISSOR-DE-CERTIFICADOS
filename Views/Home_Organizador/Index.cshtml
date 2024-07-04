@@ -115,7 +115,7 @@
                                 </td>
                                 <td style="text-align: center;">
                                     <button class="btn btn-emitir" onclick="abrirCardEmitirCertificado('@evento.Id')">Emitir Certificado</button>
-                                    <button class="btn btn-atualizar" onclick="atualizarEvento('@evento.Id', '@evento.Nome')">Atualizar</button>
+                                    <button class="btn btn-atualizar" onclick="atualizarEvento('@evento.Id', '@evento.Nome')">Incluir Pessoas</button>
                                 </td>
                             </tr>
                         }
@@ -177,13 +177,11 @@
                         <input type="text" id="inputNomeAtualizar" placeholder="Nome">
                         <input type="text" id="inputCPFAtualizar" placeholder="CPF">
                         <input type="text" id="inputEmail1Atualizar" placeholder="Email">
-                        <input type="text" id="tipoPessoaAtualizar" placeholder="Tipo Pessoa">
                     </div>
                     <textarea id="textareaTextoAtualizar" placeholder="Texto"></textarea>
                 </div>
 
-                @*Se o type não for definido em um button é atribuido a ele como default o type=submit*@
-                @*é recomendável explicitar sempre o type quando o form tiver butões com finalizadades diferentes*@
+              
                 <button type="button" id="botaoAcaoAtualizar" onclick="atualizarDados()">Adicionar Dados</button>
                 <hr>
 
@@ -195,7 +193,6 @@
                                 <th style="width: 20%">Nome</th>
                                 <th style="width: 10%">CPF</th>
                                 <th style="width: 15%">Email</th>
-                                <th style="width: 10%">Tipo Pessoa</th>
                                 <th style="width: 40%">Texto</th>
                                 <th style="width: 5%">Ações</th>
                             </tr>
@@ -213,12 +210,7 @@
                     </label>
                     <span id="fileNameAtualizar" style="margin-left: 10px;"></span>
                     <br>
-                    <!-- Botão de importar Certificado -->
-                    <input type="file" id="arteCertificadoFileAtualizar" name="arteCertificadoFileAtualizar" accept=".jpeg, .jpg" style="display:none">
-                    <label for="arteCertificadoFileAtualizar" class="custom-file-upload">
-                        Selecionar Certificado
-                    </label>
-                    <span id="certificadoFileNameAtualizar" style="margin-left: 10px;"></span>
+                  
                 </div>
 
                 <input type="hidden" id="tableDataAtualizar" name="tableDataAtualizar">
@@ -937,7 +929,7 @@
                                             $("<div class='acoes-dropdown-content'>")
                                                 .append("<button onclick='exibirCertificado(this)'>Exibir Certificado</button>")
                                                 .append("<button onclick='acao2()'>Reenviar Instruções</button>")
-                                                .append("<button onclick='acao3()'>Corrigir E-mail</button>")
+                                                .append("<button onclick='acao3()'>Atualizar</button>")
                                         )
                                 )
                                 .data("id", pessoa.id)
@@ -1223,18 +1215,25 @@
                     'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
                 }
             })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(error => { throw new Error(error.message || 'Erro desconhecido'); });
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
-                        alert('Certificados emitidos com sucesso!');
+                        alert('Ação efetuada com sucesso!');
                     } else {
-                        alert('Falha ao emitir certificados.');
+                        alert('Falha ao emitir certificados: ' + (data.message || 'Erro desconhecido'));
                     }
                 })
                 .catch(error => {
                     console.error('Erro ao emitir certificados:', error);
+                    alert('Erro ao emitir certificados: ' + error.message);
                 });
         });
+
 
 
 
