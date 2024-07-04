@@ -27,7 +27,7 @@ builder.Services.AddScoped<ISessao, Sessao>();
 //Configurar os Cookies da Sessão
 builder.Services.AddSession(o =>
 {
-    o.IdleTimeout = TimeSpan.FromMinutes(5);
+    o.IdleTimeout = TimeSpan.FromMinutes(60);
     o.Cookie.HttpOnly = true;
     o.Cookie.IsEssential = true;
 });
