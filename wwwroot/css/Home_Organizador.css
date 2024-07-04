@@ -380,6 +380,7 @@ button {
 
 #resultList {
     margin-top: 20px;
+    height:590px;
     max-height: 590px; /* Defina a altura máxima conforme necessário */
     overflow-y: auto; /* Permite a rolagem vertical */
     border: 1px solid #ccc; /* Opcional: Adiciona uma borda para visualização */
