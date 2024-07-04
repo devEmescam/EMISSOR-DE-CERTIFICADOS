@@ -22,7 +22,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
         {
             _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelper não pode ser nulo.");
         }
-
         public async Task<(bool success, string retorno)> EnviarEmailAsync(string login, string senha, int idEventoPessoa)
         {
             string remetente = string.Empty;
@@ -98,25 +97,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             {
                 throw new Exception($"Erro em [EmailService.EnviarEmailAsync]: {ex.Message}");
             }
-        }
-
-        //private async Task<string> ObterTextoAssuntoAsync()
-        //{
-        //    string retorno = string.Empty;  
-        //    string evento  = string.Empty;
-        //    string sSQL = string.Empty; 
-
-        //    try
-        //    {              
-
-        //        return $"Emissão do Certificado de Participação - {_evento}";                 
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw new Exception($"Erro em [EmailService.BuscarTextoAssuntoAsync]: {ex.Message}");
-        //    }
-        //}
-
+        }       
         private async Task ObterNomeEventoAsync(int idEventoPessoa)
         {
             string sSQL = string.Empty;
@@ -139,7 +120,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 throw new Exception($"Erro em [EmailService.RetornarNomeEventoAsync]: {ex.Message}");
             }
         }
-
         private async Task<string> ObterTextoCorpoAsync(int idEventoPessoa, string usuario, string senha)
         {
             string nome = string.Empty;
@@ -173,7 +153,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 throw new Exception($"Erro em [EmailService.ObterTextoCorpoAsync]: {ex.Message}");
             }
         }
-
         private async Task<string> ObterNomePessoaAsync(int idEventoPessoa)
         {
             string sSQL = string.Empty;
@@ -204,7 +183,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 throw new Exception($"Erro em [EmailService.ObterNomePessoaAsync]: {ex.Message}");
             }
         }
-
         private async Task<string> ObterEmailPessoaAsync(int idEventoPessoa)
         {
             string sSQL = string.Empty;
@@ -237,7 +215,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 throw new Exception($"Erro em [EmailService.ObterEmailPessoaAsync]: {ex.Message}");
             }
         }
-
         private async Task<byte[]> ObterCertificadoAsync(int idEventoPessoa)
         {
             try
@@ -255,7 +232,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 throw new Exception($"Erro em [EmailService.ObterCertificadoAsync]: {ex.Message}");
             }
         }
-
         private async Task ObterToken(string login, string senha)
         {
             try
@@ -291,7 +267,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 throw new Exception($"Erro em [EmailService.ObterToken]: {ex.Message}");
             }
         }
-
         private async Task<(bool success, string retorno)> EnviarEmail(EmailConfigRepository emailConfig, string destinatario, string assunto, string corpo, string[] cc, byte[] anexo, byte[] assinatura)
         {
             try
@@ -358,7 +333,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             }
 
         }
-
         private class TokenResponse
         {
             [JsonProperty("token")]

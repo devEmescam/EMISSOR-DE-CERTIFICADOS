@@ -184,32 +184,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         //Rotina de Emissão de certificados        
-        public async Task<IActionResult> EmitirCertificado_OLD(int id)
-        {
-            try
-            {
-                EventoModel evento = await BuscarEventoPorIdAsync(id);
-
-                if (ModelState.IsValid)
-                {
-                    await EmitirCertificadoAsync_OLD(evento);
-                }
-                else
-                {
-                    return NotFound();
-                }
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Ocorreu um erro em Home_OrganizadorController.EmitirCertificado. Erro: {ex.Message}");
-            }
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        //Rotina de Emissão de certificados        
         public async Task<IActionResult> EmitirCertificado(int id, List<int> idPessoas)
         {
             try
