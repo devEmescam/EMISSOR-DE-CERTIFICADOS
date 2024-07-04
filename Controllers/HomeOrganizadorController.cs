@@ -74,6 +74,53 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.NovoEvento]. Erro: {ex.Message}");
             }
         }
+
+        //GET: /Homer_Organizador/ObterPessoasEvento: Usado para carregar dados no card que adicionará novas pessoas ao evento registrado em banco de dados
+        public async Task<IActionResult> ObterPessoasEvento(int id) 
+        {
+            try
+            {
+                if (id <= 0) 
+                {
+                    return StatusCode(500, new { success = false, message = "Não foi possível identificar o evento." });
+                }
+                var eventoPessoas = await ObterEventoPessoas(id);
+                return Json(eventoPessoas);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.ObterPessoasEvento]");
+            }
+        }
+
+        //POST: /Home_Organizador/AdicionarPessoas: adiciona novas pessoas ao evento registrado em banco de dados
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AdicionarPessoas(int id, string tableData)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    throw new Exception("Não foi possível identificar o evento.");
+                }
+
+                if (string.IsNullOrEmpty(tableData)) 
+                {
+                    throw new Exception("Não foi possível identificar os registros de participantes.");
+                }               
+
+                var tabelaDataList = JsonConvert.DeserializeObject<List<TabelaData>>(tableData);
+                // Adiciona novas pessoas no evento de id informado
+                await AdicionarPessoasEventoAsync(id, tabelaDataList);            
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.AdicionarPessoas]. Erro: {ex.Message}");
+            }
+        } 
+
         // POST: /Home_Organizador/LerPlanilha
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -178,38 +225,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         // POST:/Home_Organizador/EmitirCertificado
         [HttpPost]
         [ValidateAntiForgeryToken]
-        //Rotina de Emissão de certificados        
-        public async Task<IActionResult> EmitirCertificado_OLD(int id, List<int> idPessoas)
-        {
-            try
-            {
-                if (idPessoas.Count == 0)
-                {
-                    return StatusCode(500, "Nenhuma pessoa selecionada para emissão de certificado.");
-                }
-
-                EventoModel evento = await BuscarEventoPorIdAsync(id);
-
-                if (ModelState.IsValid)
-                {
-                    await EmitirCertificadoAsync(evento, idPessoas);                    
-                }
-                else
-                {
-                    return NotFound();
-                }
-
-                // Obter um objeto atualizado com os dados do processo de emissão que foi realizado
-                var eventoPessoas = await ObterEventoPessoas(id);
-
-                //return RedirectToAction(nameof(Index));
-                return Json(eventoPessoas);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Ocorreu um erro em Home_OrganizadorController.EmitirCertificado. Erro: {ex.Message}");
-            }
-        }
+        //Rotina de Emissão de certificados                
         public async Task<IActionResult> EmitirCertificado(int id, List<int> idPessoas)
         {
             try
@@ -233,7 +249,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 // Obter um objeto atualizado com os dados do processo de emissão que foi realizado
                 var eventoPessoas = await ObterEventoPessoas(id);
 
-                // Return JSON object with success status
+                // Return JSON objeto com status de sucesso
                 return Json(new { success = true, data = eventoPessoas });
             }
             catch (Exception ex)
@@ -241,7 +257,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, new { success = false, message = $"Ocorreu um erro em Home_OrganizadorController.EmitirCertificado. Erro: {ex.Message}" });
             }
         }
-
         // POST:/Home_Organizador/Logout        
         [HttpPost]
         public IActionResult Logout()
@@ -423,20 +438,58 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 throw new Exception($"Ocorreu um erro em [Home_OrganizadorController.InserirEventoAsync]. Erro: {ex.Message}");
             }
         }
+
         // VERSÃO ASYNC: Método assíncrono para atualizar um evento no banco de dados
-        private async Task AtualizarEventoAsync(EventoModel evento)
+        private async Task AdicionarPessoasEventoAsync(int id, List<TabelaData>? dadosTabela)
         {
+            int? idUsuario;
+            string sSQL = string.Empty;
+
             try
             {
-                // Construir a consulta SQL para atualizar o evento
-                var query = $"UPDATE EVENTO SET NOME = '{evento.Nome}' WHERE Id = {evento.Id}";
+                // Recupera o ID do usuário logado 
+                idUsuario = HttpContext.Session.GetInt32("UserId");
 
-                // Executar a consulta de forma assíncrona
-                await _dbHelper.ExecuteQueryAsync(query);
+                if (idUsuario == null)
+                {
+                    throw new Exception("ID do usuário não encontrado na sessão.");
+                }
+
+                // Processar os dados da tabela
+                foreach (var registro in dadosTabela)
+                {
+                    // Criar objeto e inserir a pessoa
+                    PessoaModel pessoa = new PessoaModel
+                    {
+                        Nome = registro.Nome.Trim(),
+                        CPF = registro.CPF.Trim(),
+                        Email = registro.Email.Trim()
+                    };
+
+                    // Chama o método InserirPessoa do controlador PessoaController
+                    using (PessoaController pessoaController = new PessoaController(_dbHelper))
+                    {
+                        await pessoaController.InserirPessoaAsync(pessoa, idUsuario);
+                        
+                        // Necessário registrar em banco a relação da pessoa com o evento e seus respectivos textos
+                        sSQL = "";
+                        sSQL = "INSERT INTO EVENTO_PESSOA (ID_EVENTO, ID_PESSOA, TEXTO_FRENTE) " +
+                               "VALUES (@idEvento, @idPessoa, @texto)";
+
+                        var parametersEP = new Dictionary<string, object>
+                        {
+                            {"@idEvento",id },
+                            {"@idPessoa", pessoa.Id},
+                            {"@texto", registro.Texto.Trim()}
+                        };
+
+                        await _dbHelper.ExecuteQueryAsync(sSQL, parametersEP);
+                    }
+                }
             }
             catch (Exception ex)
             {
-                throw new Exception($"Ocorreu um erro em [Home_OrganizadorController.AtualizarEventoAsync] Erro: {ex.Message}");
+                throw new Exception($"Ocorreu um erro em [Home_OrganizadorController.AdicionarPessoasEventoAsync] Erro: {ex.Message}");
             }
         }
         // VERSÃO ASYNC: Método que retorna os bytes da imagem
@@ -484,79 +537,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             }
         }
 
-        // VERSÃO ASYNC: Metodo que gera certificado, cria usuario e emite email a pessoa do evento
-        private async Task EmitirCertificadoAsync_OLD(EventoModel evento)
-        {
-            DataTable oDT = new DataTable();
-            var usuariosService = new UsuariosService(_dbHelper);
-            var certificadoService = new CertificadosService(_dbHelper);
-            var emailService = new EmailService(_dbHelper);
-            string sSQL = "";
-            int idUsuario = -1;
-            string loginUsuarioADM = string.Empty;
-            string senhaUsuarioADM = string.Empty;
-
-            try
-            {
-                loginUsuarioADM = HttpContext.Session.GetString("Login");
-                senhaUsuarioADM = HttpContext.Session.GetString("Senha");
-
-                //Buscar as pessoas do evento
-                sSQL = $"SELECT * FROM EVENTO_PESSOA WHERE (CERTIFICADO_EMITIDO IS NULL OR CERTIFICADO_EMITIDO = 0) AND ID_EVENTO = {evento.Id}";
-                oDT = await _dbHelper.ExecuteQueryAsync(sSQL);
-
-                if (oDT != null && oDT.Rows.Count > 0)
-                {
-                    //Percorrer os registros/pessoas do evento
-                    foreach (DataRow row in oDT.Rows)
-                    {
-                        int idEventoPessoa = Convert.ToInt32(row["ID"]);
-                        int idPessoa = Convert.ToInt32(row["ID_PESSOA"]);
-                        string texto = Convert.ToString(row["TEXTO_FRENTE"]);
-
-                        //Só manda gerar se houver texto e imagem
-                        if (!string.IsNullOrEmpty(texto) && evento.ImagemCertificado != null)
-                        {
-                            //Se gerar certificado
-                            if (await certificadoService.GerarCertificadoAsync(idEventoPessoa, idPessoa, texto, evento.ImagemCertificado))
-                            {
-                                //Criar usuario e senha da pessoa
-                                idUsuario = await usuariosService.GerarUsuarioAsync(idPessoa);
-                                if (idUsuario > 0)
-                                {
-                                    //Enviar email com os dados do usuario e certificado anexo
-                                    var (success, retorno) = await emailService.EnviarEmailAsync(loginUsuarioADM, senhaUsuarioADM, idEventoPessoa);
-
-                                    // Validar se o email foi de fato enviado para poder atualizar campo CERTIFICADO_EMITIDO da tabela EVENTO_PESSOA
-                                    if (success)
-                                    {
-                                        // Atualizar EVENTO_PESSOA registrando resultado do processo e data 
-                                        sSQL = $"UPDATE EVENTO_PESSOA SET CERTIFICADO_EMITIDO = 1, DATA_EMISSAO = GETDATE()  WHERE ID = {idEventoPessoa}";
-                                        await _dbHelper.ExecuteQueryAsync(sSQL);
-                                    }
-                                    else
-                                    {
-                                        // Truncar a mensagem se for maior que 500 caracteres
-                                        if (retorno.Length > 500)
-                                        {
-                                            retorno = retorno.Substring(0, 500);
-                                        }
-
-                                        // Atualizar EVENTO_PESSOA registrando resultado do processo e data e mensagem retornada 
-                                        sSQL = $"UPDATE EVENTO_PESSOA SET CERTIFICADO_EMITIDO = 1, DATA_EMISSAO = GETDATE(), MENSAGEM_RETORNO_EMAIL = '{retorno}' WHERE ID = {idEventoPessoa}";
-                                        await _dbHelper.ExecuteQueryAsync(sSQL);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Erro em [Home_OrganizadorController.EmitirCertificadoAsync]: " + ex.Message);
-            }
-        }
+        // VERSÃO ASYNC: Metodo que gera certificado, cria usuario e emite email a pessoa do evento        
         private async Task EmitirCertificadoAsync(EventoModel evento, List<int> listaIdPessoas)
         {
             DataTable oDT = new DataTable();
@@ -635,7 +616,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 throw new Exception("Erro em [Home_OrganizadorController.GerarCertifcado]: " + ex.Message);
             }
         }
-
         #endregion
     }
 }
