@@ -174,8 +174,10 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                         using (Font fonteTextoFixo = new Font("Arial", 42, FontStyle.Regular, GraphicsUnit.Pixel))
                         using (Graphics graphics = Graphics.FromImage(certificado))
                         {
+                            //===================================================================================== INICIO
+                            //TEXTO CERITIFICADO
                             float larguraBorda = 2;
-                            Pen penBorda = new Pen(System.Drawing.Color.Black, larguraBorda);
+                            Pen penBorda = new Pen(Color.Black, larguraBorda);
                             float margemLateral = certificado.Width / 11;
                             float posicaoVertical = certificado.Height / 2.1f;
                             float altRetTextCertificado = 200;
@@ -193,12 +195,16 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                                 tamanhoTextoCertificado = graphics.MeasureString(textoCertificado, fonteTextoCertificado, (int)retTextCertificado.Width);
                             }
 
-                            // Desenha o retângulo com borda
+                            // USADO APENAS PARA NECESSIDADE DE AJUSTES: Desenha o retângulo com borda
                             //graphics.DrawRectangle(penBorda, retTextCertificado.X, retTextCertificado.Y, retTextCertificado.Width, retTextCertificado.Height);
                             // Desenha o texto dentro do retângulo
                             graphics.DrawString(textoCertificado, fonteTextoCertificado, Brushes.Black, retTextCertificado, new StringFormat(StringFormatFlags.LineLimit) { Alignment = StringAlignment.Center });
+                            //===================================================================================== FIM
 
-                            // Nome do participante
+                            //===================================================================================== INICIO
+                            //NOME PARTICIPANTE
+                            float larguraBorda1 = 2;
+                            Pen penBorda1 = new Pen(Color.Black, larguraBorda1);
                             float altRetNomeParticipante = 65;
                             RectangleF retNomeParticipante = new RectangleF(certificado.Width / 6, posicaoVertical - altRetNomeParticipante, certificado.Width / 1.5f, altRetNomeParticipante);
                             StringFormat formatoCentralizado = new StringFormat { Alignment = StringAlignment.Center };
@@ -213,27 +219,42 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                                 fonteNomeParticipante = new Font("Arial", tamanhoFonteNomeParticipante, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Pixel);
                                 tamanhoTextoNome = graphics.MeasureString(nomeParticipante, fonteNomeParticipante);
                             }
-
+                            // USADO APENAS PARA NECESSIDADE DE AJUSTES: Desenha o retângulo com borda
+                            //graphics.DrawRectangle(penBorda1, retNomeParticipante.X, retNomeParticipante.Y, retNomeParticipante.Width, retNomeParticipante.Height);
                             // Desenha o texto dentro do retângulo
                             graphics.DrawString(nomeParticipante, fonteNomeParticipante, Brushes.Black, retNomeParticipante, formatoCentralizado);
+                            //===================================================================================== FIM
 
-                            // Texto fixo "Certificamos que "
+                            //===================================================================================== INICIO
+                            // TEXTO FIXO "Certificamos que "
+                            float larguraBorda2 = 2;
+                            Pen penBorda2 = new Pen(Color.Black, larguraBorda2);
                             float largRetTextoFixo = graphics.MeasureString(textoFixo, fonteTextoFixo).Width;
                             float altRetTextFixo = graphics.MeasureString(textoFixo, fonteTextoFixo).Height;
                             float posVertTextFixo = retNomeParticipante.Y;
                             RectangleF retTextoFixo = new RectangleF(margemLateral, posVertTextFixo - altRetTextFixo, largRetTextoFixo, altRetTextFixo);
+                            // USADO APENAS PARA NECESSIDADE DE AJUSTES: Desenha o retângulo com borda
+                            //graphics.DrawRectangle(penBorda2, retTextoFixo.X, retTextoFixo.Y, retTextoFixo.Width, retTextoFixo.Height);
                             // Desenha o texto dentro do retângulo
                             graphics.DrawString(textoFixo, fonteTextoFixo, Brushes.Black, retTextoFixo);
+                            //===================================================================================== FIM
 
-                            // Texto do certificadoLocaleData
+                            //===================================================================================== INICIO
+                            // TEXTO LOCAL E DATA
+                            float larguraBorda3 = 2;
+                            Pen penBorda3 = new Pen(Color.Black, larguraBorda3);
                             float largRetTextCertLocaleData = 375;
                             float posHorTextCertLocaleData = certificado.Width - largRetTextCertLocaleData - margemLateral;
                             float posVertTextCertLocaleData = posicaoVertical + altRetTextCertificado;
                             RectangleF retTextCertLocaleData = new RectangleF(posHorTextCertLocaleData, posVertTextCertLocaleData, largRetTextCertLocaleData, 50);
+                            // USADO APENAS PARA NECESSIDADE DE AJUSTES: Desenha o retângulo com borda
+                            //graphics.DrawRectangle(penBorda3, retTextCertLocaleData.X, retTextCertLocaleData.Y, retTextCertLocaleData.Width, retTextCertLocaleData.Height);
                             // Desenha o texto dentro do retângulo
                             graphics.DrawString(textCertLocaleData, fontTextCertLocaleData, Brushes.Black, retTextCertLocaleData, StringFormat.GenericTypographic);
+                            //===================================================================================== FIM
 
-                            // Texto de autenticidade
+                            //===================================================================================== INICIO
+                            // TEXTO DE AUTENTICIDADE
                             using (Font fonteTextoAutenticidade = new Font("Arial", 22, FontStyle.Regular, GraphicsUnit.Pixel))
                             {
                                 float posHor = certificado.Width - 1925;
@@ -244,6 +265,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                                 Rectangle retanguloQRCode = new Rectangle(certificado.Width - 245, certificado.Height - 225, 180, 180);
                                 graphics.DrawImage(qrCodeBitmap, retanguloQRCode);
                             }
+                            //===================================================================================== FIM
                         }
 
                         byte[] certificadoBytes;

@@ -40,7 +40,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.Index] Erro: {ex.Message}");
             }
         }
-
         // POST: /Home_Organizador/NovoEvento
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -75,7 +74,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.NovoEvento]. Erro: {ex.Message}");
             }
         }
-
         // POST: /Home_Organizador/LerPlanilha
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -141,7 +139,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Erro em [Home_OrganizadorController.LerPlanilha]. Erro: {ex.Message}");
             }
         }
-
         public async Task<IActionResult> VisualizarImagem(int id)
         {
             try
@@ -157,7 +154,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Erro em [Home_OrganizadorController.VisualizarImagem]. Erro: {ex.Message}");
             }
         }
-
         public async Task<IActionResult> DetalhesEventoPessoas(int idEvento)
         {
             try
@@ -179,12 +175,11 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, new { message = $"Ocorreu um erro em [Home_OrganizadorController.DetalhesEventoPessoas]. Erro: {ex.Message}" });
             }
         }
-
         // POST:/Home_Organizador/EmitirCertificado
         [HttpPost]
         [ValidateAntiForgeryToken]
         //Rotina de Emissão de certificados        
-        public async Task<IActionResult> EmitirCertificado(int id, List<int> idPessoas)
+        public async Task<IActionResult> EmitirCertificado_OLD(int id, List<int> idPessoas)
         {
             try
             {
@@ -213,6 +208,37 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, $"Ocorreu um erro em Home_OrganizadorController.EmitirCertificado. Erro: {ex.Message}");
+            }
+        }
+        public async Task<IActionResult> EmitirCertificado(int id, List<int> idPessoas)
+        {
+            try
+            {
+                if (idPessoas.Count == 0)
+                {
+                    return StatusCode(500, new { success = false, message = "Nenhuma pessoa selecionada para emissão de certificado." });
+                }
+
+                EventoModel evento = await BuscarEventoPorIdAsync(id);
+
+                if (ModelState.IsValid)
+                {
+                    await EmitirCertificadoAsync(evento, idPessoas);
+                }
+                else
+                {
+                    return NotFound(new { success = false, message = "Evento não encontrado." });
+                }
+
+                // Obter um objeto atualizado com os dados do processo de emissão que foi realizado
+                var eventoPessoas = await ObterEventoPessoas(id);
+
+                // Return JSON object with success status
+                return Json(new { success = true, data = eventoPessoas });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = $"Ocorreu um erro em Home_OrganizadorController.EmitirCertificado. Erro: {ex.Message}" });
             }
         }
 
@@ -273,7 +299,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 throw new Exception($"Ocorreu um erro em [Home_OrganizadorController.BuscarTodosEventosAsync] Erro: {ex.Message}");
             }
         }
-
         // VERSÃO ASYNC: Método assíncrono para buscar evento no banco de dados.
         private async Task<EventoModel> BuscarEventoPorIdAsync(int id)
         {
@@ -306,7 +331,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 throw new Exception($"Ocorreu um erro em [Home_OrganizadorController.BuscarEventoPorIdAsync] Erro: {ex.Message}");
             }
         }
-
         // VERSÃO ASYNC: Método para inserir evento no banco de dados.
         private async Task InserirEventoAsync(EventoModel evento, List<TabelaData>? dadosTabela)
         {
@@ -399,7 +423,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 throw new Exception($"Ocorreu um erro em [Home_OrganizadorController.InserirEventoAsync]. Erro: {ex.Message}");
             }
         }
-
         // VERSÃO ASYNC: Método assíncrono para atualizar um evento no banco de dados
         private async Task AtualizarEventoAsync(EventoModel evento)
         {
@@ -416,7 +439,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 throw new Exception($"Ocorreu um erro em [Home_OrganizadorController.AtualizarEventoAsync] Erro: {ex.Message}");
             }
         }
-
         // VERSÃO ASYNC: Método que retorna os bytes da imagem
         private async Task<byte[]> BuscarBytesDaImagemNoBDAsync(int id)
         {
