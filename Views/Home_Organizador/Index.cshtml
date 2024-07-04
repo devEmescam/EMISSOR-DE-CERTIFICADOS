@@ -11,17 +11,15 @@
 <body>
     <img id="logo" src="/logoemescam.png" alt="Logo Emescam">
 
-    <div class="cartao-menu">
-        <div style="font-size:larger">Bem-Vindo! @ViewBag.Login</div>
+    <dv class="cartao-menu">
+        <div id="bem-vindo">Bem-Vindo! @ViewBag.Login</div>
         <form>
-            <div>
-                <a class="nav-link text-dark" href="#" onclick="mostrarCard('meus-eventos')">Meus Eventos</a>
-                <a class="nav-link text-dark" href="#" onclick="mostrarCard('buscar-pessoas')">Buscar Pessoas</a>
-                @* <a class="nav-link text-dark" href="#" onclick="mostrarCard('emitir-certificado')">Emitir Certificado</a> *@
-                <a class="nav-link text-dark" href="#" onclick="mostrarCard('configuracoes')">Configurações</a>
-                @* <a class="nav-link text-dark" href="#" onclick="mostrarCard('atualizar-evento')">Atualizar Evento</a> *@
-                <a id="sair-link" class="nav-link text-dark" asp-action="Login" asp-controller="Organizador">Sair</a>
-            </div>
+            
+                <a href="#" onclick="mostrarCard('meus-eventos')">Meus Eventos</a>
+                <a href="#" onclick="mostrarCard('buscar-pessoas')">Buscar Pessoas</a>
+                <a href="#" onclick="mostrarCard('configuracoes')">Configurações</a>
+                <a id="sair-link" asp-action="Login" asp-controller="Organizador">Sair</a>
+            
         </form>
 
         <!--CADASTRAR EVENTO-->
