@@ -4,14 +4,15 @@ using System.Data.SqlClient;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Text;
-using PdfSharpCore.Drawing;
-using PdfSharpCore.Pdf;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+//using PdfSharpCore.Drawing;
+//using PdfSharpCore.Pdf;
+//using SixLabors.ImageSharp;
+//using SixLabors.ImageSharp.PixelFormats;
 //using SixLabors.ImageSharp.Processing;
 //using Image = SixLabors.ImageSharp.Image;
 using RectangleF = System.Drawing.RectangleF;
 using Rectangle = System.Drawing.Rectangle;
+//using SixLabors.Fonts;
 //using SixLabors.ImageSharp.Formats.Png;
 
 namespace EMISSOR_DE_CERTIFICADOS.Services
@@ -22,107 +23,27 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
         public CertificadosService(DBHelpers dbHelper)
         {
             _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelpers não pode ser nulo.");
-        }
-        //public bool GerarCertificado(int idEvento_Pessoa, int idPessoa, string textoOriginal, IFormFile imagem)
-        //{
-        //    string textoCertificado = string.Empty;
-        //    string textoAutenticidade = string.Empty;
-        //    string codigoCertificado = string.Empty;
-        //    string cpf = string.Empty;
-        //    string caminhoQRCode = string.Empty;
-        //    bool retorno = false;
-
-        //    try
-        //    {
-        //        textoCertificado = ProcessarTextoCertificadoPessoa(idPessoa, textoOriginal);
-        //        cpf = RetornarCPF(idPessoa);
-        //        codigoCertificado = GerarCodigo(cpf);
-        //        textoAutenticidade = RetornarTextoAutenticidade(codigoCertificado);
-        //        caminhoQRCode = Path.Combine("wwwroot", "QRCodeEmescam.png");
-
-        //        // Caminho onde o certificado será salvo
-        //        string nomeArquivoCertificado = codigoCertificado + ".png";
-        //        string caminhoCertificado = Path.Combine("wwwroot", "Certificados", nomeArquivoCertificado);
-
-        //        // Carregar o arquivo IFormFile diretamente
-        //        using (var memoryStream = new MemoryStream())
-        //        {
-        //            imagem.CopyTo(memoryStream);
-        //            using (Bitmap certificado = new Bitmap(memoryStream))
-        //            {
-        //                // Configurar a fonte e o tamanho do texto1
-        //                using (Font fonteTextoCertificado = new Font("Arial", 48, FontStyle.Regular, GraphicsUnit.Pixel))
-        //                {
-        //                    // Criar um objeto de gráficos a partir do certificado
-        //                    using (Graphics graphics = Graphics.FromImage(certificado))
-        //                    {
-        //                        // Configurar o alinhamento central horizontal
-        //                        StringFormat formatoCentralizado = new StringFormat
-        //                        {
-        //                            Alignment = StringAlignment.Center
-        //                        };
-
-        //                        // Configurar a região central para o texto1
-        //                        RectangleF retanguloTextoCertificado = new RectangleF(certificado.Width / 6, certificado.Height / 2.5f, certificado.Width / 1.5f, certificado.Height / 2); // 2970px X 2100px
-
-        //                        // Desenhar o texto1 na região central
-        //                        graphics.DrawString(textoCertificado, fonteTextoCertificado, Brushes.Black, retanguloTextoCertificado, formatoCentralizado);
-
-        //                        // Configurar a fonte e o tamanho do textoAutenticidade
-        //                        using (Font fontetextoAutenticidade = new Font("Arial", 24, FontStyle.Bold, GraphicsUnit.Pixel))
-        //                        {
-        //                            // Configurar a região inferior esquerda para o textotextoAutenticidade
-        //                            RectangleF retanguloTextoAutenticidade = new RectangleF(10, certificado.Height - 120, 1500, 50);
-
-        //                            // Desenhar o textoAutenticidade na região inferior esquerda
-        //                            graphics.DrawString(textoAutenticidade, fontetextoAutenticidade, Brushes.Black, retanguloTextoAutenticidade);
-
-        //                            // Configurar a região inferior direita para o QRCode
-        //                            Bitmap qrCodeBitmap = new Bitmap(caminhoQRCode);
-        //                            Rectangle retanguloQRCode = new Rectangle(certificado.Width - 280, certificado.Height - 260, 180, 180);
-
-        //                            // Desenhar o QRCode na região inferior direita
-        //                            graphics.DrawImage(qrCodeBitmap, retanguloQRCode);
-        //                        }
-        //                    }
-        //                }
-
-        //                // Convertendo o certificado para um array de bytes
-        //                byte[] certificadoBytes;
-        //                using (MemoryStream ms = new MemoryStream())
-        //                {
-        //                    certificado.Save(ms, ImageFormat.Png);
-        //                    certificadoBytes = ms.ToArray();
-        //                }
-
-        //                // Inserir o certificado no banco de dados
-        //                Inserir(idEvento_Pessoa, certificadoBytes, codigoCertificado);
-
-        //                retorno = true;
-        //            }
-        //        }
-
-        //        return retorno;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw new Exception($"Erro em [CertificadosService.GerarCertificado_SEM_NEGRITO]: {ex.Message}");
-        //    }
-        //}
-        public async Task<bool> GerarCertificadoAsync(int idEvento_Pessoa, int idPessoa, string textoOriginal, IFormFile imagem)
+        }      
+        public async Task<bool> GerarCertificadoAsync_ok_retangulo_nao_dinamico(int idEvento_Pessoa, int idPessoa, string textoOriginal, IFormFile imagem)
         {
             string textoCertificado = string.Empty;
             string textoAutenticidade = string.Empty;
             string codigoCertificado = string.Empty;
-            string cpf = string.Empty;
+            string cpfParticipante = string.Empty;
+            string nomeParticipante = string.Empty;
             string caminhoQRCode = string.Empty;
+            string textoCertificadoLocaleData = string.Empty;
             bool retorno = false;
+            string textoFixo = "Certificamos que ";
 
             try
             {
                 textoCertificado = await ProcessarTextoCertificadoPessoaAsync(idPessoa, textoOriginal);
-                cpf = await RetornarCPFAsync(idPessoa);
-                codigoCertificado = GerarCodigo(cpf);
+                textoCertificadoLocaleData = ProcessarTextoCertificadoLocaleData(idPessoa, textoOriginal);
+                cpfParticipante = await RetornarCPFAsync(idPessoa);
+                //nomeParticipante = await RetornarNomeAsync(idPessoa);
+                nomeParticipante = "URSULA THAIS MENDES DA COSTA MORAES VARJÃO PARAGUASSÚ DE SÁ";
+                codigoCertificado = GerarCodigo(cpfParticipante);
                 textoAutenticidade = RetornarTextoAutenticidade(codigoCertificado);
                 caminhoQRCode = Path.Combine("wwwroot", "QRCodeEmescam.png");
 
@@ -132,24 +53,70 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                     await imagem.CopyToAsync(memoryStream);
                     using (Bitmap certificado = new Bitmap(memoryStream))
                     {
-                        // Configurar a fonte e o tamanho do texto1
-                        using (Font fonteTextoCertificado = new Font("Arial", 48, FontStyle.Regular, GraphicsUnit.Pixel))
+                        // Configurar as fontes e os tamanhos do texto
+                        using (Font fonteTextoCertificado = new Font("Arial", 42, FontStyle.Regular, GraphicsUnit.Pixel))
+                        using (Font fonteNomeParticipante = new Font("Arial", 60, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Pixel))
+                        using (Font fonteTextoCertificadoLocaleData = new Font("Arial", 30, FontStyle.Regular, GraphicsUnit.Pixel))
+                        using (Font fonteTextoFixo = new Font("Arial", 42, FontStyle.Regular, GraphicsUnit.Pixel))
+                        using (Graphics graphics = Graphics.FromImage(certificado))
                         {
-                            using (Graphics graphics = Graphics.FromImage(certificado))
+                            // Definindo as propriedades da borda
+                            float larguraBorda = 2; // Largura da borda em pixels
+                            Pen penBorda = new Pen(System.Drawing.Color.Black, larguraBorda);
+
+                            // Texto do certificado
+                            float margemLateral = certificado.Width / 11; // Aumenta a largura reduzindo a margem lateral
+                            float posicaoVertical = certificado.Height / 2.1f; // Posição vertical do retângulo do texto do certificado
+                            float alturaRetanguloTextoCertificado = 200; // Altura do retângulo do texto do certificado
+                            RectangleF retanguloTextoCertificado = new RectangleF(margemLateral, posicaoVertical, certificado.Width - 2 * margemLateral, alturaRetanguloTextoCertificado);
+                            // Desenha o retângulo com borda
+                            //graphics.DrawRectangle(penBorda, retanguloTextoCertificado.X, retanguloTextoCertificado.Y, retanguloTextoCertificado.Width, retanguloTextoCertificado.Height);
+                            // Desenha o texto dentro do retângulo
+                            graphics.DrawString(textoCertificado, fonteTextoCertificado, Brushes.Black, retanguloTextoCertificado, StringFormat.GenericTypographic);
+
+                            // Nome do participante
+                            // Altura do retângulo do nome do participante
+                            StringFormat formatoCentralizado = new StringFormat { Alignment = StringAlignment.Center };
+                            float alturaRetanguloNomeParticipante = 65;
+                            RectangleF retanguloNomeParticipante = new RectangleF(certificado.Width / 6, posicaoVertical - alturaRetanguloNomeParticipante, certificado.Width / 1.5f, alturaRetanguloNomeParticipante);
+                            // Desenha o retângulo com borda
+                            //graphics.DrawRectangle(penBorda, retanguloNomeParticipante.X, retanguloNomeParticipante.Y, retanguloNomeParticipante.Width, retanguloNomeParticipante.Height);
+                            // Desenha o texto dentro do retângulo
+                            graphics.DrawString(nomeParticipante, fonteNomeParticipante, Brushes.Black, retanguloNomeParticipante, formatoCentralizado);
+
+                            // Texto fixo "Certificamos que "
+                            float larguraRetanguloTextoFixo = graphics.MeasureString(textoFixo, fonteTextoFixo).Width;
+                            float alturaRetanguloTextoFixo = graphics.MeasureString(textoFixo, fonteTextoFixo).Height;
+                            float posicaoVerticalTextoFixo = retanguloNomeParticipante.Y;
+                            RectangleF retTextoFixo = new RectangleF(margemLateral, posicaoVerticalTextoFixo - alturaRetanguloTextoFixo, larguraRetanguloTextoFixo, alturaRetanguloTextoFixo);
+                            // Desenha o retângulo com borda
+                            //graphics.DrawRectangle(penBorda, retTextoFixo.X, retTextoFixo.Y, retTextoFixo.Width, retTextoFixo.Height);
+                            // Desenha o texto dentro do retângulo
+                            graphics.DrawString(textoFixo, fonteTextoFixo, Brushes.Black, retTextoFixo);
+
+                            // Texto do certificadoLocaleData
+                            // Largura do retângulo para o texto do certificadoLocaleData
+                            float larguraRetanguloTextoCertificadoLocaleData = 375;
+                            // Posição horizontal do retângulo do texto do certificadoLocaleData
+                            float posicaoHorizontalTextoCertificadoLocaleData = certificado.Width - larguraRetanguloTextoCertificadoLocaleData - margemLateral;
+                            // Posição vertical do retângulo do texto do certificadoLocaleData
+                            float posicaoVerticalTextoCertificadoLocaleData = posicaoVertical + alturaRetanguloTextoCertificado;
+                            RectangleF retanguloTextoCertificadoLocaleData = new RectangleF(posicaoHorizontalTextoCertificadoLocaleData, posicaoVerticalTextoCertificadoLocaleData, larguraRetanguloTextoCertificadoLocaleData, 50);
+                            // Desenha o retângulo com borda
+                            //graphics.DrawRectangle(penBorda, retanguloTextoCertificadoLocaleData.X, retanguloTextoCertificadoLocaleData.Y, retanguloTextoCertificadoLocaleData.Width, retanguloTextoCertificadoLocaleData.Height);
+                            // Desenha o texto dentro do retângulo
+                            graphics.DrawString(textoCertificadoLocaleData, fonteTextoCertificadoLocaleData, Brushes.Black, retanguloTextoCertificadoLocaleData, StringFormat.GenericTypographic);
+
+                            // Texto de autenticidade
+                            using (Font fonteTextoAutenticidade = new Font("Arial", 22, FontStyle.Regular, GraphicsUnit.Pixel))
                             {
-                                StringFormat formatoCentralizado = new StringFormat { Alignment = StringAlignment.Center };
-                                RectangleF retanguloTextoCertificado = new RectangleF(certificado.Width / 6, certificado.Height / 2.5f, certificado.Width / 1.5f, certificado.Height / 2); // 2970px X 2100px
-                                graphics.DrawString($@"{textoCertificado}", fonteTextoCertificado, Brushes.Black, retanguloTextoCertificado, formatoCentralizado);
+                                float posicaoHorizontal = certificado.Width - 1925; // Ajuste conforme necessário
+                                RectangleF retanguloTextoAutenticidade = new RectangleF(posicaoHorizontal, certificado.Height - 70, 1500, 50);
+                                graphics.DrawString(textoAutenticidade, fonteTextoAutenticidade, Brushes.Black, retanguloTextoAutenticidade);
 
-                                using (Font fontetextoAutenticidade = new Font("Arial", 22, FontStyle.Regular, GraphicsUnit.Pixel))
-                                {
-                                    RectangleF retanguloTextoAutenticidade = new RectangleF(10, certificado.Height - 120, 1500, 50);
-                                    graphics.DrawString($@"{textoAutenticidade}", fontetextoAutenticidade, Brushes.Black, retanguloTextoAutenticidade);
-
-                                    Bitmap qrCodeBitmap = new Bitmap(caminhoQRCode);
-                                    Rectangle retanguloQRCode = new Rectangle(certificado.Width - 280, certificado.Height - 260, 180, 180);
-                                    graphics.DrawImage(qrCodeBitmap, retanguloQRCode);
-                                }
+                                Bitmap qrCodeBitmap = new Bitmap(caminhoQRCode);
+                                Rectangle retanguloQRCode = new Rectangle(certificado.Width - 245, certificado.Height - 225, 180, 180);
+                                graphics.DrawImage(qrCodeBitmap, retanguloQRCode);
                             }
                         }
 
@@ -173,106 +140,132 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 throw new Exception($"Erro em [CertificadosService.GerarCertificadoAsync]: {ex.Message}");
             }
         }
-        public async Task<bool> GerarCertificadoAsync_PDF(int idEvento_Pessoa, int idPessoa, string textoOriginal, IFormFile imagem)
+        public async Task<bool> GerarCertificadoAsync(int idEvento_Pessoa, int idPessoa, string textoOriginal, IFormFile imagem)
         {
             string textoCertificado = string.Empty;
             string textoAutenticidade = string.Empty;
             string codigoCertificado = string.Empty;
-            string cpf = string.Empty;
+            string cpfParticipante = string.Empty;
+            string nomeParticipante = string.Empty;
             string caminhoQRCode = string.Empty;
+            string textCertLocaleData = string.Empty;
             bool retorno = false;
+            string textoFixo = "Certificamos que ";
 
             try
             {
                 textoCertificado = await ProcessarTextoCertificadoPessoaAsync(idPessoa, textoOriginal);
-                cpf = await RetornarCPFAsync(idPessoa);
-                codigoCertificado = GerarCodigo(cpf);
+                //textoCertificado = "Esse ajuste deve alinhar a borda inferior de retTextoFixo com a borda superior de retanguloNomeParticipante, e alinhar a borda esquerda de retTextoFixo com a borda esquerda de retanguloTextoCertificado.Verifique se os tamanhos e posições dos retângulos atendem às suas necessidades. Caso precise ajustar, é possível alterar as variáveis relacionadas às dimensões e posições dos retângulos.";
+                //textCertLocaleData = "Vitória, 07 de maio de 2024";
+                textCertLocaleData = ProcessarTextoCertificadoLocaleData(idPessoa, textoOriginal);
+                cpfParticipante = await RetornarCPFAsync(idPessoa);
+                //nomeParticipante = "URSULA THAIS MENDES DA COSTA MORAES VARJÃO PARAGUASSÚ DE SÁ";
+                nomeParticipante = await RetornarNomeAsync(idPessoa);
+                codigoCertificado = GerarCodigo(cpfParticipante);
                 textoAutenticidade = RetornarTextoAutenticidade(codigoCertificado);
                 caminhoQRCode = Path.Combine("wwwroot", "QRCodeEmescam.png");
 
-                // Criar o documento PDF usando PdfSharpCore
-                var pdfDocument = new PdfDocument();
-                var page = pdfDocument.AddPage();
-                page.Orientation = PdfSharpCore.PageOrientation.Landscape; // Definir orientação paisagem                
-                //page.Width = new XUnit(2970); // Largura em pontos
-                //page.Height = new XUnit(2100); // Altura em pontos
-                page.Width = 2970; // Largura em pontos
-                page.Height = 2100; // Altura em pontos
-
-
-                using (var gfx = XGraphics.FromPdfPage(page))
-                {
-                    // Carregar a imagem do certificado do IFormFile
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        await imagem.CopyToAsync(memoryStream);
-                        memoryStream.Seek(0, SeekOrigin.Begin);
-                        using (var certificadoImagem = SixLabors.ImageSharp.Image.Load<Rgba32>(memoryStream))
-                        {
-                            var imgPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.png");
-                            certificadoImagem.Save(imgPath, new SixLabors.ImageSharp.Formats.Png.PngEncoder());
-
-                            using (var xImage = XImage.FromFile(imgPath))
-                            {
-                                gfx.DrawImage(xImage, 0, 0, page.Width, page.Height);
-                            }
-
-                            // Deletar o arquivo temporário da imagem
-                            File.Delete(imgPath);
-                        }
-                    }
-
-                    var fontTextoCertificado = new XFont("Arial", 48, XFontStyle.Regular);
-                    var fontTextoAutenticidade = new XFont("Arial", 24, XFontStyle.Bold);
-
-                    // Posicionar texto do certificado
-                    XRect retanguloTextoCertificado = new XRect(page.Width / 6, page.Height / 2.5, page.Width / 1.5, page.Height / 2);
-                    gfx.DrawString(textoCertificado, fontTextoCertificado, XBrushes.Black, retanguloTextoCertificado, XStringFormats.Center);
-
-                    // Posicionar texto de autenticidade
-                    XRect retanguloTextoAutenticidade = new XRect(10, page.Height - 120, 1500, 50);
-                    gfx.DrawString(textoAutenticidade, fontTextoAutenticidade, XBrushes.Black, retanguloTextoAutenticidade, XStringFormats.TopLeft);
-
-                    // Posicionar QR Code
-                    using (var qrCodeImage = SixLabors.ImageSharp.Image.Load<Rgba32>(caminhoQRCode))
-                    {
-                        var qrCodePath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.png");
-                        qrCodeImage.Save(qrCodePath, new SixLabors.ImageSharp.Formats.Png.PngEncoder());
-
-                        using (var xQrCodeImage = XImage.FromFile(qrCodePath))
-                        {
-                            XRect rectQRCode = new XRect(page.Width - 280, page.Height - 260, 180, 180);
-                            gfx.DrawImage(xQrCodeImage, rectQRCode);
-                        }
-
-                        // Deletar o arquivo temporário do QR Code
-                        File.Delete(qrCodePath);
-                    }
-                }
-
-                // Salvar o documento PDF em bytes
-                byte[] pdfBytes;
                 using (var memoryStream = new MemoryStream())
                 {
-                    pdfDocument.Save(memoryStream);
-                    pdfBytes = memoryStream.ToArray();
+                    await imagem.CopyToAsync(memoryStream);
+                    using (Bitmap certificado = new Bitmap(memoryStream))
+                    {
+                        using (Font fontTextCertLocaleData = new Font("Arial", 30, FontStyle.Regular, GraphicsUnit.Pixel))
+                        using (Font fonteTextoFixo = new Font("Arial", 42, FontStyle.Regular, GraphicsUnit.Pixel))
+                        using (Graphics graphics = Graphics.FromImage(certificado))
+                        {
+                            float larguraBorda = 2;
+                            Pen penBorda = new Pen(System.Drawing.Color.Black, larguraBorda);
+                            float margemLateral = certificado.Width / 11;
+                            float posicaoVertical = certificado.Height / 2.1f;
+                            float altRetTextCertificado = 200;
+                            RectangleF retTextCertificado = new RectangleF(margemLateral, posicaoVertical, certificado.Width - 2 * margemLateral, altRetTextCertificado);
+
+                            // Ajustar tamanho da fonte do texto do certificado
+                            float tamanhoFonteTextoCertificado = 42;
+                            Font fonteTextoCertificado = new Font("Arial", tamanhoFonteTextoCertificado, FontStyle.Regular, GraphicsUnit.Pixel);
+                            SizeF tamanhoTextoCertificado = graphics.MeasureString(textoCertificado, fonteTextoCertificado, (int)retTextCertificado.Width);
+
+                            while ((tamanhoTextoCertificado.Width > retTextCertificado.Width || tamanhoTextoCertificado.Height > retTextCertificado.Height) && tamanhoFonteTextoCertificado > 10)
+                            {
+                                tamanhoFonteTextoCertificado -= 1;
+                                fonteTextoCertificado = new Font("Arial", tamanhoFonteTextoCertificado, FontStyle.Regular, GraphicsUnit.Pixel);
+                                tamanhoTextoCertificado = graphics.MeasureString(textoCertificado, fonteTextoCertificado, (int)retTextCertificado.Width);
+                            }
+
+                            // Desenha o retângulo com borda
+                            //graphics.DrawRectangle(penBorda, retTextCertificado.X, retTextCertificado.Y, retTextCertificado.Width, retTextCertificado.Height);
+                            // Desenha o texto dentro do retângulo
+                            graphics.DrawString(textoCertificado, fonteTextoCertificado, Brushes.Black, retTextCertificado, new StringFormat(StringFormatFlags.LineLimit) { Alignment = StringAlignment.Center });
+
+                            // Nome do participante
+                            float altRetNomeParticipante = 65;
+                            RectangleF retNomeParticipante = new RectangleF(certificado.Width / 6, posicaoVertical - altRetNomeParticipante, certificado.Width / 1.5f, altRetNomeParticipante);
+                            StringFormat formatoCentralizado = new StringFormat { Alignment = StringAlignment.Center };
+
+                            // Ajustar tamanho da fonte do nome do participante
+                            float tamanhoFonteNomeParticipante = 60;
+                            Font fonteNomeParticipante = new Font("Arial", tamanhoFonteNomeParticipante, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Pixel);
+                            SizeF tamanhoTextoNome = graphics.MeasureString(nomeParticipante, fonteNomeParticipante);
+                            while (tamanhoTextoNome.Width > retNomeParticipante.Width && tamanhoFonteNomeParticipante > 10)
+                            {
+                                tamanhoFonteNomeParticipante -= 1;
+                                fonteNomeParticipante = new Font("Arial", tamanhoFonteNomeParticipante, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Pixel);
+                                tamanhoTextoNome = graphics.MeasureString(nomeParticipante, fonteNomeParticipante);
+                            }
+
+                            // Desenha o texto dentro do retângulo
+                            graphics.DrawString(nomeParticipante, fonteNomeParticipante, Brushes.Black, retNomeParticipante, formatoCentralizado);
+
+                            // Texto fixo "Certificamos que "
+                            float largRetTextoFixo = graphics.MeasureString(textoFixo, fonteTextoFixo).Width;
+                            float altRetTextFixo = graphics.MeasureString(textoFixo, fonteTextoFixo).Height;
+                            float posVertTextFixo = retNomeParticipante.Y;
+                            RectangleF retTextoFixo = new RectangleF(margemLateral, posVertTextFixo - altRetTextFixo, largRetTextoFixo, altRetTextFixo);
+                            // Desenha o texto dentro do retângulo
+                            graphics.DrawString(textoFixo, fonteTextoFixo, Brushes.Black, retTextoFixo);
+
+                            // Texto do certificadoLocaleData
+                            float largRetTextCertLocaleData = 375;
+                            float posHorTextCertLocaleData = certificado.Width - largRetTextCertLocaleData - margemLateral;
+                            float posVertTextCertLocaleData = posicaoVertical + altRetTextCertificado;
+                            RectangleF retTextCertLocaleData = new RectangleF(posHorTextCertLocaleData, posVertTextCertLocaleData, largRetTextCertLocaleData, 50);
+                            // Desenha o texto dentro do retângulo
+                            graphics.DrawString(textCertLocaleData, fontTextCertLocaleData, Brushes.Black, retTextCertLocaleData, StringFormat.GenericTypographic);
+
+                            // Texto de autenticidade
+                            using (Font fonteTextoAutenticidade = new Font("Arial", 22, FontStyle.Regular, GraphicsUnit.Pixel))
+                            {
+                                float posHor = certificado.Width - 1925;
+                                RectangleF retTextAutenticidade = new RectangleF(posHor, certificado.Height - 70, 1500, 50);
+                                graphics.DrawString(textoAutenticidade, fonteTextoAutenticidade, Brushes.Black, retTextAutenticidade);
+
+                                Bitmap qrCodeBitmap = new Bitmap(caminhoQRCode);
+                                Rectangle retanguloQRCode = new Rectangle(certificado.Width - 245, certificado.Height - 225, 180, 180);
+                                graphics.DrawImage(qrCodeBitmap, retanguloQRCode);
+                            }
+                        }
+
+                        byte[] certificadoBytes;
+                        using (MemoryStream ms = new MemoryStream())
+                        {
+                            certificado.Save(ms, ImageFormat.Png);
+                            certificadoBytes = ms.ToArray();
+                        }
+
+                        await InserirAsync(idEvento_Pessoa, certificadoBytes, codigoCertificado);
+
+                        retorno = true;
+                    }
                 }
 
-                //TESTES: Salva o PDF na pasta raiz do projeto
-                //File.WriteAllBytes("path_to_save_certificate.pdf", pdfBytes);
-
-                // Salvar o PDF em algum armazenamento ou banco de dados
-                await InserirAsync(idEvento_Pessoa, pdfBytes, codigoCertificado);
-
-                retorno = true;
+                return retorno;
             }
             catch (Exception ex)
             {
                 throw new Exception($"Erro em [CertificadosService.GerarCertificadoAsync]: {ex.Message}");
             }
-
-            return retorno;
-        }
+        }        
         private async Task<string> ProcessarTextoCertificadoPessoaAsync(int idPessoa, string texto)
         {
             string nomePessoa = string.Empty;
@@ -294,10 +287,30 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                         if (!string.IsNullOrEmpty(cpf))
                         {
                             texto = texto.Replace("CPF_PESSOA", cpf);
-                        }
-
-                        //texto = $@"{texto}";
+                        }                        
                     }
+
+                    // Remover todas as tags <br> e o texto à direita de cada uma
+                    string[] parts = texto.Split(new string[] { "<br>" }, StringSplitOptions.None);
+                    texto = parts[0];
+                }
+
+                return texto;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [CertificadoEditor.ProcessarTextoCertificadoPessoa]", ex);
+            }
+        }
+        private string ProcessarTextoCertificadoLocaleData(int idPessoa, string texto)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(texto))
+                {                   
+                    // Remover todas as tags <br> e o texto à direita de cada uma
+                    string[] parts = texto.Split(new string[] { "<br>" }, StringSplitOptions.None);
+                    texto = parts[parts.Length -1];
                 }
 
                 return texto;
@@ -366,6 +379,21 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 {
                     string cpf = await pessoaController.ObterCPFPorIdPessoaAsync(idPessoa);
                     return cpf;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [CertificadoEditor.RetornarCPFAsync]: {ex.Message}");
+            }
+        }
+        private async Task<string> RetornarNomeAsync(int idPessoa)
+        {
+            try
+            {
+                using (PessoaController pessoaController = new PessoaController(_dbHelper))
+                {
+                    string nome = await pessoaController.ObterNomePorIdPessoaAsync(idPessoa);
+                    return nome;
                 }
             }
             catch (Exception ex)

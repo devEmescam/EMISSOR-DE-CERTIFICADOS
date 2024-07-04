@@ -10,12 +10,10 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
     public class UsuariosService
     {
         private readonly DBHelpers _dbHelper;
-
         public UsuariosService(DBHelpers dbHelper)
         {
             _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelper não pode ser nulo.");
-        }
-        
+        }        
         public async Task<int> GerarUsuarioAsync(int idPessoa)
         {
             int idUsuario = -1;
@@ -54,8 +52,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             {
                 throw new Exception($"Erro em [UsuariosService.GerarUsuarioAsync]: {ex.Message}");
             }
-        }
-                
+        }                
         private async Task<string> CriarSenhaAsync(string cpf)
         {
             return await Task.Run(() =>
@@ -91,8 +88,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                     throw new Exception($"Erro em [UsuariosService.CriarSenhaAsync]: {ex.Message}");
                 }
             });
-        }
-                
+        }                
         private async Task<string> RetornarCPFAsync(int idPessoa)
         {
             string cpf = string.Empty;
@@ -109,8 +105,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             {
                 throw new Exception($"Erro em [UsuariosService.RetornarCPFAsync]: {ex.Message}");
             }
-        }
-                
+        }       
         private async Task<bool> UsuarioExisteAsync(string usuario)
         {
             try
@@ -126,8 +121,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             {
                 throw new Exception($"Ocorreu um erro em [PessoaController.UsuarioExisteAsync] Erro: {ex.Message}");
             }
-        }
-                
+        }                
         private async Task<int> RetornarIdAsync(string usuario)
         {
             try
@@ -150,7 +144,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 throw new Exception($"Erro em [UsuariosService.RetornarIdAsync]: {ex.Message}");
             }
         }
-
         public async Task<UsuarioSenha> ObterUsuarioESenhaAsync(int idEventoPessoa)
         {
             try
