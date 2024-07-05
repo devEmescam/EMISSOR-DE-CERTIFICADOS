@@ -9,6 +9,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
     public class PessoaController : Controller
     {
         private readonly DBHelpers _dbHelper;
+        private readonly ISessao _sessao;
 
         public PessoaController(DBHelpers dbHelper)
         {
@@ -122,14 +123,24 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         {
             try
             {
+                // Recupera o Id do usuário da sessão
+                int userId = HttpContext.Session.GetInt32("UserId") ?? 0;
+
+                // Se o Id do usuário for zero, significa que não está logado ou o Id não foi encontrado
+                if (userId == 0)
+                {
+                    throw new Exception($"Falha ao identificar usuário logado.");
+                }
+
                 var query = @"SELECT * FROM PESSOA 
-                              WHERE Nome LIKE @Termo 
+                              WHERE (Nome LIKE @Termo 
                                     OR CPF LIKE @Termo 
-                                    OR Email LIKE @Termo";
+                                    OR Email LIKE @Termo) AND ID_USUARIO_ADMINISTRATIVO = @ID_USUARIO_ADMINISTRATIVO";
 
                 var parameters = new Dictionary<string, object>
                 {
-                    { "@Termo", "%" + termo + "%" }
+                    { "@Termo", "%" + termo + "%" },
+                    { "@ID_USUARIO_ADMINISTRATIVO", userId}
                 };
 
                 var dataTable = await _dbHelper.ExecuteQueryAsync(query, parameters);
@@ -219,21 +230,12 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             {               
 
                 // Valida se a pessoa não existe no banco de dados
-                if (!await ExistePessoaComCPFAsync(pessoa.CPF))
+                if (!await ExistePessoaComCPFAsync(pessoa.CPF, idUsuario))
                 {
                     if (Util.ValidaCPF(pessoa.CPF))
                     {
                         if (Util.ValidaEstruturaEmail(pessoa.Email))
-                        {
-                            if (idUsuario == null)
-                            {
-                                //recuperar o ID do usuario logado 
-                                idUsuario = HttpContext.Session.GetInt32("UserId");
-                                if (idUsuario == null)
-                                {
-                                    throw new Exception("ID do usuário não encontrado na sessão.");
-                                }
-                            }
+                        {                          
 
                             // Se não existir, insere a nova pessoa
                             var query = $"INSERT INTO PESSOA (NOME, CPF, EMAIL, ID_USUARIO_ADMINISTRATIVO, DATA_CADASTRO) VALUES ('{pessoa.Nome}', '{pessoa.CPF}', '{pessoa.Email}', {idUsuario}, GETDATE())";
@@ -294,15 +296,16 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         }
                 
         // VERSÃO ASYNC: Método assíncrono que valida se a pessoa existe através do CPF
-        private async Task<bool> ExistePessoaComCPFAsync(string cpf)
+        private async Task<bool> ExistePessoaComCPFAsync(string cpf, int? userId = null)
         {
             try
             {
-                // Consulta o banco de dados para verificar se existe uma pessoa com o mesmo CPF
-                var query = $"SELECT COUNT(*) FROM Pessoa WHERE CPF = @CPF";
+                // Consulta o banco de dados para verificar se existe uma pessoa com o mesmo CPF para o mesmo ID_USUARIO_ADMINISTRATIVO
+                var query = $"SELECT COUNT(*) FROM Pessoa WHERE CPF = @CPF and ID_USUARIO_ADMINISTRATIVO = @ID_USUARIO_ADMINISTRATIVO";
                 var parameters = new Dictionary<string, object>
                 {
-                    { "@CPF", cpf }
+                    { "@CPF", cpf },
+                    { "@ID_USUARIO_ADMINISTRATIVO", userId}
                 };
 
                 var result = await _dbHelper.ExecuteScalarAsync<int>(query, parameters);

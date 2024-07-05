@@ -6,7 +6,6 @@ using EMISSOR_DE_CERTIFICADOS.Services;
 using EMISSOR_DE_CERTIFICADOS.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
-using System.Data.SqlClient;
 using Newtonsoft.Json;
 
 namespace EMISSOR_DE_CERTIFICADOS.Controllers
