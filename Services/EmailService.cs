@@ -135,7 +135,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                                 <p>Temos o prazer de informar que o certificado de participação no evento {_evento} foi emitido com sucesso. Para sua conveniência, criamos um USUÁRIO e SENHA para que você possa acessar nosso site e visualizar ou baixar o seu certificado emitido.</p>
                                 <p>Para acessar o seu certificado, siga os passos abaixo:</p>
                                 <ol>
-                                    <li>Acesse o site através do seguinte endereço: <a href='https://emescam.certificados.edu/participante'>https://emescam.certificados.edu/participante</a></li>
+                                    <li>Acesse o site através do seguinte endereço: <a href='https://certificados.emescam.br/participante/login'>https://certificados.emescam.br/participante/login</a></li>
                                     <li>Utilize as seguintes credenciais para fazer o login:</li>
                                     <ul style='list-style-type: none;'>
                                         <li><b>Usuário:</b> {usuario}</li>
