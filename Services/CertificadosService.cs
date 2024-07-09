@@ -50,8 +50,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                     await imagem.CopyToAsync(memoryStream);
                     using (Bitmap certificado = new Bitmap(memoryStream))
                     {
-                        using (Font fontTextCertLocaleData = new Font("Arial", 30, FontStyle.Regular, GraphicsUnit.Pixel)) // tamanho original: 30
-                        using (Font fonteTextoFixo = new Font("Arial", 42, FontStyle.Regular, GraphicsUnit.Pixel)) // tamanho original: 42
+                        using (Font fontTextCertLocaleData = new Font("Arial", 36, FontStyle.Regular, GraphicsUnit.Pixel)) // tamanho original: 30
+                        using (Font fonteTextoFixo = new Font("Arial", 48, FontStyle.Regular, GraphicsUnit.Pixel)) // tamanho original: 42
                         using (Graphics graphics = Graphics.FromImage(certificado))
                         {
 
@@ -73,7 +73,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                             float altRetTextCertificado = 200;
                             RectangleF retTextCertificado = new RectangleF(margemLateral, posicaoVertical, certificado.Width - 2 * margemLateral, altRetTextCertificado);
                             // Ajustar tamanho da fonte do texto do certificado
-                            float tamanhoFonteTextoCertificado = 42; //tamanho original 42
+                            float tamanhoFonteTextoCertificado = 48; //tamanho original 42
                             Font fonteTextoCertificado = new Font("Arial", tamanhoFonteTextoCertificado, FontStyle.Regular, GraphicsUnit.Pixel);
                             SizeF tamanhoTextoCertificado = graphics.MeasureString(textoCertificado, fonteTextoCertificado, (int)retTextCertificado.Width);
                             //Ajusta o texto dentro do retangulo diminuindo o tamanho da fonte se necessário
@@ -91,10 +91,10 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
 
                             //===================================================================================== INICIO
                             //NOME PARTICIPANTE                                                        
-                            float altRetNomeParticipante = 65;
+                            float altRetNomeParticipante = 85;
                             RectangleF retNomeParticipante = new RectangleF(margemLateral, posicaoVertical - altRetNomeParticipante, certificado.Width - 2 * margemLateral, altRetNomeParticipante);
                             // Ajustar tamanho da fonte do nome do participante
-                            float tamanhoFonteNomeParticipante = 60; // tamanho orginal 60
+                            float tamanhoFonteNomeParticipante = 66; // tamanho original 60
                             Font fonteNomeParticipante = new Font("Arial", tamanhoFonteNomeParticipante, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Pixel);
                             SizeF tamanhoTextoNome = graphics.MeasureString(nomeParticipante, fonteNomeParticipante);
                             //Ajusta o texto dentro do retangulo diminuindo o tamanho da fonte se necessário
@@ -134,11 +134,14 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
 
                             //===================================================================================== INICIO
                             // TEXTO DE AUTENTICIDADE e QRCode
-                            using (Font fonteTextoAutenticidade = new Font("Arial", 20, FontStyle.Regular, GraphicsUnit.Pixel)) //tamanho original22
-                            {
-                                float posHor = certificado.Width - 1925;
+                            using (Font fonteTextoAutenticidade = new Font("Arial", 22, FontStyle.Regular, GraphicsUnit.Pixel)) //tamanho original22
+                            {                                
+                                float posHor = margemLateral - 30; // Use margemLateral para alinhar com retTextCertificado
                                 RectangleF retTextAutenticidade = new RectangleF(posHor, certificado.Height - 70, 1500, 50);
+                                // USADO APENAS PARA NECESSIDADE DE AJUSTES: Desenha o retângulo com borda
+                                //graphics.DrawRectangle(penBorda, retTextAutenticidade.X, retTextAutenticidade.Y, retTextAutenticidade.Width, retTextAutenticidade.Height);
                                 graphics.DrawString(textoAutenticidade, fonteTextoAutenticidade, pincelTextoCertificado, retTextAutenticidade);
+
 
                                 Bitmap qrCodeBitmap = new Bitmap(caminhoQRCode);
                                 Rectangle retanguloQRCode = new Rectangle(certificado.Width - 245, certificado.Height - 228, 153, 153);

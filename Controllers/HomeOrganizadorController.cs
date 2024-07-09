@@ -265,7 +265,10 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 // Limpe os dados da sessão para desconectar o usuário
                 HttpContext.Session.Clear();
                 _sessao.RemoverSessaoUsuario();
-                return Ok(); // Ou qualquer outro código de status apropriado
+                //return Ok(); // Precisa direcionar para esse local: https://certificados.emescam.br/organizador/login
+                // Redirecionar para a página de login do organizador
+                //return RedirectToAction("Index", "Login_organizador");
+                return View("~/Views/Login_Organizador/Login_organizador.cshtml");
             }
             catch (Exception ex)
             {
