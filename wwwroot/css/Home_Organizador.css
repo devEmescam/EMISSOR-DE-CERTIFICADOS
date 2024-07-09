@@ -162,6 +162,37 @@ body {
         text-align: center; /* Centraliza horizontalmente o conteúdo das células */
     }
 
+.tabela-container2 {
+    max-height: 320px;
+    overflow-y: auto;
+    position: relative;
+}
+
+    .tabela-container2 table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .tabela-container2 table thead {
+            position: sticky;
+            top: 0;
+            background-color: #fff; /* Cor de fundo do cabeçalho */
+            z-index: 1; /* Garante que o cabeçalho esteja acima das linhas da tabela */
+        }
+
+        .tabela-container2 table th, .tabela-container2 table td {
+            vertical-align: middle; /* Centraliza verticalmente o conteúdo das células */
+            text-align: center; /* Centraliza horizontalmente o conteúdo das células */
+            border: 1px solid #ddd; /* Adiciona bordas às células */
+            padding: 8px; /* Adiciona um pouco de espaço dentro das células */
+        }
+
+        .tabela-container2 table th {
+            background-color: #f2f2f2; /* Cor de fundo do cabeçalho */
+            font-weight: bold; /* Negrito para o texto do cabeçalho */
+        }
+
+
 button.btn {
     padding: 10px 20px;
     font-size: 16px;
