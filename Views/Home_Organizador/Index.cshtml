@@ -171,21 +171,19 @@
                 <input type="text" id="nomeEventoAtualizar" name="nomeEventoAtualizar" placeholder="Nome do Evento">
                 <hr>
                 <!--Aqui preenchem os dados-->
-                <div class="dados-form">
-                    <div id="divDadosAtualizar">
-                        <input type="text" id="inputNomeAtualizar" placeholder="Nome">
-                        <input type="text" id="inputCPFAtualizar" placeholder="CPF">
-                        <input type="text" id="inputEmail1Atualizar" placeholder="Email">
-                    </div>
-                    <textarea id="textareaTextoAtualizar" placeholder="Texto"></textarea>
+                <div id="divDadosAtualizar">
+                    <input type="text" id="inputNomeAtualizar" placeholder="Nome">
+                    <input type="text" id="inputCPFAtualizar" placeholder="CPF">
+                    <input type="text" id="inputEmail1Atualizar" placeholder="Email">
+                    <textarea id="inputTextoAtualizar" placeholder="Texto"></textarea>
                 </div>
 
-              
-                <button type="button" id="botaoAcaoAtualizar" onclick="atualizarDados()">Adicionar Dados</button>
+
+                <button type="button" id="botaoAcaoAtualizar" onclick="adicionarDados()">Adicionar Dados</button>
                 <hr>
 
                 <!--Tabela que será preenchida-->
-                <div class="tabela-containe***r">
+                <div class="tabela-container2">
                     <table id="tabelaAtualizar" class="display">
                         <thead>
                             <tr>
@@ -201,7 +199,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="upload-container">
+                <div class="upload-container2">
                     <!-- Botão de importar EXCEL -->
                     <input type="file" id="excelFileAtualizar" accept=".xlsx" style="display:none" onchange="importarExcel()">
                     <label for="excelFileAtualizar" class="custom-file-upload">
@@ -1323,7 +1321,154 @@
             }
         });
 
+            //fis2311855
 
+
+            //ADICIONAR PESSOAS------------------------------------------
+
+            // Função para adicionar uma nova linha na tabela com os dados dos inputs
+            function adicionarDados() {
+                const nome = document.getElementById('inputNomeAtualizar').value;
+                const cpf = document.getElementById('inputCPFAtualizar').value;
+                const email = document.getElementById('inputEmail1Atualizar').value;
+                const texto = document.getElementById('inputTextoAtualizar').value;
+
+                if (!nome || !cpf || !email || !texto) {
+                    alert("Adicionada com sucesso.");
+                    return;
+                }
+
+                if (!validarCPF(cpf)) {
+                    alert("CPF inválido. Por favor, insira um CPF válido.");
+                    return;
+                }
+
+                const tbody = document.getElementById('eventos-tbody-atualizar');
+                const row = document.createElement('tr');
+
+                // Nome
+                const tdNome = document.createElement('td');
+                tdNome.textContent = nome;
+                row.appendChild(tdNome);
+
+                // CPF
+                const tdCPF = document.createElement('td');
+                tdCPF.textContent = cpf;
+                row.appendChild(tdCPF);
+
+                // Email
+                const tdEmail = document.createElement('td');
+                tdEmail.textContent = email;
+                row.appendChild(tdEmail);
+
+                // Texto
+                const tdTexto = document.createElement('td');
+                tdTexto.textContent = texto;
+                row.appendChild(tdTexto);
+
+                // Ações
+                const tdAcoes = document.createElement('td');
+
+                // Botão Excluir
+                const botaoExcluir = document.createElement("button");
+                botaoExcluir.textContent = "Excluir";
+                botaoExcluir.className = 'btn table-btn';
+                botaoExcluir.onclick = function (event) {
+                    event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
+                    if (confirm("Tem certeza de que deseja excluir esta pessoa?")) {
+                        // Obter a linha a ser excluída
+                        const linha = event.target.closest('tr');
+                        // Remover a linha da tabela
+                        linha.remove();
+                    }
+                };
+                tdAcoes.appendChild(botaoExcluir);
+
+                // Botão Atualizar
+                const botaoAtualizar = document.createElement("button");
+                botaoAtualizar.textContent = "Atualizar";
+                botaoAtualizar.className = 'btn table-btn';
+                botaoAtualizar.onclick = function (event) {
+                    event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
+
+                    // Obter a linha a ser editada
+                    const linha = event.target.closest('tr');
+
+                    // Obter os elementos de TD dentro da linha
+                    const tds = linha.querySelectorAll('td');
+
+                    // Extrair os valores atuais da pessoa da linha
+                    const nomeAtual = tds[0].textContent;
+                    const cpfAtual = tds[1].textContent;
+                    const emailAtual = tds[2].textContent;
+                    const textoAtual = tds[3].textContent;
+
+                    // Preparar os campos de edição na div divDadosAtualizar
+                    const divDadosAtualizar = document.getElementById('divDadosAtualizar');
+                    divDadosAtualizar.innerHTML = `
+                        <input type="text" id="inputNomeAtualizar" placeholder="Nome" value="${nomeAtual}">
+                        <input type="text" id="inputCPFAtualizar" placeholder="CPF" value="${cpfAtual}">
+                        <input type="text" id="inputEmail1Atualizar" placeholder="Email" value="${emailAtual}">
+                        <textarea id="inputTextoAtualizar" placeholder="Texto">${textoAtual}</textarea>
+                    `;
+
+                    // Remover o botão Atualizar
+                    const tdAcoes = linha.querySelector('td:last-child');
+                    tdAcoes.innerHTML = '';
+
+                    // Adicionar botão Confirmar Atualização
+                    const botaoConfirmar = document.createElement("button");
+                    botaoConfirmar.textContent = "Confirmar";
+                    botaoConfirmar.className = 'btn table-btn';
+                    botaoConfirmar.onclick = function (event) {
+                        event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
+
+                        // Obter os novos valores dos inputs
+                        const nomeNovo = document.getElementById('inputNomeAtualizar').value;
+                        const cpfNovo = document.getElementById('inputCPFAtualizar').value;
+                        const emailNovo = document.getElementById('inputEmail1Atualizar').value;
+                        const textoNovo = document.getElementById('inputTextoAtualizar').value;
+                       
+
+                        // Atualizar os valores na linha da tabela
+                        tds[0].textContent = nomeNovo;
+                        tds[1].textContent = cpfNovo;
+                        tds[2].textContent = emailNovo;
+                        tds[3].textContent = textoNovo;
+
+                        // Limpar os campos de edição
+                        limparCamposAtualizacao();
+
+                        // Exibir novamente o botão Atualizar
+                        tdAcoes.innerHTML = ''; // Limpa ações atuais
+                        tdAcoes.appendChild(botaoAtualizar);
+                        tdAcoes.appendChild(botaoExcluir); // Adicionar botão excluir de volta
+                    };
+
+                    // Adicionar o botão Confirmar na célula de Ações
+                    tdAcoes.appendChild(botaoConfirmar);
+                };
+
+                tdAcoes.appendChild(botaoAtualizar);
+                row.appendChild(tdAcoes);
+                tbody.appendChild(row);
+
+                // Limpar os campos de edição
+                limparCamposAtualizacao();
+            }
+
+            // Função para limpar os campos de atualização
+            function limparCamposAtualizacao() {
+                document.getElementById('inputNomeAtualizar').value = '';
+                document.getElementById('inputCPFAtualizar').value = '';
+                document.getElementById('inputEmail1Atualizar').value = '';
+                document.getElementById('inputTextoAtualizar').value = '';
+            }
+
+            // Adiciona um evento ao botão "Adicionar Dados" para chamar a função adicionarDados
+            document.getElementById('botaoAcaoAtualizar').addEventListener('click', adicionarDados);
+
+            // Função para atualizar os detalhes do evento e preencher a tabela
             async function atualizarEvento(eventoId, eventoNome) {
                 if (!eventoId) {
                     console.error('Evento ID não definido.');
@@ -1356,34 +1501,169 @@
                     eventoPessoas.pessoasEventos.forEach(pessoa => {
                         const row = document.createElement('tr');
 
+                        // Nome
                         const tdNome = document.createElement('td');
                         tdNome.textContent = pessoa.nome; // Exibir o nome da pessoa
-
                         row.appendChild(tdNome);
 
-                        // Adicionar colunas vazias para CPF, Email, Texto e Ações para manter o layout
+                        // CPF
                         const tdCPF = document.createElement('td');
+                        tdCPF.textContent = pessoa.cpf; // Exibir o CPF da pessoa
+                        row.appendChild(tdCPF);
+
+                        // Email
                         const tdEmail = document.createElement('td');
+                        tdEmail.textContent = pessoa.email; // Exibir o email da pessoa
+                        row.appendChild(tdEmail);
+
+                        // Texto
                         const tdTexto = document.createElement('td');
+                        tdTexto.textContent = pessoa.texto; // Exibir o texto da pessoa
+                        row.appendChild(tdTexto);
+
+                        // Ações
                         const tdAcoes = document.createElement('td');
 
-                        row.appendChild(tdCPF);
-                        row.appendChild(tdEmail);
-                        row.appendChild(tdTexto);
-                        row.appendChild(tdAcoes);
+                        // Botão Excluir
+                        const botaoExcluir = document.createElement("button");
+                        botaoExcluir.textContent = "Excluir";
+                        botaoExcluir.className = 'btn table-btn';
+                        botaoExcluir.onclick = function (event) {
+                            event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
+                            if (confirm("Tem certeza de que deseja excluir esta pessoa?")) {
+                                // Obter a linha a ser excluída
+                                const linha = event.target.closest('tr');
 
+                                // Remover a linha da tabela
+                                linha.remove();
+                            }
+                        };
+                        tdAcoes.appendChild(botaoExcluir);
+
+                        // Botão Atualizar
+                        const botaoAtualizar = document.createElement("button");
+                        botaoAtualizar.textContent = "Atualizar";
+                        botaoAtualizar.className = 'btn table-btn';
+                        botaoAtualizar.onclick = function (event) {
+                            event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
+
+                            // Obter a linha a ser editada
+                            const linha = event.target.closest('tr');
+
+                            // Obter os elementos de TD dentro da linha
+                            const tds = linha.querySelectorAll('td');
+
+                            // Extrair os valores atuais da pessoa da linha
+                            const nomeAtual = tds[0].textContent;
+                            const cpfAtual = tds[1].textContent;
+                            const emailAtual = tds[2].textContent;
+                            const textoAtual = tds[3].textContent;
+
+                            // Preparar os campos de edição na div divDadosAtualizar
+                            const divDadosAtualizar = document.getElementById('divDadosAtualizar');
+                            divDadosAtualizar.innerHTML = `
+                                <input type="text" id="inputNomeAtualizar" placeholder="Nome" value="${nomeAtual}">
+                                <input type="text" id="inputCPFAtualizar" placeholder="CPF" value="${cpfAtual}">
+                                <input type="text" id="inputEmail1Atualizar" placeholder="Email" value="${emailAtual}">
+                                <textarea id="inputTextoAtualizar" placeholder="Texto">${textoAtual}</textarea>
+                            `;
+
+                            // Remover o botão Atualizar
+                            const tdAcoes = linha.querySelector('td:last-child');
+                            tdAcoes.innerHTML = '';
+
+                            // Adicionar botão Confirmar Atualização
+                            const botaoConfirmar = document.createElement("button");
+                            botaoConfirmar.textContent = "Confirmar";
+                            botaoConfirmar.className = 'btn table-btn';
+                            botaoConfirmar.onclick = function (event) {
+                                event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
+
+                                // Obter os novos valores dos inputs
+                                const nomeNovo = document.getElementById('inputNomeAtualizar').value;
+                                const cpfNovo = document.getElementById('inputCPFAtualizar').value;
+                                const emailNovo = document.getElementById('inputEmail1Atualizar').value;
+                                const textoNovo = document.getElementById('inputTextoAtualizar').value;
+
+                                // Atualizar os valores na linha da tabela
+                                tds[0].textContent = nomeNovo;
+                                tds[1].textContent = cpfNovo;
+                                tds[2].textContent = emailNovo;
+                                tds[3].textContent = textoNovo;
+
+                                // Limpar os campos de edição
+                                limparCamposAtualizacao();
+
+                                // Exibir novamente o botão Atualizar
+                                tdAcoes.innerHTML = ''; // Limpa ações atuais
+                                tdAcoes.appendChild(botaoAtualizar);
+                                tdAcoes.appendChild(botaoExcluir); // Adicionar botão excluir de volta
+                            };
+
+                            // Adicionar o botão Confirmar na célula de Ações
+                            tdAcoes.appendChild(botaoConfirmar);
+                        };
+
+                        tdAcoes.appendChild(botaoAtualizar);
+                        row.appendChild(tdAcoes);
                         tbody.appendChild(row);
                     });
                 } else {
                     const row = document.createElement('tr');
-                    const td = document.createElement('td');
-                    td.colSpan = 5; // Número total de colunas na tabela
-                    td.style.textAlign = 'center';
-                    td.textContent = 'Nenhum participante encontrado.';
-                    row.appendChild(td);
+                    const tdAcoes = document.createElement('td');
+                    tdAcoes.colSpan = 4; // Ajuste conforme o número de colunas na tabela
+                    tdAcoes.textContent = 'Nenhum participante encontrado.';
+                    row.appendChild(tdAcoes);
                     tbody.appendChild(row);
                 }
             }
+
+            // Função para limpar os campos de atualização
+            function limparCamposAtualizacao() {
+                document.getElementById('inputNomeAtualizar').value = '';
+                document.getElementById('inputCPFAtualizar').value = '';
+                document.getElementById('inputEmail1Atualizar').value = '';
+                document.getElementById('inputTextoAtualizar').value = '';
+            }
+
+            // Adiciona um evento ao botão "Adicionar Dados" para chamar a função adicionarDados
+            document.getElementById('botaoAcaoAtualizar').addEventListener('click', adicionarDados);
+
+            function validarCPF(cpf) {
+                cpf = cpf.replace(/[^\d]+/g, '');
+                if (cpf.length !== 11) return false;
+
+                let soma;
+                let resto;
+                soma = 0;
+                if (cpf == "00000000000" || cpf == "11111111111" || cpf == "22222222222" || cpf == "33333333333" ||
+                    cpf == "44444444444" || cpf == "55555555555" || cpf == "66666666666" || cpf == "77777777777" ||
+                    cpf == "88888888888" || cpf == "99999999999")
+                    return false;
+
+                for (let i = 1; i <= 9; i++) soma = soma + parseInt(cpf.substring(i - 1, i)) * (11 - i);
+                resto = (soma * 10) % 11;
+
+                if ((resto == 10) || (resto == 11)) resto = 0;
+                if (resto != parseInt(cpf.substring(9, 10))) return false;
+
+                soma = 0;
+                for (let i = 1; i <= 10; i++) soma = soma + parseInt(cpf.substring(i - 1, i)) * (12 - i);
+                resto = (soma * 10) % 11;
+
+                if ((resto == 10) || (resto == 11)) resto = 0;
+                if (resto != parseInt(cpf.substring(10, 11))) return false;
+                return true;
+            }
+
+            function permitirSomenteNumeros(event) {
+                const charCode = event.which ? event.which : event.keyCode;
+                if (charCode < 48 || charCode > 57) {
+                    event.preventDefault();
+                }
+            }
+
+            document.getElementById('inputCPFAtualizar').addEventListener('keypress', permitirSomenteNumeros);
 
 
          
