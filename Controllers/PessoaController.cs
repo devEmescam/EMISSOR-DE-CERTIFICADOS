@@ -23,7 +23,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             var pessoas = await BuscarTodasPessoasAsync();
             return View(pessoas);
         }
-
         // GET: Pessoa/Details/5        
         public async Task<IActionResult> Details(int id)
         {
@@ -34,21 +33,34 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return NotFound();
             }
             return View(pessoa);
-        }
-        
+        }        
         [HttpGet]
         public async Task<IActionResult> BuscarPessoas(string termo)
         {
             var pessoas = (await BuscarPorNomeCpfEmailAsync(termo)).Select(p => new {p.Id, p.Nome, p.CPF, p.Email}).ToList();
             return Json(pessoas);
         }
+        [HttpGet]
+        public async Task<IActionResult> ObterIdPessoaPorCPF(string cpf)
+        {
+            int id = 0;
+            try
+            {
+                id = await ObterIdPessoaPorCPFAsync(cpf);
+                return Json(id);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Ocorreu um erro em [PessoaController.ObterIdPessoaPorCPF]. Erro: {ex.Message}");
+            }
+        }
 
-        // GET: Pessoa/Create        
+        // GET: Pessoa/Create
+        [HttpGet]
         public async Task<IActionResult> Create()
         {
             return View();
         }
-
         // POST: Pessoa/Create        
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -62,8 +74,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             }
             return View(pessoa);
         }
-
         // GET: Pessoa/Edit/5
+        [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
             // Recupera a pessoa do banco de dados para edição
@@ -74,7 +86,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             }
             return View(pessoa);
         }
-
         // POST: Pessoa/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -93,8 +104,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             }
             return View(pessoa);
         }
-
         // GET: Pessoa/Delete/5
+        [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
             // Recupera a pessoa do banco de dados para exclusão
@@ -105,7 +116,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             }
             return View(pessoa);
         }
-
         // POST: Pessoa/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -258,7 +268,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 else
                 {
                     pessoa.Id = await ObterIdPessoaPorCPFAsync(pessoa.CPF);
-                    return "CPF informado já existe em banco de dados.";
+                    return "CPF informado já existe no banco de dados.";
                 }
             }
             catch (Exception ex)
@@ -268,7 +278,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         }
                 
         // VERSÃO ASYNC: Método assíncrono para atualizar uma pessoa no banco de dados
-        private async Task AtualizarPessoaAsync(PessoaModel pessoa)
+        public async Task AtualizarPessoaAsync(PessoaModel pessoa)
         {
             try
             {
@@ -296,7 +306,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         }
                 
         // VERSÃO ASYNC: Método assíncrono que valida se a pessoa existe através do CPF
-        private async Task<bool> ExistePessoaComCPFAsync(string cpf, int? userId = null)
+        public async Task<bool> ExistePessoaComCPFAsync(string cpf, int? userId = null)
         {
             try
             {
@@ -318,7 +328,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         }
 
         //VERSÃO ASYNC: Método assíncrono que retorna o ID da pessoa através do CPF
-        private async Task<int> ObterIdPessoaPorCPFAsync(string cpf)
+        public async Task<int> ObterIdPessoaPorCPFAsync(string cpf)
         {
             try
             {
@@ -332,7 +342,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 }
                 else
                 {
-                    throw new InvalidOperationException("Não foi possível encontrar o id com o CPF fornecido.");
+                    return 0;
+                    //throw new InvalidOperationException("Não foi possível encontrar o id com o CPF fornecido.");
                 }
             }
             catch (Exception ex)

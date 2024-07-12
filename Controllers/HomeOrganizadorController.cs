@@ -15,13 +15,16 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
     {
         private readonly DBHelpers _dbHelper;
         private readonly ISessao _sessao;
-        public Home_OrganizadorController(DBHelpers dbHelper)
+        
+        public Home_OrganizadorController(DBHelpers dbHelper, ISessao sessao)
         {
             _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelpers não pode ser nulo.");
+            _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");
         }
 
         #region *** IActionResults ***
         // GET: EVENTOS
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             try
@@ -75,6 +78,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         }
 
         //GET: /Homer_Organizador/ObterPessoasEvento: Usado para carregar dados no card que adicionará novas pessoas ao evento registrado em banco de dados
+        [HttpGet]
         public async Task<IActionResult> ObterPessoasEvento(int id) 
         {
             try
@@ -95,7 +99,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         //POST: /Home_Organizador/AdicionarPessoas: adiciona novas pessoas ao evento registrado em banco de dados
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AdicionarPessoas(int id, string tableData)
+        public async Task<IActionResult> AtualizarPessoasEvento(int id, string tableData)
         {
             try
             {
@@ -111,7 +115,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
 
                 var tabelaDataList = JsonConvert.DeserializeObject<List<TabelaData>>(tableData);
                 // Adiciona novas pessoas no evento de id informado
-                await AdicionarPessoasEventoAsync(id, tabelaDataList);            
+                await AtualizarPessoasEventoAsync(id, tabelaDataList);            
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -256,6 +260,20 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, new { success = false, message = $"Ocorreu um erro em Home_OrganizadorController.EmitirCertificado. Erro: {ex.Message}" });
             }
         }
+
+        public async Task<IActionResult> ObterEmailConfig() 
+        {
+            try
+            {
+                var emailConfig = await ObterEmailConfigAsync();
+                return View(emailConfig);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = $"Ocorreu um erro em Home_OrganizadorController.ObterEmailConfig. Erro: {ex.Message}" });
+            }        
+        }
+
         // POST:/Home_Organizador/Logout        
         [HttpPost]
         public IActionResult Logout()
@@ -275,6 +293,18 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Erro ao encerrar a sessão: {ex.Message}");
             }
         }
+
+        [HttpGet]
+        public IActionResult CheckSession()
+        {
+            var user = _sessao.BuscarSessaodoUsuario();
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+            return Ok();
+        }
+
         #endregion
 
         #region *** METODOS PRIVADOS ***        
@@ -442,7 +472,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         }
 
         // VERSÃO ASYNC: Método assíncrono para atualizar um evento no banco de dados
-        private async Task AdicionarPessoasEventoAsync(int id, List<TabelaData>? dadosTabela)
+        private async Task AtualizarPessoasEventoAsync(int id, List<TabelaData>? dadosTabela)
         {
             int? idUsuario;
             string sSQL = string.Empty;
@@ -460,7 +490,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 // Processar os dados da tabela
                 foreach (var registro in dadosTabela)
                 {
-                    // Criar objeto e inserir a pessoa
+                    // Criar um objeto da pessoa
                     PessoaModel pessoa = new PessoaModel
                     {
                         Nome = registro.Nome.Trim(),
@@ -468,30 +498,50 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                         Email = registro.Email.Trim()
                     };
 
-                    // Chama o método InserirPessoa do controlador PessoaController
+                    //Cria uma instancia de pessoaController para chamar os metodos contidos nessa classe
                     using (PessoaController pessoaController = new PessoaController(_dbHelper))
                     {
-                        await pessoaController.InserirPessoaAsync(pessoa, idUsuario);
-                        
-                        // Necessário registrar em banco a relação da pessoa com o evento e seus respectivos textos
-                        sSQL = "";
-                        sSQL = "INSERT INTO EVENTO_PESSOA (ID_EVENTO, ID_PESSOA, TEXTO_FRENTE) " +
-                               "VALUES (@idEvento, @idPessoa, @texto)";
-
-                        var parametersEP = new Dictionary<string, object>
+                        //Necessário identificar se as pessoas percorridas em dadosTabela já existem no banco de dados para decidir sobre INSERIR ou ATUALIZAR                        
+                        if (!await pessoaController.ExistePessoaComCPFAsync(pessoa.CPF, idUsuario))
                         {
-                            {"@idEvento",id },
-                            {"@idPessoa", pessoa.Id},
-                            {"@texto", registro.Texto.Trim()}
-                        };
+                            // Chama o método InserirPessoa do controlador PessoaController
+                            await pessoaController.InserirPessoaAsync(pessoa, idUsuario);
 
-                        await _dbHelper.ExecuteQueryAsync(sSQL, parametersEP);
+                            // Necessário registrar em banco a relação da pessoa com o evento e seus respectivos textos
+                            sSQL = "";
+                            sSQL = "INSERT INTO EVENTO_PESSOA (ID_EVENTO, ID_PESSOA, TEXTO_FRENTE) " +
+                                   "VALUES (@idEvento, @idPessoa, @texto)";
+                            var parametersEP = new Dictionary<string, object>
+                            {
+                                {"@idEvento",id },
+                                {"@idPessoa", pessoa.Id},
+                                {"@texto", registro.Texto.Trim()}
+                            };
+
+                            await _dbHelper.ExecuteQueryAsync(sSQL, parametersEP);
+                        }
+                        else 
+                        {
+                            //Nesse caso a pessoa existe e terá suas informações atualizadas
+                            //Decido atualizar todas que chegarem nesse fluxo para garantir que algum dado modificado em tela seja armazenado em banco de dados
+
+                            //Busco o idPessoa para poder atualizar os registros corretos nas tabelas envolvidas
+                            pessoa.Id = await pessoaController.ObterIdPessoaPorCPFAsync(pessoa.CPF);
+
+                            //Atualizo os dados da pessoa
+                            await pessoaController.AtualizarPessoaAsync(pessoa);
+
+                            //Necessário atualizar o texto do certificado da pessoa que foi atualizada
+                            sSQL = "";
+                            sSQL = $"UPDATE EVENTO_PESSOA SET TEXTO_FRENTE = '{registro.Texto}' WHERE ID_EVENTO = {id} AND ID_PESSOA = {pessoa.Id}";
+                            await _dbHelper.ExecuteQueryAsync(sSQL);
+                        }
                     }
                 }
             }
             catch (Exception ex)
             {
-                throw new Exception($"Ocorreu um erro em [Home_OrganizadorController.AdicionarPessoasEventoAsync] Erro: {ex.Message}");
+                throw new Exception($"Ocorreu um erro em [Home_OrganizadorController.AtualizarPessoasEventoAsync] Erro: {ex.Message}");
             }
         }
         // VERSÃO ASYNC: Método que retorna os bytes da imagem
@@ -616,6 +666,21 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             catch (Exception ex)
             {
                 throw new Exception("Erro em [Home_OrganizadorController.GerarCertifcado]: " + ex.Message);
+            }
+        }
+        private async Task<EmailConfigModel> ObterEmailConfigAsync() 
+        {
+            var emailConfigRepo = new EmailConfigRepository(_dbHelper);
+            var emailConfig = new List<EmailConfigModel>();
+
+            try
+            {
+                emailConfig = await emailConfigRepo.CarregarDadosAsync();
+                return emailConfig.First();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro em [Home_OrganizadorController.ObterEmailConfigAsync]: " + ex.Message);
             }
         }
         #endregion
