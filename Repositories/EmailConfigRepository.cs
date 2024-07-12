@@ -1,19 +1,12 @@
 ﻿using DocumentFormat.OpenXml.CustomProperties;
 using EMISSOR_DE_CERTIFICADOS.DBConnections;
+using EMISSOR_DE_CERTIFICADOS.Models;
 using System.Data;
 
 namespace EMISSOR_DE_CERTIFICADOS.Repositories
 {
     public class EmailConfigRepository
     {
-        public int Id { get; set; }
-        public string Email { get; set; }
-        public string Senha { get; set; }
-        public string ServidorSMTP { get; set; }
-        public string Porta { get; set; }
-        public string SSL { get; set; }
-        public IFormFile ImagemAssinatura { get; set; }
-
         private readonly DBHelpers _dbHelper;
         public EmailConfigRepository(DBHelpers dbHelper)
         {
@@ -32,23 +25,24 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
             }
         }
 
-        public async Task<List<EmailConfigRepository>> CarregarDadosAsync()
+        public async Task<List<EmailConfigModel>> CarregarDadosAsync()
         {
             try
             {
                 DataTable oDT = await CarregarDadosDTAsync();
-                var emailConfigList = new List<EmailConfigRepository>();
+                var emailConfigList = new List<EmailConfigModel>();
 
                 foreach (DataRow row in oDT.Rows)
                 {
-                    var emailConfig = new EmailConfigRepository(_dbHelper)
+                    var emailConfig = new EmailConfigModel()
                     {
-                        Id = Convert.ToInt32(row["ID"]),
-                        Email = Convert.ToString(row["EMAIL"]),
-                        Senha = Convert.ToString(row["SENHA"]),
-                        ServidorSMTP = Convert.ToString(row["SERVIDOR_SMTP"]),
-                        Porta = Convert.ToString(row["PORTA"]),
-                        SSL = Convert.ToString(row["SSL"])
+                        Id = row["ID"] != DBNull.Value ? Convert.ToInt32(row["ID"]) : 0,
+                        Email = row["EMAIL"] != DBNull.Value ? Convert.ToString(row["EMAIL"]) : string.Empty,
+                        Senha = row["SENHA"] != DBNull.Value ? Convert.ToString(row["SENHA"]) : string.Empty,
+                        ServidorSMTP = row["SERVIDOR_SMTP"] != DBNull.Value ? Convert.ToString(row["SERVIDOR_SMTP"]) : string.Empty,
+                        Porta = row["PORTA"] != DBNull.Value ? Convert.ToString(row["PORTA"]) : string.Empty,
+                        SSL = row["SSL"] != DBNull.Value ? Convert.ToString(row["SSL"]) : "0",                        
+                        ImagemAssinaturaEmail = row["IMAGEM_ASSINATURA_EMAIL"] != DBNull.Value ? (byte[])row["IMAGEM_ASSINATURA_EMAIL"] : null
                     };
 
                     emailConfigList.Add(emailConfig);
@@ -59,6 +53,28 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
             catch (Exception ex)
             {
                 throw new Exception($"Erro em [EmailConfigRepository.CarregarDados]: {ex.Message}");
+            }
+        }
+
+        private IFormFile ConvertByteArrayToFormFile(byte[] byteArray, string fileName)
+        {
+            try
+            {
+                if (byteArray == null || byteArray.Length == 0)
+                {
+                    return null;
+                }
+
+                var stream = new MemoryStream(byteArray);
+                return new FormFile(stream, 0, byteArray.Length, "file", fileName)
+                {
+                    Headers = new HeaderDictionary(),
+                    ContentType = "application/octet-stream"
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [EventoPessoasRepository.ConvertByteArrayToFormFile]: {ex.Message}");
             }
         }
     }

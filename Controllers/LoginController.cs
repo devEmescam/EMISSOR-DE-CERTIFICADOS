@@ -26,8 +26,12 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         }
         public IActionResult Sair()
         {
-            _sessao.RemoverSessaoUsuario();
-            return RedirectToAction("Index", "Login");
+            // Limpe os dados da sessão para desconectar o usuário
+            HttpContext.Session.Clear();
+            _sessao.RemoverSessaoUsuario();            
+            // Redirecionar para a página de login do organizador
+            return RedirectToAction("Index", "Home");
+            
         }        
 
         [HttpPost]
@@ -46,15 +50,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                         // Usuário encontrado no banco de dados da aplicação, agora verificar login e senha no AD
                         if (_adHelper.VerificaUsuario(loginModel.Login, loginModel.Senha)) // Assuma que VerificaUsuario também deve ser assíncrono se necessário
                         {
-                            _sessao.CriarSessaoDoUsuario(loginModel);
-
-                            // Armazena o Id do usuário na sessão
-                            HttpContext.Session.SetInt32("UserId", loginModel.Id);
-                            // Armazenar o Login do usuário na sessão
-                            HttpContext.Session.SetString("Login", loginModel.Login);
-                            // Armazenar a Senha do usuário na sessão
-                            HttpContext.Session.SetString("Senha", loginModel.Senha);
-
+                            _sessao.CriarSessaoDoUsuario(loginModel);                           
                             return RedirectToAction("Index", "Home_Organizador");
                         }
                         else
@@ -91,8 +87,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                     // Valida se retornou algo
                     if (loginModel.Id > 0)
                     {
-                        _sessao.CriarSessaoDoUsuario(loginModel);
-                        //return RedirectToAction("Login", "Home_Participante");
+                        _sessao.CriarSessaoDoUsuario(loginModel);                        
                         return RedirectToAction("Index", "Home_Participante");
                     }
                     else

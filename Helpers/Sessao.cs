@@ -32,7 +32,18 @@ namespace EMISSOR_DE_CERTIFICADOS.Helpers
             {
                 string valor = JsonConvert.SerializeObject(login);
 
-                _httpContext.HttpContext.Session.SetString("sessaoUsuarioLogado", valor);
+                _httpContext.HttpContext.Session.SetString("sessaoUsuarioLogado", valor);                
+                _httpContext.HttpContext.Session.SetInt32("UserId", login.Id);
+                _httpContext.HttpContext.Session.SetString("Login", login.Login.ToLower());
+                _httpContext.HttpContext.Session.SetString("Senha", login.Senha);
+                if (login.Administrativo)
+                {
+                    _httpContext.HttpContext.Session.SetString("Tipo", "organizador");
+                }
+                else 
+                {
+                    _httpContext.HttpContext.Session.SetString("Tipo", "nao_definido");
+                }
             }
             catch (Exception ex)
             {
@@ -43,7 +54,10 @@ namespace EMISSOR_DE_CERTIFICADOS.Helpers
         public void RemoverSessaoUsuario()
         {
             _httpContext.HttpContext.Session.Remove("sessaoUsuarioLogado");
-
+            _httpContext.HttpContext.Session.Remove("UserId");
+            _httpContext.HttpContext.Session.Remove("Login");
+            _httpContext.HttpContext.Session.Remove("Senha");
+            _httpContext.HttpContext.Session.Remove("Tipo");
         }
     }
 }

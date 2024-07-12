@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using EMISSOR_DE_CERTIFICADOS.DBConnections;
+using EMISSOR_DE_CERTIFICADOS.Models;
 using EMISSOR_DE_CERTIFICADOS.Repositories;
 using Newtonsoft.Json;
 
@@ -32,6 +33,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             string destinatario = string.Empty;
             string[] cc = null;
             string assunto = string.Empty;
+            var emailConfigModel = new List<EmailConfigModel>();
             var emailConfigRepo = new EmailConfigRepository(_dbHelper);
             string loginUsuario = string.Empty;
             string senhaUsuario = string.Empty;
@@ -39,12 +41,12 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             try
             {
                 // Buscar as configurações do email
-                var emailConfigList = await emailConfigRepo.CarregarDadosAsync();
-                if (emailConfigList == null || emailConfigList.Count == 0)
+                emailConfigModel = await emailConfigRepo.CarregarDadosAsync();
+                if (emailConfigModel == null || emailConfigModel.Count == 0)
                 {
                     throw new Exception("Nenhuma configuração de e-mail encontrada.");
                 }
-                var emailConfig = emailConfigList.First();
+                var emailConfig = emailConfigModel.First();
 
                 //Buscar destinatario
                 destinatario = await ObterEmailPessoaAsync(idEventoPessoa);
@@ -54,8 +56,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 }
 
                 //Buscar CC
-                //TO DO: PROVAVELMENTE ISSO SERÁ TRATADO TAMBÉM PELA CONFIGURAÇÃO DE EMAIL
-
+                //TO DO: SE FOR USADO SERÁ TRATADO TAMBÉM PELA CONFIGURAÇÃO DE EMAIL
 
                 // Buscar os dados do usuario
                 var usuarioService = new UsuariosService(_dbHelper);
@@ -67,8 +68,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                     throw new Exception("Nenhum evento encontrado para o idEventoPessoa fornecido.");
                 }
 
-                // Buscar textoAssunto do email
-                //assunto = await ObterTextoAssuntoAsync();
+                // Buscar textoAssunto do email                
                 assunto = $"Emissão do Certificado de Participação - {_evento}";
 
                 // Buscar textoCorpo do email
@@ -90,7 +90,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
 
                 // Chamar método para enviar o email
                 //return await EnviarEmail(emailConfig, destinatario, assunto, corpo, cc, anexoImagem, assinaturaImagem);
-                var resultadoEnvio = await EnviarEmail(emailConfig, destinatario, assunto, corpo, cc, anexoImagem, assinaturaImagem);
+                var resultadoEnvio = await EnviarEmail(emailConfig, destinatario, assunto, corpo, cc, anexoImagem); //, assinaturaImagem
                 return resultadoEnvio;
             }
             catch (Exception ex)
@@ -267,7 +267,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 throw new Exception($"Erro em [EmailService.ObterToken]: {ex.Message}");
             }
         }
-        private async Task<(bool success, string retorno)> EnviarEmail(EmailConfigRepository emailConfig, string destinatario, string assunto, string corpo, string[] cc, byte[] anexo, byte[] assinatura)
+        private async Task<(bool success, string retorno)> EnviarEmail(EmailConfigModel emailConfig, string destinatario, string assunto, string corpo, string[] cc, byte[] anexo) //, byte[] assinatura
         {
             try
             {
@@ -289,7 +289,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                     { new StringContent(emailConfig.SSL), "SSL" }
                 };
 
-
                 // Adicionar campos opcionais
                 if (cc != null && cc.Length > 0)
                 {
@@ -306,9 +305,9 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                     form.Add(anexoContent, "Anexo", "certificado.jpg");
                 }
 
-                if (assinatura != null && assinatura.Length > 0)
+                if (emailConfig.ImagemAssinaturaEmail != null && emailConfig.ImagemAssinaturaEmail.Length > 0)
                 {
-                    var assinaturaContent = new ByteArrayContent(assinatura);
+                    var assinaturaContent = new ByteArrayContent(emailConfig.ImagemAssinaturaEmail);
                     assinaturaContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
                     form.Add(assinaturaContent, "Assinatura", "assinatura.jpg");
                 }
@@ -331,7 +330,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             {
                 throw new Exception($"Erro em [EmailService.EnviarEmail]: {ex.Message}");
             }
-
         }
         private class TokenResponse
         {
