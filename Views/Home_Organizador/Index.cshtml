@@ -209,7 +209,7 @@
                 </div>
                 <div class="upload-container2">
                     <!-- Botão de importar EXCEL -->
-                    <input type="file" id="excelFileAtualizar" accept=".xlsx" style="display:none" onchange="importarExcel()">
+                    <input type="file" id="excelFileAtualizar" accept=".xlsx" style="display:none" onchange="importarExcelAtualizar()">
                     <label for="excelFileAtualizar" class="custom-file-upload">
                         Importar Pessoas
                     </label>
@@ -1329,7 +1329,6 @@
             }
         });
 
-            //fis2311855
 
 
             //ADICIONAR PESSOAS------------------------------------------
@@ -1765,7 +1764,178 @@
             });
 
 
-         
+            
+            //FUNÇÃO PARA IMPORTAR PLANILHA
+
+            function importarExcelAtualizar() {
+                var input = document.getElementById('excelFileAtualizar');
+                if (!input.files || input.files.length === 0) {
+                    alert('Por favor, selecione um arquivo Excel.');
+                    return;
+                }
+                var file = input.files[0];
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    var data = new Uint8Array(e.target.result);
+                    var workbook = XLSX.read(data, { type: 'array' });
+                    var sheetName = workbook.SheetNames[0];
+                    var worksheet = workbook.Sheets[sheetName];
+
+                    var expectedColumns = ['NOME_PESSOA', 'CPF_PESSOA', 'EMAIL_PESSOA', 'TEXTO'];
+                    var headerRow = XLSX.utils.sheet_to_json(worksheet, { header: 1, range: 'A1:D1' })[0];
+                    var isValidModel = expectedColumns.every(function (col, index) {
+                        return headerRow[index] === col;
+                    });
+
+                    if (!isValidModel) {
+                        alert('O modelo da planilha selecionada está incorreto.');
+                        return;
+                    }
+
+                    var table = document.getElementById('tabelaAtualizar').getElementsByTagName('tbody')[0];
+                    var rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, range: 1 });
+
+                    rows.forEach(function (row) {
+                        if (row.some(cellContent => cellContent.trim() !== "")) { // Verificar se algum dado da linha está preenchido
+                            var newRow = table.insertRow(-1);
+                            var cellIndex = 0;
+
+                            for (const key in row) {
+                                if (row.hasOwnProperty(key)) {
+                                    var cell = newRow.insertCell(cellIndex++);
+                                    cell.textContent = row[key];
+                                }
+                            }
+
+                            var celulaAcoes = newRow.insertCell(cellIndex); // Adicionar célula para ações
+                            adicionarBotoesLinhaAtualizar(celulaAcoes, newRow); // Chamar a função para adicionar botões
+                        }
+                    });
+
+                    destacarCPFsInvalidos(); // Verifica CPFs inválidos após adicionar novas linhas
+                };
+                reader.readAsArrayBuffer(file);
+            }
+
+            function adicionarBotoesLinhaAtualizar(celulaAcoes, linha) {
+                // Verificar se a linha contém dados antes de adicionar os botões
+                var hasData = Array.from(linha.cells).some(cell => cell.textContent.trim() !== "");
+
+                if (hasData) {
+                    var botaoExcluir = document.createElement("button");
+                    botaoExcluir.textContent = "Excluir";
+                    botaoExcluir.className = 'btn table-btn';
+                    botaoExcluir.onclick = function (event) {
+                        event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
+                        if (confirm("Tem certeza de que deseja excluir esta linha?")) {
+                            excluirLinhaAtualizar(linha);
+                            destacarCPFsInvalidos();
+                        }
+                    };
+                    celulaAcoes.appendChild(botaoExcluir);
+
+                    var botaoAtualizar = document.createElement("button");
+                    botaoAtualizar.textContent = "Atualizar";
+                    botaoAtualizar.className = 'btn table-btn';
+                    botaoAtualizar.onclick = function (event) {
+                        event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
+                        carregarDadosParaEditar(linha);
+                        // Mostrar o botão de confirmação de atualização
+                        var botaoConfirmarAtualizacao = document.getElementById('botaoConfirmarAtualizacao');
+                        botaoConfirmarAtualizacao.setAttribute('data-pessoa-id', linha.cells[1].textContent); // Exemplo de atributo com CPF
+                        botaoConfirmarAtualizacao.style.display = 'inline-block';
+                    };
+                    celulaAcoes.appendChild(botaoAtualizar);
+                }
+
+                celulaAcoes.style.textAlign = "center"; // Centralizar os botões na célula
+                destacarCPFsInvalidos(); // Verificar CPFs da nova linha
+            }
+
+            function excluirLinhaAtualizar(linha) {
+                linha.parentElement.removeChild(linha);
+            }
+
+            function carregarDadosParaEditar(linha) {
+                // Obter os dados da linha
+                var nome = linha.cells[0].textContent;
+                var cpf = linha.cells[1].textContent;
+                var email = linha.cells[2].textContent;
+                var texto = linha.cells[3].textContent;
+
+                // Preencher os campos de entrada com os dados da linha
+                document.getElementById('inputNomeAtualizar').value = nome;
+                document.getElementById('inputCPFAtualizar').value = cpf;
+                document.getElementById('inputEmail1Atualizar').value = email; // Ajustado para o ID correto
+                document.getElementById('inputTextoAtualizar').value = texto;
+
+                // Exibir o botão de confirmação de atualização
+                document.getElementById('botaoConfirmarAtualizacao').style.display = 'inline-block'; // Ajustado para o ID correto
+
+                // Adicionar um atributo à linha para identificá-la durante a confirmação
+                linha.setAttribute('data-editing', 'true');
+
+                // Lógica adicional, se necessário, para manipular a linha selecionada
+            }
+
+
+            document.getElementById('btnConfirmarAtualizacao').onclick = function (event) {
+                event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
+
+                // Obter a linha que está sendo editada
+                var linhas = document.querySelectorAll('#tabelaAtualizar tbody tr');
+                var linhaEditando = null;
+
+                linhas.forEach(function (linha) {
+                    if (linha.getAttribute('data-editing') === 'true') {
+                        linhaEditando = linha;
+                    }
+                });
+
+                if (linhaEditando) {
+                    // Atualizar a linha com os novos dados dos campos de entrada
+                    linhaEditando.cells[0].textContent = document.getElementById('inputNomeAtualizar').value;
+                    linhaEditando.cells[1].textContent = document.getElementById('inputCPFAtualizar').value;
+                    linhaEditando.cells[2].textContent = document.getElementById('inputEmailAtualizar').value;
+                    linhaEditando.cells[3].textContent = document.getElementById('inputTextoAtualizar').value;
+
+                    // Remover o atributo de edição
+                    linhaEditando.removeAttribute('data-editing');
+
+                    // Esconder o botão de confirmação de atualização
+                    document.getElementById('btnConfirmarAtualizacao').style.display = 'none';
+                }
+            }
+
+            function destacarCPFsInvalidos() {
+                var tabela = document.getElementById('tabelaAtualizar');
+                var linhas = tabela.rows;
+
+                for (var i = 1; i < linhas.length; i++) {
+                    var cpf = linhas[i].cells[1].textContent.trim(); // Coluna do CPF
+
+                    if (!validarCPF(cpf)) {
+                        linhas[i].style.backgroundColor = '#f8d7da'; // Destacar linha com CPF inválido
+                    } else {
+                        linhas[i].style.backgroundColor = ''; // Remover destaque se CPF for válido
+                    }
+                }
+            }
+
+            // Função para validar CPF 
+            function validarCPF(cpf) {
+                // Implemente aqui sua lógica de validação de CPF
+                // Retorna true se válido, false se inválido
+                return true; // Exemplo simples, ajuste conforme sua necessidade
+            }
+
+            // Event listener para chamar a função de importação ao selecionar um arquivo
+            document.getElementById('excelFileAtualizar').addEventListener('change', importarExcelAtualizar);
+
+            
+            
+
     </script>
 </body>
 </html>
