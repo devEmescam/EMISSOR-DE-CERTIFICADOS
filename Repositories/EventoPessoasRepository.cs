@@ -12,7 +12,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
             _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelper não pode ser nulo.");
         }
 
-        public async Task<Evento> CarregarDadosAsync(int idEvento)
+        public async Task<Evento> CarregarDadosAsync(int idEvento, bool emitirCertificado)
         {
             try
             {
@@ -32,7 +32,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                     Nome = row["NOME"] != DBNull.Value ? Convert.ToString(row["NOME"]) : string.Empty,
                     ImagemCertificado = row["IMAGEM_CERTIFICADO"] != DBNull.Value ? ConvertByteArrayToFormFile((byte[])row["IMAGEM_CERTIFICADO"], "certificado.png") : null,
                     DataCadastro = row["DATA_CADASTRO"] != DBNull.Value ? Convert.ToString(row["DATA_CADASTRO"]) : null,
-                    PessoasEventos = await CarregarPessoasEventoAsync(idEvento)
+                    PessoasEventos = await CarregarPessoasEventoAsync(idEvento, emitirCertificado)
                 };
 
                 return evento;
@@ -43,14 +43,26 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
             }
         }
 
-        private async Task<List<PessoaEvento>> CarregarPessoasEventoAsync(int idEvento)
+        private async Task<List<PessoaEvento>> CarregarPessoasEventoAsync(int idEvento, bool emitirCertificado)
         {
+            string sSQL = string.Empty;
+
             try
-            {                
-                var sSQL = $"SELECT EP.ID_PESSOA, P.NOME, EP.CERTIFICADO_EMITIDO, FORMAT(EP.DATA_EMISSAO,'dd/MM/yyyy') DATA_EMISSAO, EP.MENSAGEM_RETORNO_EMAIL, EP.TEXTO_FRENTE, P.CPF, P.EMAIL " + 
-                           $"FROM EVENTO_PESSOA EP " +
-                           $"JOIN PESSOA P ON (EP.ID_PESSOA = P.ID) " +
-                           $"WHERE ID_EVENTO = {idEvento}";
+            {               
+
+                sSQL = "SELECT EP.ID_PESSOA, P.NOME, EP.CERTIFICADO_EMITIDO, FORMAT(EP.DATA_EMISSAO,'dd/MM/yyyy') DATA_EMISSAO, EP.MENSAGEM_RETORNO_EMAIL, EP.TEXTO_FRENTE, P.CPF, P.EMAIL ";
+                sSQL += "FROM EVENTO_PESSOA EP ";
+                sSQL += "JOIN PESSOA P ON (EP.ID_PESSOA = P.ID) ";
+                sSQL += "WHERE ID_EVENTO = " + idEvento;               
+
+                if (!emitirCertificado)
+                {
+                    // As duas linhas abaixo garantem que sejam retornados somente registros que não tiveram certificados emitidos
+                    sSQL += "AND CERTIFICADO_EMITIDO <> 1 ";
+                    sSQL += "AND (DATA_EMISSAO IS NULL OR DATA_EMISSAO = '' OR DATA_EMISSAO = '1900-01-01')";                    
+                }
+
+
 
                 var oDT = await _dbHelper.ExecuteQueryAsync(sSQL);
                 var pessoasEventoList = new List<PessoaEvento>();
@@ -68,6 +80,12 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                         Cpf = row["CPF"] != DBNull.Value ? Convert.ToString(row["CPF"]) : string.Empty,
                         Email = row["Email"] != DBNull.Value ? Convert.ToString(row["Email"]) : string.Empty
                     };
+
+                    //Se DataEmissao tiver valor  = 01/01/1900 tratar igual null ou em branco
+                    if (pessoaEvento.DataEmissao == "01/01/1900") 
+                    {
+                        pessoaEvento.DataEmissao = null;
+                    }
 
                     pessoasEventoList.Add(pessoaEvento);
                 }

@@ -22,9 +22,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");
         }
 
-        #region *** IActionResults ***
-        // GET: EVENTOS
-        [HttpGet]
+        #region *** IActionResults ***        
+        [HttpGet] // GET: EVENTOS
         public async Task<IActionResult> Index()
         {
             try
@@ -41,9 +40,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             {
                 return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.Index] Erro: {ex.Message}");
             }
-        }
-        // POST: /Home_Organizador/NovoEvento
-        [HttpPost]
+        }        
+        [HttpPost] // POST: /Home_Organizador/NovoEvento
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> NovoEvento(string nomeEvento, IFormFile arteCertificadoFile, string tableData)
         {
@@ -75,10 +73,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             {
                 return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.NovoEvento]. Erro: {ex.Message}");
             }
-        }
-
-        //GET: /Homer_Organizador/ObterPessoasEvento: Usado para carregar dados no card que adicionará novas pessoas ao evento registrado em banco de dados
-        [HttpGet]
+        }        
+        [HttpGet] //GET: /Home_Organizador/ObterPessoasEvento: Usado para carregar dados no card que adicionará novas pessoas ao evento registrado em banco de dados
         public async Task<IActionResult> ObterPessoasEvento(int id) 
         {
             try
@@ -87,17 +83,15 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 {
                     return StatusCode(500, new { success = false, message = "Não foi possível identificar o evento." });
                 }
-                var eventoPessoas = await ObterEventoPessoas(id);
+                var eventoPessoas = await ObterEventoPessoas(id, false);
                 return Json(eventoPessoas);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.ObterPessoasEvento]");
             }
-        }
-
-        //POST: /Home_Organizador/AdicionarPessoas: adiciona novas pessoas ao evento registrado em banco de dados
-        [HttpPost]
+        }        
+        [HttpPost] //POST: /Home_Organizador/AdicionarPessoas: adiciona novas pessoas ao evento registrado em banco de dados
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AtualizarPessoasEvento(int id, string tableData)
         {
@@ -122,10 +116,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             {
                 return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.AdicionarPessoas]. Erro: {ex.Message}");
             }
-        } 
-
-        // POST: /Home_Organizador/LerPlanilha
-        [HttpPost]
+        }         
+        [HttpPost] // POST: /Home_Organizador/LerPlanilha
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> LerPlanilha(string caminhoArquivo, string evento)
         {
@@ -204,12 +196,13 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Erro em [Home_OrganizadorController.VisualizarImagem]. Erro: {ex.Message}");
             }
         }
+        //Home_Organizador/DetalhesEventoPessoas: Chamado pela ação de tela referente a emissão dos certificados das pessoas do evento        
         public async Task<IActionResult> DetalhesEventoPessoas(int idEvento)
         {
             try
             {
                 // Obter os detalhes do evento e das pessoas
-                var evento = await ObterEventoPessoas(idEvento);
+                var evento = await ObterEventoPessoas(idEvento, true);
 
                 // Validação do retorno
                 if (evento == null)
@@ -224,9 +217,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             {
                 return StatusCode(500, new { message = $"Ocorreu um erro em [Home_OrganizadorController.DetalhesEventoPessoas]. Erro: {ex.Message}" });
             }
-        }
-        // POST:/Home_Organizador/EmitirCertificado
-        [HttpPost]
+        }        
+        [HttpPost] // POST:/Home_Organizador/EmitirCertificado
         [ValidateAntiForgeryToken]
         //Rotina de Emissão de certificados                
         public async Task<IActionResult> EmitirCertificado(int id, List<int> idPessoas)
@@ -250,7 +242,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 }
 
                 // Obter um objeto atualizado com os dados do processo de emissão que foi realizado
-                var eventoPessoas = await ObterEventoPessoas(id);
+                var eventoPessoas = await ObterEventoPessoas(id, true);
 
                 // Return JSON objeto com status de sucesso
                 return Json(new { success = true, data = eventoPessoas });
@@ -260,7 +252,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, new { success = false, message = $"Ocorreu um erro em Home_OrganizadorController.EmitirCertificado. Erro: {ex.Message}" });
             }
         }
-
         public async Task<IActionResult> ObterEmailConfig() 
         {
             try
@@ -272,10 +263,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             {
                 return StatusCode(500, new { success = false, message = $"Ocorreu um erro em Home_OrganizadorController.ObterEmailConfig. Erro: {ex.Message}" });
             }        
-        }
-
-        // POST:/Home_Organizador/Logout        
-        [HttpPost]
+        }                
+        [HttpPost] // POST:/Home_Organizador/Logout
         public IActionResult Logout()
         {
             try
@@ -293,7 +282,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Erro ao encerrar a sessão: {ex.Message}");
             }
         }
-
         [HttpGet]
         public IActionResult CheckSession()
         {
@@ -304,7 +292,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             }
             return Ok();
         }
-
         #endregion
 
         #region *** METODOS PRIVADOS ***        
@@ -470,7 +457,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 throw new Exception($"Ocorreu um erro em [Home_OrganizadorController.InserirEventoAsync]. Erro: {ex.Message}");
             }
         }
-
         // VERSÃO ASYNC: Método assíncrono para atualizar um evento no banco de dados
         private async Task AtualizarPessoasEventoAsync(int id, List<TabelaData>? dadosTabela)
         {
@@ -561,7 +547,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 throw new Exception("Erro em [Home_OrganizadorController.BuscarBytesDaImagemNoBDAsync]: " + ex.Message);
             }
         }
-        private async Task<Evento> ObterEventoPessoas(int idEvento)
+        private async Task<Evento> ObterEventoPessoas(int idEvento, bool emitirCertificado)
         {
             var eventoRepository = new EventoPessoasRepository(_dbHelper);
             try
@@ -573,7 +559,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 }
 
                 // Carregar os dados do evento e das pessoas do evento
-                var evento = await eventoRepository.CarregarDadosAsync(idEvento);
+                var evento = await eventoRepository.CarregarDadosAsync(idEvento, emitirCertificado);
 
                 // Validação do retorno
                 if (evento == null)
@@ -588,7 +574,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 throw new Exception("Erro em [Home_OrganizadorController.ObterEventoPessoas]: " + ex.Message);
             }
         }
-
         // VERSÃO ASYNC: Metodo que gera certificado, cria usuario e emite email a pessoa do evento        
         private async Task EmitirCertificadoAsync(EventoModel evento, List<int> listaIdPessoas)
         {
@@ -653,8 +638,14 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                                     }
                                     else
                                     {
+                                        // Truncar a mensagem de retorno se ela for maior que 500 caracteres
+                                        if (retorno.Length > 500)
+                                        {
+                                            retorno = retorno.Substring(0, 500);
+                                        }
+
                                         // Atualizar EVENTO_PESSOA registrando resultado do processo e data e mensagem retornada 
-                                        sSQL = $"UPDATE EVENTO_PESSOA SET CERTIFICADO_EMITIDO = 1, DATA_EMISSAO = GETDATE(), MENSAGEM_RETORNO_EMAIL = '{retorno}' WHERE ID = {idEventoPessoa}";
+                                        sSQL = $"UPDATE EVENTO_PESSOA SET CERTIFICADO_EMITIDO = 0, DATA_EMISSAO = '', MENSAGEM_RETORNO_EMAIL = '{retorno}' WHERE ID = {idEventoPessoa}";
                                         await _dbHelper.ExecuteQueryAsync(sSQL);
                                     }
                                 }
@@ -671,12 +662,12 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         private async Task<EmailConfigModel> ObterEmailConfigAsync() 
         {
             var emailConfigRepo = new EmailConfigRepository(_dbHelper);
-            var emailConfig = new List<EmailConfigModel>();
+            var emailConfig = new EmailConfigModel();
 
             try
             {
                 emailConfig = await emailConfigRepo.CarregarDadosAsync();
-                return emailConfig.First();
+                return emailConfig;
             }
             catch (Exception ex)
             {

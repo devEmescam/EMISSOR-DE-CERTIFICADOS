@@ -33,7 +33,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             string destinatario = string.Empty;
             string[] cc = null;
             string assunto = string.Empty;
-            var emailConfigModel = new List<EmailConfigModel>();
+            var emailConfigModel = new EmailConfigModel();
             var emailConfigRepo = new EmailConfigRepository(_dbHelper);
             string loginUsuario = string.Empty;
             string senhaUsuario = string.Empty;
@@ -42,11 +42,11 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             {
                 // Buscar as configurações do email
                 emailConfigModel = await emailConfigRepo.CarregarDadosAsync();
-                if (emailConfigModel == null || emailConfigModel.Count == 0)
+                if (emailConfigModel == null)
                 {
                     throw new Exception("Nenhuma configuração de e-mail encontrada.");
                 }
-                var emailConfig = emailConfigModel.First();
+                //var emailConfig = emailConfigModel;
 
                 //Buscar destinatario
                 destinatario = await ObterEmailPessoaAsync(idEventoPessoa);
@@ -90,7 +90,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
 
                 // Chamar método para enviar o email
                 //return await EnviarEmail(emailConfig, destinatario, assunto, corpo, cc, anexoImagem, assinaturaImagem);
-                var resultadoEnvio = await EnviarEmail(emailConfig, destinatario, assunto, corpo, cc, anexoImagem); //, assinaturaImagem
+                var resultadoEnvio = await EnviarEmail(emailConfigModel, destinatario, assunto, corpo, cc, anexoImagem); //, assinaturaImagem
                 return resultadoEnvio;
             }
             catch (Exception ex)
@@ -236,7 +236,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
         {
             try
             {
-                var url = "https://apps.emescam.br/site/comunicador/api/auth/login";
+                //var url = "https://apps.emescam.br/site/comunicador/api/auth/login";
+                var url = "https://api.emescam.br/comunicador/api/auth/login"; //NOVA URL
                 //var url = "https://localhost:7056/api/auth/login";
                 var httpClient = new HttpClient();
 
@@ -271,7 +272,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
         {
             try
             {
-                var url = "https://apps.emescam.br/site/comunicador/api/email/enviar";
+                //var url = "https://apps.emescam.br/site/comunicador/api/email/enviar";
+                var url = "https://api.emescam.br/comunicador/api/email/enviar"; //NOVA URL
                 //var url = "https://localhost:7056/api/email/enviar";
                 var httpClient = new HttpClient();
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);

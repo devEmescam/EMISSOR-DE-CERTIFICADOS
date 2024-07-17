@@ -25,7 +25,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
             }
         }
 
-        public async Task<List<EmailConfigModel>> CarregarDadosAsync()
+        public async Task<EmailConfigModel> CarregarDadosAsync()
         {
             try
             {
@@ -42,13 +42,13 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                         ServidorSMTP = row["SERVIDOR_SMTP"] != DBNull.Value ? Convert.ToString(row["SERVIDOR_SMTP"]) : string.Empty,
                         Porta = row["PORTA"] != DBNull.Value ? Convert.ToString(row["PORTA"]) : string.Empty,
                         SSL = row["SSL"] != DBNull.Value ? Convert.ToString(row["SSL"]) : "0",                        
-                        ImagemAssinaturaEmail = row["IMAGEM_ASSINATURA_EMAIL"] != DBNull.Value ? (byte[])row["IMAGEM_ASSINATURA_EMAIL"] : null
+                        ImagemAssinaturaEmail = row["IMAGEM_ASSINATURA"] != DBNull.Value ? (byte[])row["IMAGEM_ASSINATURA"] : null
                     };
 
                     emailConfigList.Add(emailConfig);
                 }
 
-                return emailConfigList;
+                return emailConfigList.First();
             }
             catch (Exception ex)
             {
