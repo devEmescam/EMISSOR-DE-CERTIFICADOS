@@ -120,7 +120,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
             }            
         }
     }
-
     public class Evento
     {
         public int Id { get; set; }
@@ -129,7 +128,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
         public string DataCadastro { get; set; }
         public List<PessoaEvento> PessoasEventos { get; set; }
     }
-
     public class PessoaEvento
     {
         public int Id { get; set; }

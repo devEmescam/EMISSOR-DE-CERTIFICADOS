@@ -6,6 +6,8 @@ using System.Drawing.Imaging;
 using System.Text;
 using RectangleF = System.Drawing.RectangleF;
 using Rectangle = System.Drawing.Rectangle;
+using EMISSOR_DE_CERTIFICADOS.Repositories;
+using EMISSOR_DE_CERTIFICADOS.Helpers;
 //using SixLabors.Fonts;
 //using SixLabors.ImageSharp.Formats.Png;
 
@@ -14,9 +16,14 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
     public class CertificadosService
     {
         private readonly DBHelpers _dbHelper;
-        public CertificadosService(DBHelpers dbHelper)
+        private readonly ISessao _sessao;
+        private readonly PessoaEventosRepository _pessoaEventosRepository;
+
+        public CertificadosService(DBHelpers dbHelper, ISessao sessao, PessoaEventosRepository pessoaEventosRepository)
         {
             _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelpers não pode ser nulo.");
+            _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");
+            _pessoaEventosRepository = pessoaEventosRepository ?? throw new ArgumentNullException(nameof(dbHelper), "O PessoaEventosRepository não pode ser nulo.");
         }              
         public async Task<bool> GerarCertificadoAsync(int idEvento_Pessoa, int idPessoa, string textoOriginal, IFormFile imagem)
         {
@@ -182,7 +189,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             {
                 if (!string.IsNullOrEmpty(texto))
                 {
-                    using (PessoaController pessoaController = new PessoaController(_dbHelper))
+                    using (PessoaController pessoaController = new PessoaController(_dbHelper,_sessao, _pessoaEventosRepository))
                     {
                         nomePessoa = await pessoaController.ObterNomePorIdPessoaAsync(idPessoa);
                     }
@@ -276,7 +283,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
         {
             try
             {
-                using (PessoaController pessoaController = new PessoaController(_dbHelper))
+                using (PessoaController pessoaController = new PessoaController(_dbHelper,_sessao, _pessoaEventosRepository))
                 {
                     string cpf = await pessoaController.ObterCPFPorIdPessoaAsync(idPessoa);
                     return cpf;
