@@ -1,12 +1,7 @@
-﻿using System;
-using System.Data;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
-using DocumentFormat.OpenXml.Office2010.Excel;
 using EMISSOR_DE_CERTIFICADOS.DBConnections;
+using EMISSOR_DE_CERTIFICADOS.Helpers;
 using EMISSOR_DE_CERTIFICADOS.Models;
 using EMISSOR_DE_CERTIFICADOS.Repositories;
 using Newtonsoft.Json;
@@ -18,10 +13,14 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
         private string _token;
         private string _evento;
         private readonly DBHelpers _dbHelper;
+        private readonly PessoaEventosRepository _pessoaEventosRepository;
+        private readonly ISessao _sessao;
 
-        public EmailService(DBHelpers dbHelper)
+        public EmailService(DBHelpers dbHelper, ISessao sessao, PessoaEventosRepository pessoaEventosRepository)
         {
             _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelper não pode ser nulo.");
+            _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");
+            _pessoaEventosRepository = pessoaEventosRepository ?? throw new ArgumentNullException(nameof(dbHelper), "O PessoaEventosRepository não pode ser nulo.");
         }
         public async Task<(bool success, string retorno)> EnviarEmailAsync(string login, string senha, int idEventoPessoa)
         {
@@ -59,7 +58,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 //TO DO: SE FOR USADO SERÁ TRATADO TAMBÉM PELA CONFIGURAÇÃO DE EMAIL
 
                 // Buscar os dados do usuario
-                var usuarioService = new UsuariosService(_dbHelper);
+                var usuarioService = new UsuariosService(_dbHelper,_sessao, _pessoaEventosRepository);
                 var dadosUsuario = await usuarioService.ObterUsuarioESenhaAsync(idEventoPessoa);
 
                 await ObterNomeEventoAsync(idEventoPessoa);

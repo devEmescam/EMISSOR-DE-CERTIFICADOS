@@ -15,11 +15,13 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
     {
         private readonly DBHelpers _dbHelper;
         private readonly ISessao _sessao;
-        
-        public Home_OrganizadorController(DBHelpers dbHelper, ISessao sessao)
+        private readonly PessoaEventosRepository _pessoaEventosRepository;
+
+        public Home_OrganizadorController(DBHelpers dbHelper, ISessao sessao, PessoaEventosRepository pessoaEventosRepository)
         {
             _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelpers não pode ser nulo.");
             _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");
+            _pessoaEventosRepository = pessoaEventosRepository ?? throw new ArgumentNullException(nameof(sessao), "O PessoaEventosRepository não pode ser nulo.");
         }
 
         #region *** IActionResults ***
@@ -76,7 +78,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.NovoEvento]. Erro: {ex.Message}");
             }
         }
-
         //GET: /Homer_Organizador/ObterPessoasEvento: Usado para carregar dados no card que adicionará novas pessoas ao evento registrado em banco de dados
         [HttpGet]
         public async Task<IActionResult> ObterPessoasEvento(int id) 
@@ -95,7 +96,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.ObterPessoasEvento]");
             }
         }
-
         //POST: /Home_Organizador/AdicionarPessoas: adiciona novas pessoas ao evento registrado em banco de dados
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -123,7 +123,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.AdicionarPessoas]. Erro: {ex.Message}");
             }
         } 
-
         // POST: /Home_Organizador/LerPlanilha
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -260,7 +259,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, new { success = false, message = $"Ocorreu um erro em Home_OrganizadorController.EmitirCertificado. Erro: {ex.Message}" });
             }
         }
-
         public async Task<IActionResult> ObterEmailConfig() 
         {
             try
@@ -273,7 +271,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, new { success = false, message = $"Ocorreu um erro em Home_OrganizadorController.ObterEmailConfig. Erro: {ex.Message}" });
             }        
         }
-
         // POST:/Home_Organizador/Logout        
         [HttpPost]
         public IActionResult Logout()
@@ -293,7 +290,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Erro ao encerrar a sessão: {ex.Message}");
             }
         }
-
         [HttpGet]
         public IActionResult CheckSession()
         {
@@ -304,7 +300,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             }
             return Ok();
         }
-
         #endregion
 
         #region *** METODOS PRIVADOS ***        
@@ -444,7 +439,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                     };
 
                     // Chama o método InserirPessoa do controlador PessoaController
-                    using (PessoaController pessoaController = new PessoaController(_dbHelper))
+                    using (PessoaController pessoaController = new PessoaController(_dbHelper, _sessao, _pessoaEventosRepository))
                     {
                         await pessoaController.InserirPessoaAsync(pessoa, idUsuario);
 
@@ -470,7 +465,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 throw new Exception($"Ocorreu um erro em [Home_OrganizadorController.InserirEventoAsync]. Erro: {ex.Message}");
             }
         }
-
         // VERSÃO ASYNC: Método assíncrono para atualizar um evento no banco de dados
         private async Task AtualizarPessoasEventoAsync(int id, List<TabelaData>? dadosTabela)
         {
@@ -499,15 +493,15 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                     };
 
                     //Cria uma instancia de pessoaController para chamar os metodos contidos nessa classe
-                    using (PessoaController pessoaController = new PessoaController(_dbHelper))
+                    using (PessoaController pessoaController = new PessoaController(_dbHelper,_sessao, _pessoaEventosRepository))
                     {
                         //Necessário identificar se as pessoas percorridas em dadosTabela já existem no banco de dados para decidir sobre INSERIR ou ATUALIZAR                        
                         if (!await pessoaController.ExistePessoaComCPFAsync(pessoa.CPF, idUsuario))
                         {
-                            // Chama o método InserirPessoa do controlador PessoaController
+                            //Chama o método InserirPessoa do controlador PessoaController
                             await pessoaController.InserirPessoaAsync(pessoa, idUsuario);
 
-                            // Necessário registrar em banco a relação da pessoa com o evento e seus respectivos textos
+                            //Necessário registrar em banco a relação da pessoa com o evento e seus respectivos textos
                             sSQL = "";
                             sSQL = "INSERT INTO EVENTO_PESSOA (ID_EVENTO, ID_PESSOA, TEXTO_FRENTE) " +
                                    "VALUES (@idEvento, @idPessoa, @texto)";
@@ -588,14 +582,13 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 throw new Exception("Erro em [Home_OrganizadorController.ObterEventoPessoas]: " + ex.Message);
             }
         }
-
         // VERSÃO ASYNC: Metodo que gera certificado, cria usuario e emite email a pessoa do evento        
         private async Task EmitirCertificadoAsync(EventoModel evento, List<int> listaIdPessoas)
         {
             DataTable oDT = new DataTable();
-            var usuariosService = new UsuariosService(_dbHelper);
-            var certificadoService = new CertificadosService(_dbHelper);
-            var emailService = new EmailService(_dbHelper);
+            var usuariosService = new UsuariosService(_dbHelper,_sessao, _pessoaEventosRepository);
+            var certificadoService = new CertificadosService(_dbHelper, _sessao, _pessoaEventosRepository);
+            var emailService = new EmailService(_dbHelper,_sessao, _pessoaEventosRepository);
             string sSQL = "";
             int idUsuario = -1;
             string loginUsuarioADM = string.Empty;
