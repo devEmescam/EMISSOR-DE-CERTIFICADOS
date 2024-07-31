@@ -10,19 +10,25 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
 </head>
 <body>
-    <img id="logo" src="/logoemescam.png" alt="Logo Emescam">
 
-    <dv class="cartao-menu">
-        <div id="bem-vindo">Bem-Vindo! @ViewBag.Login</div>
-        <form>
-            
-                <a href="#" onclick="mostrarCard('meus-eventos')">Meus Eventos</a>
-                <a href="#" onclick="mostrarCard('buscar-pessoas')">Buscar Pessoas</a>
-                <a href="#" onclick="mostrarCard('configuracoes')">Configurações</a>
+    <header>
+        <img id="logo" src="/logoemescam.png" alt="Logo Emescam">
+        <nav>
+            <a href="#" onclick="mostrarCard('meus-eventos')">Meus Eventos</a>
+            <a href="#" onclick="mostrarCard('buscar-pessoas')">Buscar Pessoas</a>
+            <a href="#" onclick="mostrarCard('configuracoes')">Configurações</a>
+        </nav>
+        <div id="dropdown-container">
+            <div id="bem-vindo">Bem-Vindo! @ViewBag.Login</div>
+            <div id="dropdown-content">
                 <a id="sair-link" href="#">Sair</a>
-    
+            </div>
+        </div>
+    </header>
 
-        </form>
+
+    <div class="cartao-menu">
+       
 
         <!--CADASTRAR EVENTO-->
         <!-- Formulário para cadastro de evento -->
@@ -47,6 +53,9 @@
                 <button type="button" id="confirmarAtualizacaoBtn" onclick="confirmarAtualizacao()" style="display:none;">Confirmar Atualização</button>
                 <hr>
                 <!-- Tabela que será preenchida -->
+
+                <button id="btnLimparTabela" onclick="limparTabela()">Limpar Tabela</button>
+
                 <div class="tabela-container">
                     <table id="tabela" class="display">
                         <thead>
@@ -329,6 +338,13 @@
             return processarDadosTabela(event);
         }
 
+        //--------- LIMPAR TABELA----------
+        function limparTabela() {
+            var tabela = document.getElementById('eventos-tbody');
+            tabela.innerHTML = ''; // Remove todas as linhas da tabela
+
+            alert("Ação realizada"); // Exibe um alerta ao usuário
+        }
 
         function mostrarCard(id) {
             var cards = document.querySelectorAll('.card');
@@ -460,12 +476,23 @@
             celulaTipoPessoa.textContent = tipoPessoa;
             celulaTexto.textContent = texto;
 
-            adicionarBotoesLinha(celulaAcoes, novaLinha); // Passa a célula de ações como parâmetro
+            adicionarBotoesLinha(celulaAcoes, novaLinha);
             limparCampos();
             destacarCPFsInvalidos();
+
+            // Remover linhas em branco após adicionar a nova linha
+            removerLinhasEmBranco();
         }
 
         function adicionarBotoesLinha(celulaAcoes, linha) {
+            // Checa se a linha contém dados válidos antes de adicionar botões
+            var celulas = linha.getElementsByTagName("td");
+            var linhaTemDados = Array.from(celulas).some(celula => celula.textContent.trim() !== "");
+
+            if (!linhaTemDados) {
+                return; // Sai da função se a linha não tiver dados
+            }
+
             var botaoExcluir = document.createElement("button");
             botaoExcluir.textContent = "Excluir";
             botaoExcluir.className = 'btn table-btn';
@@ -490,6 +517,7 @@
             celulaAcoes.style.textAlign = "center"; // Centralizar os botões na célula
             destacarCPFsInvalidos(); // Verificar CPFs da nova linha
         }
+
 
 
         function atualizarDados() {
@@ -601,7 +629,7 @@
                 var rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, range: 1 });
 
                 rows.forEach(function (row) {
-                    if (row.every(cellContent => cellContent !== "")) { // Verificar se todos os dados da linha estão preenchidos
+                    if (row.every(cellContent => cellContent !== "")) {
                         var newRow = table.insertRow(-1);
                         var cellIndex = 0;
 
@@ -618,9 +646,37 @@
                 });
 
                 destacarCPFsInvalidos(); // Verifica CPFs inválidos após adicionar novas linhas
+
+                // Remover linhas em branco após importar os dados do Excel
+                removerLinhasEmBranco();
             };
             reader.readAsArrayBuffer(file);
         }
+
+        function removerLinhasEmBranco() {
+            var tabela = document.getElementById("tabela").getElementsByTagName("tbody")[0];
+            var linhas = tabela.getElementsByTagName("tr");
+
+            // Usar loop reverso para evitar problemas com o índice ao remover linhas
+            for (var i = linhas.length - 1; i >= 0; i--) {
+                var celulas = linhas[i].getElementsByTagName("td");
+                var linhaVazia = true;
+
+                // Verificar se todas as células da linha estão vazias ou contêm apenas espaços
+                for (var j = 0; j < celulas.length; j++) {
+                    if (celulas[j].textContent.trim() !== "") {
+                        linhaVazia = false;
+                        break;
+                    }
+                }
+
+                // Se a linha estiver vazia, remova-a
+                if (linhaVazia) {
+                    tabela.deleteRow(i);
+                }
+            }
+        }
+
 
 
 
@@ -1599,34 +1655,37 @@
                     tbody.appendChild(row);
                 }
             }
-            
-            // Função para confirmar a atualização
-            function confirmarAtualizacao() {
-                const pessoaId = document.getElementById('botaoConfirmarAtualizacao').getAttribute('data-pessoa-id');
-                const nomeNovo = document.getElementById('inputNomeAtualizar').value;
-                const cpfNovo = document.getElementById('inputCPFAtualizar').value;
-                const emailNovo = document.getElementById('inputEmail1Atualizar').value;
-                const textoNovo = document.getElementById('inputTextoAtualizar').value;
 
-                // Lógica para atualizar os dados da pessoa no backend com base no ID (pessoaId)
 
-                // Esconder o botão de confirmação após a atualização
-                document.getElementById('botaoConfirmarAtualizacao').style.display = 'none';
+        // //DANDO CONFLITO COM O CRIAR EVENTOS------------------------------------------------------------------------------------------
 
-                // Atualizar a linha na tabela correspondente à pessoa
-                const linhas = document.querySelectorAll('#eventos-tbody-atualizar tr');
-                linhas.forEach(linha => {
-                    const tds = linha.querySelectorAll('td');
-                    if (tds[1].textContent === cpfNovo) { // Comparar com o CPF para encontrar a linha correta
-                        tds[0].textContent = nomeNovo;
-                        tds[2].textContent = emailNovo;
-                        tds[3].textContent = textoNovo;
-                    }
-                });
+            // // Função para confirmar a atualização
+            // function confirmarAtualizacao() {
+            //     const pessoaId = document.getElementById('botaoConfirmarAtualizacao').getAttribute('data-pessoa-id');
+            //     const nomeNovo = document.getElementById('inputNomeAtualizar').value;
+            //     const cpfNovo = document.getElementById('inputCPFAtualizar').value;
+            //     const emailNovo = document.getElementById('inputEmail1Atualizar').value;
+            //     const textoNovo = document.getElementById('inputTextoAtualizar').value;
 
-                // Limpar os campos de edição
-                limparCamposAtualizacao();
-            }
+            //     // Lógica para atualizar os dados da pessoa no backend com base no ID (pessoaId)
+
+            //     // Esconder o botão de confirmação após a atualização
+            //     document.getElementById('botaoConfirmarAtualizacao').style.display = 'none';
+
+            //     // Atualizar a linha na tabela correspondente à pessoa
+            //     const linhas = document.querySelectorAll('#eventos-tbody-atualizar tr');
+            //     linhas.forEach(linha => {
+            //         const tds = linha.querySelectorAll('td');
+            //         if (tds[1].textContent === cpfNovo) { // Comparar com o CPF para encontrar a linha correta
+            //             tds[0].textContent = nomeNovo;
+            //             tds[2].textContent = emailNovo;
+            //             tds[3].textContent = textoNovo;
+            //         }
+            //     });
+
+            //     // Limpar os campos de edição
+            //     limparCamposAtualizacao();
+            // }
 
             // Adiciona um evento ao botão de confirmação para chamar a função confirmarAtualizacao
             document.getElementById('botaoConfirmarAtualizacao').addEventListener('click', confirmarAtualizacao);
@@ -1857,27 +1916,28 @@
                 linha.parentElement.removeChild(linha);
             }
 
-            function carregarDadosParaEditar(linha) {
-                // Obter os dados da linha
-                var nome = linha.cells[0].textContent;
-                var cpf = linha.cells[1].textContent;
-                var email = linha.cells[2].textContent;
-                var texto = linha.cells[3].textContent;
+            // //DANDO CONFLITO COM O CRIAR EVENTOS------------------------------------------------------------------------------------------
+            // function carregarDadosParaEditar(linha) {
+            //     // Obter os dados da linha
+            //     var nome = linha.cells[0].textContent;
+            //     var cpf = linha.cells[1].textContent;
+            //     var email = linha.cells[2].textContent;
+            //     var texto = linha.cells[3].textContent;
 
-                // Preencher os campos de entrada com os dados da linha
-                document.getElementById('inputNomeAtualizar').value = nome;
-                document.getElementById('inputCPFAtualizar').value = cpf;
-                document.getElementById('inputEmail1Atualizar').value = email; // Ajustado para o ID correto
-                document.getElementById('inputTextoAtualizar').value = texto;
+            //     // Preencher os campos de entrada com os dados da linha
+            //     document.getElementById('inputNomeAtualizar').value = nome;
+            //     document.getElementById('inputCPFAtualizar').value = cpf;
+            //     document.getElementById('inputEmail1Atualizar').value = email; // Ajustado para o ID correto
+            //     document.getElementById('inputTextoAtualizar').value = texto;
 
-                // Exibir o botão de confirmação de atualização
-                document.getElementById('botaoConfirmarAtualizacao').style.display = 'inline-block'; // Ajustado para o ID correto
+            //     // Exibir o botão de confirmação de atualização
+            //     document.getElementById('botaoConfirmarAtualizacao').style.display = 'inline-block'; // Ajustado para o ID correto
 
-                // Adicionar um atributo à linha para identificá-la durante a confirmação
-                linha.setAttribute('data-editing', 'true');
+            //     // Adicionar um atributo à linha para identificá-la durante a confirmação
+            //     linha.setAttribute('data-editing', 'true');
 
-                // Lógica adicional, se necessário, para manipular a linha selecionada
-            }
+            //     // Lógica adicional, se necessário, para manipular a linha selecionada
+            // }
 
 
             document.getElementById('btnConfirmarAtualizacao').onclick = function (event) {
@@ -1933,8 +1993,9 @@
             // Event listener para chamar a função de importação ao selecionar um arquivo
             document.getElementById('excelFileAtualizar').addEventListener('change', importarExcelAtualizar);
 
-            
-            
+
+
+        
 
     </script>
 </body>
