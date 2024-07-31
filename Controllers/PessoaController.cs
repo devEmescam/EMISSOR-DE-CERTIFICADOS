@@ -3,6 +3,9 @@ using System.Data;
 using EMISSOR_DE_CERTIFICADOS.DBConnections;
 using EMISSOR_DE_CERTIFICADOS.Models;
 using EMISSOR_DE_CERTIFICADOS.Helpers;
+using DocumentFormat.OpenXml.Presentation;
+using static EMISSOR_DE_CERTIFICADOS.Repositories.PessoaEventosRepository;
+using EMISSOR_DE_CERTIFICADOS.Repositories;
 
 namespace EMISSOR_DE_CERTIFICADOS.Controllers
 {
@@ -10,10 +13,13 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
     {
         private readonly DBHelpers _dbHelper;
         private readonly ISessao _sessao;
+        private readonly PessoaEventosRepository _pessoaEventosRepository;
 
-        public PessoaController(DBHelpers dbHelper)
+        public PessoaController(DBHelpers dbHelper, ISessao sessao, PessoaEventosRepository pessoaEventosRepository)
         {
             _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelpers não pode ser nulo.");
+            _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");
+            _pessoaEventosRepository = pessoaEventosRepository ?? throw new ArgumentNullException(nameof(dbHelper), "O PessoaEventosRepository não pode ser nulo.");
         }
 
         #region *** IActionResults ***        
@@ -37,8 +43,11 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         [HttpGet]
         public async Task<IActionResult> BuscarPessoas(string termo)
         {
-            var pessoas = (await BuscarPorNomeCpfEmailAsync(termo)).Select(p => new {p.Id, p.Nome, p.CPF, p.Email}).ToList();
+            //var pessoas = (await BuscarPorNomeCpfEmailAsync(termo)).Select(p => new {p.Id, p.Nome, p.CPF, p.Email}).ToList();
+            var pessoas = await BuscarPorNomeCpfEmailAsync(termo);
+
             return Json(pessoas);
+            
         }
         [HttpGet]
         public async Task<IActionResult> ObterIdPessoaPorCPF(string cpf)
@@ -129,52 +138,63 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
 
         #region *** METODOS ***      
         // VERSÃO ASYNC: Método para buscar pessoas pelo termo informado
-        private async Task<IEnumerable<PessoaModel>> BuscarPorNomeCpfEmailAsync(string termo)
+        private async Task<IEnumerable<Pessoa>> BuscarPorNomeCpfEmailAsync(string termo)
         {
             try
             {
+
                 // Recupera o Id do usuário da sessão
                 int userId = HttpContext.Session.GetInt32("UserId") ?? 0;
-
                 // Se o Id do usuário for zero, significa que não está logado ou o Id não foi encontrado
                 if (userId == 0)
                 {
                     throw new Exception($"Falha ao identificar usuário logado.");
                 }
-
-                var query = @"SELECT * FROM PESSOA 
-                              WHERE (Nome LIKE @Termo 
-                                    OR CPF LIKE @Termo 
-                                    OR Email LIKE @Termo) AND ID_USUARIO_ADMINISTRATIVO = @ID_USUARIO_ADMINISTRATIVO";
-
-                var parameters = new Dictionary<string, object>
-                {
-                    { "@Termo", "%" + termo + "%" },
-                    { "@ID_USUARIO_ADMINISTRATIVO", userId}
-                };
-
-                var dataTable = await _dbHelper.ExecuteQueryAsync(query, parameters);
-                var pessoas = new List<PessoaModel>();
-
-                foreach (DataRow row in dataTable.Rows)
-                {
-                    pessoas.Add(new PessoaModel
-                    {
-                        Id = Convert.ToInt32(row["Id"]),
-                        Nome = Convert.ToString(row["Nome"]),
-                        CPF = Convert.ToString(row["CPF"]),
-                        Email = Convert.ToString(row["Email"])
-                    });
-                }
-
+                var pessoas = await _pessoaEventosRepository.CarregarDadosAsync(termo, userId);
                 return pessoas;
+
+                //// Recupera o Id do usuário da sessão
+                //int userId = HttpContext.Session.GetInt32("UserId") ?? 0;
+
+                //// Se o Id do usuário for zero, significa que não está logado ou o Id não foi encontrado
+                //if (userId == 0)
+                //{
+                //    throw new Exception($"Falha ao identificar usuário logado.");
+                //}
+
+                //var query = @"SELECT * FROM PESSOA 
+                //              WHERE (Nome LIKE @Termo 
+                //                    OR CPF LIKE @Termo 
+                //                    OR Email LIKE @Termo) AND ID_USUARIO_ADMINISTRATIVO = @ID_USUARIO_ADMINISTRATIVO";
+
+                //var parameters = new Dictionary<string, object>
+                //{
+                //    { "@Termo", "%" + termo + "%" },
+                //    { "@ID_USUARIO_ADMINISTRATIVO", userId}
+                //};
+
+                //var dataTable = await _dbHelper.ExecuteQueryAsync(query, parameters);
+                //var pessoas = new List<PessoaModel>();
+
+                //foreach (DataRow row in dataTable.Rows)
+                //{
+                //    pessoas.Add(new PessoaModel
+                //    {
+                //        Id = Convert.ToInt32(row["Id"]),
+                //        Nome = Convert.ToString(row["Nome"]),
+                //        CPF = Convert.ToString(row["CPF"]),
+                //        Email = Convert.ToString(row["Email"])
+                //    });
+                //}
+
+                //return pessoas;
             }
             catch (Exception ex)
             {
                 throw new Exception($"Ocorreu um erro em [PessoaController.BuscarPorNomeCpfEmailAsync] Erro: {ex.Message}");
             }
         }
-                
+        
         // VERSÃO ASYNC: Método assíncrono para retornar todas as pessoas do banco de dados
         private async Task<IEnumerable<PessoaModel>> BuscarTodasPessoasAsync()
         {

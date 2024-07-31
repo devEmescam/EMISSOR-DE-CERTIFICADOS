@@ -1,10 +1,14 @@
 using EMISSOR_DE_CERTIFICADOS.DBConnections;
 using EMISSOR_DE_CERTIFICADOS.Helpers;
+using EMISSOR_DE_CERTIFICADOS.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Registrando o PessoaEventosRepository no container de injeção de dependências
+builder.Services.AddScoped<PessoaEventosRepository>();
 
 builder.Logging.AddConsole();
 // Configura o nível mínimo de logging para Debug

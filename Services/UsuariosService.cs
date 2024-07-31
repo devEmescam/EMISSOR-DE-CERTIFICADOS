@@ -4,15 +4,23 @@ using System.Security.Cryptography;
 using System.Text;
 using EMISSOR_DE_CERTIFICADOS.DBConnections;
 using EMISSOR_DE_CERTIFICADOS.Controllers;
+using EMISSOR_DE_CERTIFICADOS.Repositories;
+using EMISSOR_DE_CERTIFICADOS.Helpers;
 
 namespace EMISSOR_DE_CERTIFICADOS.Services
 {
     public class UsuariosService
     {
         private readonly DBHelpers _dbHelper;
-        public UsuariosService(DBHelpers dbHelper)
+        private readonly ISessao _sessao;
+        private readonly PessoaEventosRepository _pessoaEventosRepository;
+
+
+        public UsuariosService(DBHelpers dbHelper, ISessao sessao, PessoaEventosRepository pessoaEventosRepository)
         {
             _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelper não pode ser nulo.");
+            _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");
+            _pessoaEventosRepository = pessoaEventosRepository ?? throw new ArgumentNullException(nameof(dbHelper), "O PessoaEventosRepository não pode ser nulo.");
         }        
         public async Task<int> GerarUsuarioAsync(int idPessoa)
         {
@@ -95,7 +103,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
 
             try
             {
-                using (PessoaController pessoaController = new PessoaController(_dbHelper))
+                using (PessoaController pessoaController = new PessoaController(_dbHelper,_sessao, _pessoaEventosRepository))
                 {
                     cpf = await pessoaController.ObterCPFPorIdPessoaAsync(idPessoa);
                 }
