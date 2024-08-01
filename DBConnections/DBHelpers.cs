@@ -3,7 +3,7 @@ using System.Data.SqlClient;
 
 namespace EMISSOR_DE_CERTIFICADOS.DBConnections
 {
-    public class DBHelpers
+    public class DBHelpers : IDBHelpers
     {
         private readonly Dictionary<string, string> _connectionStrings;
         public DBHelpers(Dictionary<string, string> connectionStrings)
@@ -293,6 +293,5 @@ namespace EMISSOR_DE_CERTIFICADOS.DBConnections
                 }
             }
         }
-
     }
 }

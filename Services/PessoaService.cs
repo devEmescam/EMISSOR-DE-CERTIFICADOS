@@ -6,13 +6,13 @@ using static EMISSOR_DE_CERTIFICADOS.Repositories.PessoaEventosRepository;
 
 namespace EMISSOR_DE_CERTIFICADOS.Services
 {
-    public class PessoaService : IPessoaService
+    internal class PessoaService : IPessoaService
     {
         private readonly IPessoaRepository _pessoaRepository;
         private readonly ISessao _sessao;
-        private readonly PessoaEventosRepository _pessoaEventosRepository;
+        private readonly IPessoaEventosRepository _pessoaEventosRepository;
 
-        public PessoaService(IPessoaRepository pessoaRepository, ISessao sessao, PessoaEventosRepository pessoaEventosRepository)
+        public PessoaService(IPessoaRepository pessoaRepository, ISessao sessao, IPessoaEventosRepository pessoaEventosRepository)
         {
             _pessoaRepository = pessoaRepository;
             _sessao = sessao;

@@ -8,11 +8,11 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
 {
     public class LoginController : Controller
     {
-        private readonly DBHelpers _dbHelper;
+        private readonly IDBHelpers _dbHelper;
         private readonly ISessao _sessao;
         private readonly ADHelper _adHelper = new ADHelper();                
 
-        public LoginController(DBHelpers databaseHelper, ISessao sessao)
+        public LoginController(IDBHelpers databaseHelper, ISessao sessao)
         {
             _dbHelper = databaseHelper;
             _sessao = sessao;            

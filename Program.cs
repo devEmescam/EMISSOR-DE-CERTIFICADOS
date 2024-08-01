@@ -1,4 +1,3 @@
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using EMISSOR_DE_CERTIFICADOS.DBConnections;
 using EMISSOR_DE_CERTIFICADOS.Helpers;
 using EMISSOR_DE_CERTIFICADOS.Interfaces;
@@ -11,23 +10,28 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 // Registrando injeções de dependências no container 
-builder.Services.AddScoped<PessoaEventosRepository>();
+builder.Services.AddScoped<IPessoaEventosRepository, PessoaEventosRepository>();
+builder.Services.AddScoped<IEventoPessoasRepository, EventoPessoasRepository>();
 builder.Services.AddScoped<IPessoaService, PessoaService>();
 builder.Services.AddScoped<IPessoaRepository, PessoaRepository>();
-
-builder.Logging.AddConsole();
-// Configura o nível mínimo de logging para Debug
-builder.Logging.SetMinimumLevel(LogLevel.Debug);
-
-// Add IHttpContextAccessor to the services
-builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IOrganizadorService, OrganizadorService>();
+builder.Services.AddScoped<IOrganizadorRepository, OrganizadorRepository>();
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<IUsuarioService, UsuariosService>();
+builder.Services.AddScoped<ICertificadosService, CertificadosService>();
+builder.Services.AddScoped<ICertificadosRepository, CertificadosRepository>();
 
 var connectionStrings = new Dictionary<string, string>
 {
     { "CertificadoConnection", builder.Configuration.GetConnectionString("CertificadoConnection") },
 };
+builder.Services.AddSingleton<IDBHelpers>(provider => new DBHelpers(connectionStrings));
 
-builder.Services.AddSingleton(new DBHelpers(connectionStrings));
+builder.Logging.AddConsole();
+// Configura o nível mínimo de logging para Debug
+builder.Logging.SetMinimumLevel(LogLevel.Debug);
+// Add IHttpContextAccessor to the services
+builder.Services.AddHttpContextAccessor();
 
 //===========================================================================================
 //Injetar dependencia do "HttpContext" e "Sessao" para usar o controle de sessão da aplicacao
