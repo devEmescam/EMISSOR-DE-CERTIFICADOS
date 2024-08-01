@@ -1,13 +1,14 @@
 ﻿using EMISSOR_DE_CERTIFICADOS.DBConnections;
+using EMISSOR_DE_CERTIFICADOS.Interfaces;
 using System.Data;
 
 namespace EMISSOR_DE_CERTIFICADOS.Repositories
 {
-    public class EventoPessoasRepository
+    internal class EventoPessoasRepository : IEventoPessoasRepository
     {
-        private readonly DBHelpers _dbHelper;
+        private readonly IDBHelpers _dbHelper;
 
-        public EventoPessoasRepository(DBHelpers dbHelper)
+        public EventoPessoasRepository(IDBHelpers dbHelper)
         {
             _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelper não pode ser nulo.");
         }

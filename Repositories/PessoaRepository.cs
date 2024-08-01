@@ -5,10 +5,10 @@ using System.Data;
 
 namespace EMISSOR_DE_CERTIFICADOS.Repositories
 {
-    public class PessoaRepository : IPessoaRepository
+    internal class PessoaRepository : IPessoaRepository
     {
-        private readonly DBHelpers _dbHelper;
-        public PessoaRepository(DBHelpers dbHelper)
+        private readonly IDBHelpers _dbHelper;
+        public PessoaRepository(IDBHelpers dbHelper)
         {
             _dbHelper = dbHelper;
         }

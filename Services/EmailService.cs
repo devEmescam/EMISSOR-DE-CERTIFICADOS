@@ -13,17 +13,19 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
     {
         private string _token;
         private string _evento;
-        private readonly DBHelpers _dbHelper;
-        private readonly PessoaEventosRepository _pessoaEventosRepository;
+        private readonly IDBHelpers _dbHelper;
+        private readonly IPessoaEventosRepository _pessoaEventosRepository;
         private readonly ISessao _sessao;
         private readonly IPessoaService _pessoaService;
+        private readonly IUsuarioService _usuarioService;
 
-        public EmailService(DBHelpers dbHelper, ISessao sessao, PessoaEventosRepository pessoaEventosRepository, IPessoaService pessoaService)
+        public EmailService(IDBHelpers dbHelper, ISessao sessao, IPessoaEventosRepository pessoaEventosRepository, IPessoaService pessoaService, IUsuarioService usuarioService)
         {
-            _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelper não pode ser nulo.");
+            _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O IDBHelper não pode ser nulo.");
             _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");
-            _pessoaEventosRepository = pessoaEventosRepository ?? throw new ArgumentNullException(nameof(dbHelper), "O PessoaEventosRepository não pode ser nulo.");
+            _pessoaEventosRepository = pessoaEventosRepository ?? throw new ArgumentNullException(nameof(dbHelper), "O IPessoaEventosRepository não pode ser nulo.");
             _pessoaService = pessoaService ?? throw new ArgumentNullException(nameof(pessoaService), "O IPessoaService não ser nulo.");
+            _usuarioService = usuarioService ?? throw new ArgumentNullException(nameof(pessoaService), "O IUsuarioService não ser nulo.");
         }
         public async Task<(bool success, string retorno)> EnviarEmailAsync(string login, string senha, int idEventoPessoa)
         {
@@ -60,9 +62,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 //Buscar CC
                 //TO DO: SE FOR USADO SERÁ TRATADO TAMBÉM PELA CONFIGURAÇÃO DE EMAIL
 
-                // Buscar os dados do usuario
-                var usuarioService = new UsuariosService(_dbHelper,_sessao, _pessoaEventosRepository, _pessoaService);
-                var dadosUsuario = await usuarioService.ObterUsuarioESenhaAsync(idEventoPessoa);
+                // Buscar os dados do usuario                
+                var dadosUsuario = await _usuarioService.ObterUsuarioESenhaAsync(idEventoPessoa);
 
                 await ObterNomeEventoAsync(idEventoPessoa);
                 if (string.IsNullOrEmpty(_evento))

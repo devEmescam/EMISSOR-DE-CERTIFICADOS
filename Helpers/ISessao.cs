@@ -8,5 +8,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Helpers
         void RemoverSessaoUsuario();
         LoginModel BuscarSessaodoUsuario();
         int ObterUsuarioId();
+        string ObterUsuarioLogin();
     }
 }

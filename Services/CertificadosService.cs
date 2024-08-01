@@ -1,32 +1,29 @@
-﻿using EMISSOR_DE_CERTIFICADOS.Controllers;
-using EMISSOR_DE_CERTIFICADOS.DBConnections;
-using System.Data.SqlClient;
+﻿using EMISSOR_DE_CERTIFICADOS.DBConnections;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Text;
 using RectangleF = System.Drawing.RectangleF;
 using Rectangle = System.Drawing.Rectangle;
-using EMISSOR_DE_CERTIFICADOS.Repositories;
 using EMISSOR_DE_CERTIFICADOS.Helpers;
 using EMISSOR_DE_CERTIFICADOS.Interfaces;
-//using SixLabors.Fonts;
-//using SixLabors.ImageSharp.Formats.Png;
 
 namespace EMISSOR_DE_CERTIFICADOS.Services
 {
-    public class CertificadosService
+    internal class CertificadosService : ICertificadosService
     {
-        private readonly DBHelpers _dbHelper;
+        private readonly IDBHelpers _dbHelper;
         private readonly ISessao _sessao;
-        private readonly PessoaEventosRepository _pessoaEventosRepository;
-        private readonly IPessoaService _pessoaService;     
+        private readonly IPessoaEventosRepository _pessoaEventosRepository;
+        private readonly IPessoaService _pessoaService;
+        private readonly ICertificadosRepository _certiificadosRepository;
 
-        public CertificadosService(DBHelpers dbHelper, ISessao sessao, PessoaEventosRepository pessoaEventosRepository, IPessoaService pessoaService)
+        public CertificadosService(IDBHelpers dbHelper, ISessao sessao, IPessoaEventosRepository pessoaEventosRepository, IPessoaService pessoaService, ICertificadosRepository certificadosRepository)
         {
             _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelpers não pode ser nulo.");
             _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");
-            _pessoaEventosRepository = pessoaEventosRepository ?? throw new ArgumentNullException(nameof(dbHelper), "O PessoaEventosRepository não pode ser nulo.");
+            _pessoaEventosRepository = pessoaEventosRepository ?? throw new ArgumentNullException(nameof(pessoaEventosRepository), "O PessoaEventosRepository não pode ser nulo.");
             _pessoaService = pessoaService ?? throw new ArgumentNullException(nameof(pessoaService), "O IPessoaService não ser nulo.");
+            _certiificadosRepository = certificadosRepository ?? throw new ArgumentNullException(nameof(certificadosRepository), "O ICertificadosRepository não ser nulo.");
         }              
         public async Task<bool> GerarCertificadoAsync(int idEvento_Pessoa, int idPessoa, string textoOriginal, IFormFile imagem)
         {
@@ -287,12 +284,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
         private async Task<string> RetornarCPFAsync(int idPessoa)
         {
             try
-            {
-                //using (PessoaController pessoaController = new PessoaController(_dbHelper,_sessao, _pessoaEventosRepository))
-                //{
-                //    string cpf = await pessoaController.ObterCPFPorIdPessoaAsync(idPessoa);
-                //    return cpf;
-                //}
+            {                
                 string cpf = await _pessoaService.ObterCPFPorIdPessoaAsync(idPessoa);
                 return cpf;
             }
@@ -305,18 +297,20 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
         {
             try
             {
-                string sSQL = "UPDATE EVENTO_PESSOA SET IMAGEM_CERTIFICADO = @Certificado, CODIGO_CERTIFICADO = @CodigoCertificado WHERE ID = @IdEventoPessoa";
+                //string sSQL = "UPDATE EVENTO_PESSOA SET IMAGEM_CERTIFICADO = @Certificado, CODIGO_CERTIFICADO = @CodigoCertificado WHERE ID = @IdEventoPessoa";
 
-                using (var connection = _dbHelper.GetConnection("CertificadoConnection"))
-                {
-                    using (var command = new SqlCommand(sSQL, (SqlConnection)connection))
-                    {
-                        command.Parameters.AddWithValue("@Certificado", certificadoBytes);
-                        command.Parameters.AddWithValue("@CodigoCertificado", codigoCertificado);
-                        command.Parameters.AddWithValue("@IdEventoPessoa", idEventoPessoa);
-                        await command.ExecuteNonQueryAsync();
-                    }
-                }
+                //using (var connection = _dbHelper.GetConnection("CertificadoConnection"))
+                //{
+                //    using (var command = new SqlCommand(sSQL, (SqlConnection)connection))
+                //    {
+                //        command.Parameters.AddWithValue("@Certificado", certificadoBytes);
+                //        command.Parameters.AddWithValue("@CodigoCertificado", codigoCertificado);
+                //        command.Parameters.AddWithValue("@IdEventoPessoa", idEventoPessoa);
+                //        await command.ExecuteNonQueryAsync();
+                //    }
+                //}
+
+                await _certiificadosRepository.InserirAsync(idEventoPessoa, certificadoBytes, codigoCertificado);
             }
             catch (Exception ex)
             {

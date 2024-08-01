@@ -8,17 +8,15 @@ using static EMISSOR_DE_CERTIFICADOS.Repositories.PessoaEventosRepository;
 namespace EMISSOR_DE_CERTIFICADOS.Controllers
 {
     public class Home_ParticipanteController : Controller
-    {
-        private readonly DBHelpers _dbHelper;
+    {        
         private readonly ISessao _sessao;
-        private readonly PessoaEventosRepository _pessoaEventosRepository;
+        private readonly IPessoaEventosRepository _pessoaEventosRepository;
         private readonly IPessoaService _pessoaService;
 
-        public Home_ParticipanteController(DBHelpers dbHelper, ISessao sessao, PessoaEventosRepository pessoaEventosRepository, IPessoaService pessoaService)
-        {
-            _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelpers não pode ser nulo.");
+        public Home_ParticipanteController(ISessao sessao, IPessoaEventosRepository pessoaEventosRepository, IPessoaService pessoaService)
+        {     
             _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");
-            _pessoaEventosRepository = pessoaEventosRepository ?? throw new ArgumentNullException(nameof(dbHelper), "O PessoaEventosRepository não pode ser nulo.");
+            _pessoaEventosRepository = pessoaEventosRepository ?? throw new ArgumentNullException(nameof(pessoaEventosRepository), "O PessoaEventosRepository não pode ser nulo.");
             _pessoaService = pessoaService ?? throw new ArgumentNullException(nameof(pessoaService), "O IPessoaService não pode ser nulo.");
         }
 
@@ -84,11 +82,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                     throw new Exception("Login do usuário não encontrado na sessão.");
                 }
 
-                //Cria uma instancia de pessoaController para chamar os metodos contidos nessa classe
-                //using (PessoaController pessoaController = new PessoaController(_dbHelper, _sessao, _pessoaEventosRepository)) 
-                //{
-                //    idPessoa = await pessoaController.ObterIdPessoaPorCPFAsync(cpf);
-                //}
+                //Cria uma instancia de pessoaController para chamar os metodos contidos nessa classe                
 
                 idPessoa = await _pessoaService.ObterIdPessoaPorCPFAsync(cpf);
                 var eventos = await _pessoaEventosRepository.CarregarEventosPessoa(idPessoa, -1, false);

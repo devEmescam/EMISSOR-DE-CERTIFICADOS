@@ -1,16 +1,17 @@
 ﻿using EMISSOR_DE_CERTIFICADOS.DBConnections;
+using EMISSOR_DE_CERTIFICADOS.Interfaces;
 using System.Data;
 
 namespace EMISSOR_DE_CERTIFICADOS.Repositories
 {
-    public class PessoaEventosRepository
+    internal class PessoaEventosRepository: IPessoaEventosRepository
     {
-        private readonly DBHelpers _dbHelper;
-        public PessoaEventosRepository(DBHelpers dbHelper)
+        private readonly IDBHelpers _dbHelper;
+        public PessoaEventosRepository(IDBHelpers dbHelper)
         {
             _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelper não pode ser nulo.");
         }
-        public async Task<List<Pessoa>> CarregarDadosAsync(string termo, int idUsuario, bool visaoOrganizador) 
+        public async Task<List<Pessoa>> CarregarDadosAsync(string termo, int idUsuario, bool visaoOrganizador)
         {
             try
             {
@@ -111,19 +112,19 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                 throw new Exception($"Erro em [PessoaEventosRepository.CarregarEventosPessoa]: {ex.Message}");
             }
         }
-
-        public class Pessoa 
-        {
-            public int Id { get; set; }
-            public string Nome { get; set; }
-            public string CPF { get; set; }
-            public string Email { get; set; }
-            public List<EventoPessoa> Eventos { get; set; }
-        }
-        public class EventoPessoa 
-        {
-            public string Nome { get; set; }
-            public IFormFile ImagemCertificado { get; set; }
-        }
+       
     }
+}
+public class Pessoa
+{
+    public int Id { get; set; }
+    public string Nome { get; set; }
+    public string CPF { get; set; }
+    public string Email { get; set; }
+    public List<EventoPessoa> Eventos { get; set; }
+}
+public class EventoPessoa
+{
+    public string Nome { get; set; }
+    public IFormFile ImagemCertificado { get; set; }
 }

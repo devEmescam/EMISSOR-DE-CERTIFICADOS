@@ -1,55 +1,41 @@
-﻿using System.Data;
-using System.Net.Http.Headers;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using EMISSOR_DE_CERTIFICADOS.DBConnections;
-using EMISSOR_DE_CERTIFICADOS.Controllers;
-using EMISSOR_DE_CERTIFICADOS.Repositories;
 using EMISSOR_DE_CERTIFICADOS.Helpers;
 using EMISSOR_DE_CERTIFICADOS.Interfaces;
 
 namespace EMISSOR_DE_CERTIFICADOS.Services
 {
-    public class UsuariosService
+    internal class UsuariosService : IUsuarioService
     {
-        private readonly DBHelpers _dbHelper;
+        private readonly IDBHelpers _dbHelper;
         private readonly ISessao _sessao;
-        private readonly PessoaEventosRepository _pessoaEventosRepository;
+        private readonly IPessoaEventosRepository _pessoaEventosRepository;
         private readonly IPessoaService _pessoaService;
+        private readonly IUsuarioRepository _usuarioRepository;
 
-        public UsuariosService(DBHelpers dbHelper, ISessao sessao, PessoaEventosRepository pessoaEventosRepository, IPessoaService pessoaService)
+        public UsuariosService(IDBHelpers dbHelper, ISessao sessao, IPessoaEventosRepository pessoaEventosRepository, IPessoaService pessoaService, IUsuarioRepository usuarioRepository)
         {
             _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelper não pode ser nulo.");
             _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");
-            _pessoaEventosRepository = pessoaEventosRepository ?? throw new ArgumentNullException(nameof(dbHelper), "O PessoaEventosRepository não pode ser nulo.");
+            _pessoaEventosRepository = pessoaEventosRepository ?? throw new ArgumentNullException(nameof(pessoaEventosRepository), "O PessoaEventosRepository não pode ser nulo.");
             _pessoaService = pessoaService ?? throw new ArgumentNullException(nameof(pessoaService), "O IPessoaService não ser nulo.");
+            _usuarioRepository = usuarioRepository ?? throw new ArgumentNullException(nameof(pessoaService), "O IUsuarioRepository não ser nulo.");
         }        
         public async Task<int> GerarUsuarioAsync(int idPessoa)
         {
             int idUsuario = -1;
-            string cpf = string.Empty;
-            string sSQL = string.Empty;
+            string cpf = string.Empty;            
             string senha = string.Empty;
 
             try
             {
-                cpf =  await RetornarCPFAsync(idPessoa);
+                cpf = await RetornarCPFAsync(idPessoa);
 
                 if (!await UsuarioExisteAsync(cpf))
                 {
                     senha = await CriarSenhaAsync(cpf);
-
-                    sSQL = "INSERT INTO USUARIO (USUARIO, SENHA, ADMINISTRATIVO, DATA_CADASTRO) " +
-                           "VALUES (@CPF, @Senha, 0, GETDATE()); " +
-                           "SELECT SCOPE_IDENTITY();"; // Obtem o ID do usuario inserido
-
-                    var parameters = new Dictionary<string, object>
-                    {
-                        { "@CPF", cpf },
-                        { "@Senha", senha }
-                    };
-
-                    idUsuario = await _dbHelper.ExecuteScalarAsync<int>(sSQL, parameters);
+                    idUsuario = await _usuarioRepository.GerarUsuarioAsync(cpf, senha);
                 }
                 else
                 {
@@ -104,11 +90,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             string cpf = string.Empty;
 
             try
-            {
-                //using (PessoaController pessoaController = new PessoaController(_dbHelper,_sessao, _pessoaEventosRepository))
-                //{
-                //    cpf = await pessoaController.ObterCPFPorIdPessoaAsync(idPessoa);
-                //}
+            {                
                 cpf = await _pessoaService.ObterCPFPorIdPessoaAsync(idPessoa);
                 return cpf;
             }
@@ -121,34 +103,32 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
         {
             try
             {
-                // Consulta o banco de dados para verificar se existe uma pessoa com o mesmo CPF
-                var sSQL = $"SELECT COUNT(*) FROM USUARIO WHERE USUARIO = '{usuario}'";
-                var result = await _dbHelper.ExecuteScalarAsync<int>(sSQL);
-                int count = Convert.ToInt32(result);
-
-                return count > 0;
+                bool retorno = false;
+                if ( await _usuarioRepository.UsuarioExisteAsync(usuario))  
+                {
+                    retorno = true;
+                }
+                return retorno; 
             }
             catch (Exception ex)
             {
-                throw new Exception($"Ocorreu um erro em [PessoaController.UsuarioExisteAsync] Erro: {ex.Message}");
+                throw new Exception($"Ocorreu um erro em [UsuariosService.UsuarioExisteAsync] Erro: {ex.Message}");
             }
         }                
         private async Task<int> RetornarIdAsync(string usuario)
         {
             try
             {
-                var query = $"SELECT ID FROM USUARIO WHERE USUARIO = '{usuario}'";
-                var result = await _dbHelper.ExecuteScalarAsync<int>(query);
+                int retorno = await _usuarioRepository.RetornarIdAsync(usuario);
 
-                // Se o resultado não for nulo, converte para inteiro e retorna o ID
-                if (result != null)
+                if (retorno != null)
                 {
-                    return Convert.ToInt32(result);
+                    return retorno;
                 }
-                else
+                else 
                 {
                     throw new InvalidOperationException("Não foi possível encontrar o registo com o Usuario fornecido.");
-                }
+                };
             }
             catch (Exception ex)
             {
@@ -159,33 +139,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
         {
             try
             {
-                var sSQL = "SELECT U.USUARIO, U.SENHA" +
-                           " FROM EVENTO_PESSOA EP" +
-                           " JOIN PESSOA P ON (EP.ID_PESSOA = P.ID)" +
-                           " JOIN USUARIO U ON (P.CPF = U.USUARIO)" +
-                           " WHERE EP.ID = @IdEventoPessoa";
-
-                var parameters = new Dictionary<string, object>
-                {
-                    { "@IdEventoPessoa", idEventoPessoa }
-                };
-
-                // Executar a consulta
-                DataTable result = await _dbHelper.ExecuteQueryAsync(sSQL, parameters);
-
-                if (result.Rows.Count == 0)
-                {
-                    throw new Exception("Nenhum usuário encontrado para o idEventoPessoa fornecido.");
-                }
-
-                // Extrair os dados da primeira linha retornada
-                DataRow row = result.Rows[0];
-                var usuarioSenha = new UsuarioSenha
-                {
-                    Usuario = Convert.ToString(row["USUARIO"]),
-                    Senha = Convert.ToString(row["SENHA"])
-                };
-
+                var usuarioSenha = await _usuarioRepository.ObterUsuarioESenhaAsync(idEventoPessoa);
                 return usuarioSenha;
             }
             catch (Exception ex)
@@ -193,10 +147,5 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 throw new Exception($"Erro em [UsuariosService.ObterUsuarioESenhaAsync]: {ex.Message}");
             }
         }
-    }
-    public class UsuarioSenha
-    {
-        public string Usuario { get; set; }
-        public string Senha { get; set; }
-    }
+    }    
 }

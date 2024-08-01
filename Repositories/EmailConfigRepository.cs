@@ -7,8 +7,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
 {
     public class EmailConfigRepository
     {
-        private readonly DBHelpers _dbHelper;
-        public EmailConfigRepository(DBHelpers dbHelper)
+        private readonly IDBHelpers _dbHelper;
+        public EmailConfigRepository(IDBHelpers dbHelper)
         {
             _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelper não pode ser nulo.");
         }
