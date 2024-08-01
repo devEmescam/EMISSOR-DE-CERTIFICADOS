@@ -7,5 +7,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Helpers
         void CriarSessaoDoUsuario(LoginModel login);
         void RemoverSessaoUsuario();
         LoginModel BuscarSessaodoUsuario();
+        int ObterUsuarioId();
     }
 }

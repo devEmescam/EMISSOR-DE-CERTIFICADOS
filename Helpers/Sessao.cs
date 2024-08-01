@@ -50,7 +50,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Helpers
                 throw new Exception($"Ocorreu um erro em Sessao.CriarSessaoDoUsuario. Erro: {ex.Message}");
             }
         }
-
         public void RemoverSessaoUsuario()
         {
             _httpContext.HttpContext.Session.Remove("sessaoUsuarioLogado");
@@ -58,6 +57,17 @@ namespace EMISSOR_DE_CERTIFICADOS.Helpers
             _httpContext.HttpContext.Session.Remove("Login");
             _httpContext.HttpContext.Session.Remove("Senha");
             _httpContext.HttpContext.Session.Remove("Tipo");
+        }
+        public int ObterUsuarioId() 
+        {
+            try
+            {
+                 return _httpContext.HttpContext.Session.GetInt32("UserId") ?? 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ocorreu um erro em Sessao.ObterUsuarioId. Erro: {ex.Message}");
+            }
         }
     }
 }

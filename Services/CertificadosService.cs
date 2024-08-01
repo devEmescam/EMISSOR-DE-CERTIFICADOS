@@ -8,6 +8,7 @@ using RectangleF = System.Drawing.RectangleF;
 using Rectangle = System.Drawing.Rectangle;
 using EMISSOR_DE_CERTIFICADOS.Repositories;
 using EMISSOR_DE_CERTIFICADOS.Helpers;
+using EMISSOR_DE_CERTIFICADOS.Interfaces;
 //using SixLabors.Fonts;
 //using SixLabors.ImageSharp.Formats.Png;
 
@@ -18,12 +19,14 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
         private readonly DBHelpers _dbHelper;
         private readonly ISessao _sessao;
         private readonly PessoaEventosRepository _pessoaEventosRepository;
+        private readonly IPessoaService _pessoaService;     
 
-        public CertificadosService(DBHelpers dbHelper, ISessao sessao, PessoaEventosRepository pessoaEventosRepository)
+        public CertificadosService(DBHelpers dbHelper, ISessao sessao, PessoaEventosRepository pessoaEventosRepository, IPessoaService pessoaService)
         {
             _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelpers não pode ser nulo.");
             _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");
             _pessoaEventosRepository = pessoaEventosRepository ?? throw new ArgumentNullException(nameof(dbHelper), "O PessoaEventosRepository não pode ser nulo.");
+            _pessoaService = pessoaService ?? throw new ArgumentNullException(nameof(pessoaService), "O IPessoaService não ser nulo.");
         }              
         public async Task<bool> GerarCertificadoAsync(int idEvento_Pessoa, int idPessoa, string textoOriginal, IFormFile imagem)
         {
@@ -189,10 +192,12 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             {
                 if (!string.IsNullOrEmpty(texto))
                 {
-                    using (PessoaController pessoaController = new PessoaController(_dbHelper,_sessao, _pessoaEventosRepository))
-                    {
-                        nomePessoa = await pessoaController.ObterNomePorIdPessoaAsync(idPessoa);
-                    }
+                    //using (PessoaController pessoaController = new PessoaController(_dbHelper,_sessao, _pessoaEventosRepository))
+                    //{
+                    //    nomePessoa = await pessoaController.ObterNomePorIdPessoaAsync(idPessoa);
+                    //}
+
+                    nomePessoa = await _pessoaService.ObterNomePorIdPessoaAsync(idPessoa);
 
                     int posNomePessoa = texto.IndexOf("NOME_PESSOA");
                     int posBR = texto.IndexOf("<br>", StringComparison.OrdinalIgnoreCase);
@@ -283,11 +288,13 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
         {
             try
             {
-                using (PessoaController pessoaController = new PessoaController(_dbHelper,_sessao, _pessoaEventosRepository))
-                {
-                    string cpf = await pessoaController.ObterCPFPorIdPessoaAsync(idPessoa);
-                    return cpf;
-                }
+                //using (PessoaController pessoaController = new PessoaController(_dbHelper,_sessao, _pessoaEventosRepository))
+                //{
+                //    string cpf = await pessoaController.ObterCPFPorIdPessoaAsync(idPessoa);
+                //    return cpf;
+                //}
+                string cpf = await _pessoaService.ObterCPFPorIdPessoaAsync(idPessoa);
+                return cpf;
             }
             catch (Exception ex)
             {
