@@ -144,7 +144,7 @@ body {
         }
 
 .tabela-container {
-    max-height: 380px;
+    max-height: 340px;
     overflow-y: auto;
 }
 
@@ -282,18 +282,18 @@ button.btn-atualizar {
     border: none;
     border-radius: 2px; /* Bordas arredondadas */
     position: relative; /* Posicionamento alterado para relativo */
-    margin: 10px 5px 10px 5px; /* Margens adicionadas para espaçamento */
+    margin: 10px 5px; /* Margens adicionadas para espaçamento */
 }
 
 #excelFile + .custom-file-upload {
-    float: left; /* Posiciona o botão de Excel à esquerda */
-    margin-right: 300px; /* Aumenta a margem à direita */
+    float: right; /* Posiciona o botão de Excel à direita */
+    margin-left: 300px; /* Aumenta a margem à esquerda */
 }
 
 #arteCertificadoFile + .custom-file-upload {
-    float: right; /* Posiciona o botão de Certificado à direita */
-    margin-left: 300px; /* Aumenta a margem à esquerda */
-    margin-top: -15px;
+    float: left; /* Posiciona o botão de Certificado à esquerda */
+    margin-right: 300px; /* Aumenta a margem à direita */
+    margin-top: -15px; /* Margem superior ajustada para alinhamento */
 }
 
 span {
@@ -371,12 +371,11 @@ hr {
 
 #certificadoFileName {
     position: absolute; /* Posicionamento absoluto dentro de seu container */
-    right: 0; /* Alinha ao lado direito do container */
+    left: 0; /* Alinha ao lado esquerdo do container */
     bottom: -20px; /* Posiciona abaixo do botão */
     color: #333; /* Cor do texto */
     font-size: 12px; /* Tamanho da fonte */
-    float: left; /* Posiciona o botão de Certificado à direita */
-    margin-right: 0px; /* Aumenta a margem à esquerda */
+    margin-right: 0px; /* Remove a margem à direita */
 }
 
 

@@ -19,7 +19,7 @@
             <a href="#" onclick="mostrarCard('configuracoes')">Configurações</a>
         </nav>
         <div id="dropdown-container">
-            <div id="bem-vindo">Bem-Vindo! @ViewBag.Login</div>
+            <div id="bem-vindo">Bem-Vindo, @ViewBag.Login!</div>
             <div id="dropdown-content">
                 <a id="sair-link" href="#">Sair</a>
             </div>
@@ -1688,233 +1688,233 @@
             // }
 
             // Adiciona um evento ao botão de confirmação para chamar a função confirmarAtualizacao
-            document.getElementById('botaoConfirmarAtualizacao').addEventListener('click', confirmarAtualizacao);
+            // document.getElementById('botaoConfirmarAtualizacao').addEventListener('click', confirmarAtualizacao);
 
-            // Função para limpar os campos de atualização
-            function limparCamposAtualizacao() {
-                document.getElementById('inputNomeAtualizar').value = '';
-                document.getElementById('inputCPFAtualizar').value = '';
-                document.getElementById('inputEmail1Atualizar').value = '';
-                document.getElementById('inputTextoAtualizar').value = '';
-            }
+            // // Função para limpar os campos de atualização
+            // function limparCamposAtualizacao() {
+            //     document.getElementById('inputNomeAtualizar').value = '';
+            //     document.getElementById('inputCPFAtualizar').value = '';
+            //     document.getElementById('inputEmail1Atualizar').value = '';
+            //     document.getElementById('inputTextoAtualizar').value = '';
+            // }
 
-            // Adiciona um evento ao botão "Adicionar Dados" para chamar a função adicionarDados
-            document.getElementById('botaoAcaoAtualizar').addEventListener('click', adicionarDados);
+            // // Adiciona um evento ao botão "Adicionar Dados" para chamar a função adicionarDados
+            // document.getElementById('botaoAcaoAtualizar').addEventListener('click', adicionarDados);
 
-            function validarCPF(cpf) {
-                cpf = cpf.replace(/[^\d]+/g, '');
-                if (cpf.length !== 11) return false;
+            // function validarCPF(cpf) {
+            //     cpf = cpf.replace(/[^\d]+/g, '');
+            //     if (cpf.length !== 11) return false;
 
-                let soma;
-                let resto;
-                soma = 0;
-                if (cpf == "00000000000" || cpf == "11111111111" || cpf == "22222222222" || cpf == "33333333333" ||
-                    cpf == "44444444444" || cpf == "55555555555" || cpf == "66666666666" || cpf == "77777777777" ||
-                    cpf == "88888888888" || cpf == "99999999999")
-                    return false;
+            //     let soma;
+            //     let resto;
+            //     soma = 0;
+            //     if (cpf == "00000000000" || cpf == "11111111111" || cpf == "22222222222" || cpf == "33333333333" ||
+            //         cpf == "44444444444" || cpf == "55555555555" || cpf == "66666666666" || cpf == "77777777777" ||
+            //         cpf == "88888888888" || cpf == "99999999999")
+            //         return false;
 
-                for (let i = 1; i <= 9; i++) soma = soma + parseInt(cpf.substring(i - 1, i)) * (11 - i);
-                resto = (soma * 10) % 11;
+            //     for (let i = 1; i <= 9; i++) soma = soma + parseInt(cpf.substring(i - 1, i)) * (11 - i);
+            //     resto = (soma * 10) % 11;
 
-                if ((resto == 10) || (resto == 11)) resto = 0;
-                if (resto != parseInt(cpf.substring(9, 10))) return false;
+            //     if ((resto == 10) || (resto == 11)) resto = 0;
+            //     if (resto != parseInt(cpf.substring(9, 10))) return false;
 
-                soma = 0;
-                for (let i = 1; i <= 10; i++) soma = soma + parseInt(cpf.substring(i - 1, i)) * (12 - i);
-                resto = (soma * 10) % 11;
+            //     soma = 0;
+            //     for (let i = 1; i <= 10; i++) soma = soma + parseInt(cpf.substring(i - 1, i)) * (12 - i);
+            //     resto = (soma * 10) % 11;
 
-                if ((resto == 10) || (resto == 11)) resto = 0;
-                if (resto != parseInt(cpf.substring(10, 11))) return false;
-                return true;
-            }
+            //     if ((resto == 10) || (resto == 11)) resto = 0;
+            //     if (resto != parseInt(cpf.substring(10, 11))) return false;
+            //     return true;
+            // }
 
-            function permitirSomenteNumeros(event) {
-                const charCode = event.which ? event.which : event.keyCode;
-                if (charCode < 48 || charCode > 57) {
-                    event.preventDefault();
-                }
-            }
+            // function permitirSomenteNumeros(event) {
+            //     const charCode = event.which ? event.which : event.keyCode;
+            //     if (charCode < 48 || charCode > 57) {
+            //         event.preventDefault();
+            //     }
+            // }
 
-            document.getElementById('inputCPFAtualizar').addEventListener('keypress', permitirSomenteNumeros);
-
-
-            document.getElementById('AtualizarEvento').addEventListener('click', async function (event) {
-                event.preventDefault(); // Prevenir o comportamento padrão do botão
-
-                const tabela = document.querySelector('.tabela-container2 tbody');
-                const linhas = tabela.querySelectorAll('tr');
-                const dadosTabela = [];
-
-                linhas.forEach(linha => {
-                    const colunas = linha.querySelectorAll('td');
-                    const pessoa = {
-                        nome: colunas[0].textContent,
-                        cpf: colunas[1].textContent,
-                        email: colunas[2].textContent,
-                        texto: colunas[3].textContent
-                    };
-                    dadosTabela.push(pessoa);
-                });
-
-                const idEvento = document.getElementById('idEventoAtualizar').value;
-
-                if (!idEvento || idEvento <= 0) {
-                    alert('ID do evento inválido.');
-                    return;
-                }
-
-                if (dadosTabela.length === 0) {
-                    alert('Nenhum dado na tabela para enviar.');
-                    return;
-                }
-
-                try {
-                    const response = await fetch('/Home_Organizador/AdicionarPessoas', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                        },
-                        body: new URLSearchParams({
-                            id: idEvento, // Certifique-se de que o ID é enviado como string
-                            tableData: JSON.stringify(dadosTabela)
-                        })
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-
-                    const result = await response.json();
-                    if (result.success) {
-                        alert('Dados enviados com sucesso.');
-                        // Aqui você pode adicionar qualquer ação que queira realizar após o sucesso do envio
-                    } else {
-                        alert('Erro ao enviar os dados: ' + result.message);
-                    }
-                } catch (error) {
-                    console.error('Erro ao enviar os dados:', error);
-                    alert('Erro ao enviar os dados: ' + error.message);
-                }
-            });
+            // document.getElementById('inputCPFAtualizar').addEventListener('keypress', permitirSomenteNumeros);
 
 
-            document.addEventListener("DOMContentLoaded", function () {
-                const sairLink = document.getElementById("sair-link");
+            // document.getElementById('AtualizarEvento').addEventListener('click', async function (event) {
+            //     event.preventDefault(); // Prevenir o comportamento padrão do botão
 
-                sairLink.addEventListener("click", function (event) {
-                    event.preventDefault(); // Evita o comportamento padrão do link
+            //     const tabela = document.querySelector('.tabela-container2 tbody');
+            //     const linhas = tabela.querySelectorAll('tr');
+            //     const dadosTabela = [];
 
-                    fetch('/Login/Sair', {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                        .then(response => {
-                            if (response.redirected) {
-                                window.location.href = response.url;
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Erro ao sair:', error);
-                        });
-                });
-            });
+            //     linhas.forEach(linha => {
+            //         const colunas = linha.querySelectorAll('td');
+            //         const pessoa = {
+            //             nome: colunas[0].textContent,
+            //             cpf: colunas[1].textContent,
+            //             email: colunas[2].textContent,
+            //             texto: colunas[3].textContent
+            //         };
+            //         dadosTabela.push(pessoa);
+            //     });
+
+            //     const idEvento = document.getElementById('idEventoAtualizar').value;
+
+            //     if (!idEvento || idEvento <= 0) {
+            //         alert('ID do evento inválido.');
+            //         return;
+            //     }
+
+            //     if (dadosTabela.length === 0) {
+            //         alert('Nenhum dado na tabela para enviar.');
+            //         return;
+            //     }
+
+            //     try {
+            //         const response = await fetch('/Home_Organizador/AdicionarPessoas', {
+            //             method: 'POST',
+            //             headers: {
+            //                 'Content-Type': 'application/x-www-form-urlencoded',
+            //                 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            //             },
+            //             body: new URLSearchParams({
+            //                 id: idEvento, // Certifique-se de que o ID é enviado como string
+            //                 tableData: JSON.stringify(dadosTabela)
+            //             })
+            //         });
+
+            //         if (!response.ok) {
+            //             throw new Error(`HTTP error! Status: ${response.status}`);
+            //         }
+
+            //         const result = await response.json();
+            //         if (result.success) {
+            //             alert('Dados enviados com sucesso.');
+            //             // Aqui você pode adicionar qualquer ação que queira realizar após o sucesso do envio
+            //         } else {
+            //             alert('Erro ao enviar os dados: ' + result.message);
+            //         }
+            //     } catch (error) {
+            //         console.error('Erro ao enviar os dados:', error);
+            //         alert('Erro ao enviar os dados: ' + error.message);
+            //     }
+            // });
+
+
+            // document.addEventListener("DOMContentLoaded", function () {
+            //     const sairLink = document.getElementById("sair-link");
+
+            //     sairLink.addEventListener("click", function (event) {
+            //         event.preventDefault(); // Evita o comportamento padrão do link
+
+            //         fetch('/Login/Sair', {
+            //             method: 'GET',
+            //             headers: {
+            //                 'Content-Type': 'application/json'
+            //             }
+            //         })
+            //             .then(response => {
+            //                 if (response.redirected) {
+            //                     window.location.href = response.url;
+            //                 }
+            //             })
+            //             .catch(error => {
+            //                 console.error('Erro ao sair:', error);
+            //             });
+            //     });
+            // });
 
 
             
-            //FUNÇÃO PARA IMPORTAR PLANILHA
+            // //FUNÇÃO PARA IMPORTAR PLANILHA
 
-            function importarExcelAtualizar() {
-                var input = document.getElementById('excelFileAtualizar');
-                if (!input.files || input.files.length === 0) {
-                    alert('Por favor, selecione um arquivo Excel.');
-                    return;
-                }
-                var file = input.files[0];
-                var reader = new FileReader();
+            // function importarExcelAtualizar() {
+            //     var input = document.getElementById('excelFileAtualizar');
+            //     if (!input.files || input.files.length === 0) {
+            //         alert('Por favor, selecione um arquivo Excel.');
+            //         return;
+            //     }
+            //     var file = input.files[0];
+            //     var reader = new FileReader();
 
-                reader.onload = function (e) {
-                    var data = new Uint8Array(e.target.result);
-                    var workbook = XLSX.read(data, { type: 'array' });
-                    var sheetName = workbook.SheetNames[0];
-                    var worksheet = workbook.Sheets[sheetName];
+            //     reader.onload = function (e) {
+            //         var data = new Uint8Array(e.target.result);
+            //         var workbook = XLSX.read(data, { type: 'array' });
+            //         var sheetName = workbook.SheetNames[0];
+            //         var worksheet = workbook.Sheets[sheetName];
 
-                    var expectedColumns = ['NOME_PESSOA', 'CPF_PESSOA', 'EMAIL_PESSOA', 'TEXTO'];
-                    var headerRow = XLSX.utils.sheet_to_json(worksheet, { header: 1, range: 'A1:D1' })[0];
-                    var isValidModel = expectedColumns.every(function (col, index) {
-                        return headerRow[index] === col;
-                    });
+            //         var expectedColumns = ['NOME_PESSOA', 'CPF_PESSOA', 'EMAIL_PESSOA', 'TEXTO'];
+            //         var headerRow = XLSX.utils.sheet_to_json(worksheet, { header: 1, range: 'A1:D1' })[0];
+            //         var isValidModel = expectedColumns.every(function (col, index) {
+            //             return headerRow[index] === col;
+            //         });
 
-                    if (!isValidModel) {
-                        alert('O modelo da planilha selecionada está incorreto.');
-                        return;
-                    }
+            //         if (!isValidModel) {
+            //             alert('O modelo da planilha selecionada está incorreto.');
+            //             return;
+            //         }
 
-                    var table = document.getElementById('tabelaAtualizar').getElementsByTagName('tbody')[0];
-                    var rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, range: 1 });
+            //         var table = document.getElementById('tabelaAtualizar').getElementsByTagName('tbody')[0];
+            //         var rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, range: 1 });
 
-                    rows.forEach(function (row) {
-                        if (row.some(cellContent => cellContent.trim() !== "")) { // Verificar se algum dado da linha está preenchido
-                            var newRow = table.insertRow(-1);
-                            var cellIndex = 0;
+            //         rows.forEach(function (row) {
+            //             if (row.some(cellContent => cellContent.trim() !== "")) { // Verificar se algum dado da linha está preenchido
+            //                 var newRow = table.insertRow(-1);
+            //                 var cellIndex = 0;
 
-                            for (const key in row) {
-                                if (row.hasOwnProperty(key)) {
-                                    var cell = newRow.insertCell(cellIndex++);
-                                    cell.textContent = row[key];
-                                }
-                            }
+            //                 for (const key in row) {
+            //                     if (row.hasOwnProperty(key)) {
+            //                         var cell = newRow.insertCell(cellIndex++);
+            //                         cell.textContent = row[key];
+            //                     }
+            //                 }
 
-                            var celulaAcoes = newRow.insertCell(cellIndex); // Adicionar célula para ações
-                            adicionarBotoesLinhaAtualizar(celulaAcoes, newRow); // Chamar a função para adicionar botões
-                        }
-                    });
+            //                 var celulaAcoes = newRow.insertCell(cellIndex); // Adicionar célula para ações
+            //                 adicionarBotoesLinhaAtualizar(celulaAcoes, newRow); // Chamar a função para adicionar botões
+            //             }
+            //         });
 
-                    destacarCPFsInvalidos(); // Verifica CPFs inválidos após adicionar novas linhas
-                };
-                reader.readAsArrayBuffer(file);
-            }
+            //         destacarCPFsInvalidos(); // Verifica CPFs inválidos após adicionar novas linhas
+            //     };
+            //     reader.readAsArrayBuffer(file);
+            // }
 
-            function adicionarBotoesLinhaAtualizar(celulaAcoes, linha) {
-                // Verificar se a linha contém dados antes de adicionar os botões
-                var hasData = Array.from(linha.cells).some(cell => cell.textContent.trim() !== "");
+            // function adicionarBotoesLinhaAtualizar(celulaAcoes, linha) {
+            //     // Verificar se a linha contém dados antes de adicionar os botões
+            //     var hasData = Array.from(linha.cells).some(cell => cell.textContent.trim() !== "");
 
-                if (hasData) {
-                    var botaoExcluir = document.createElement("button");
-                    botaoExcluir.textContent = "Excluir";
-                    botaoExcluir.className = 'btn table-btn';
-                    botaoExcluir.onclick = function (event) {
-                        event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
-                        if (confirm("Tem certeza de que deseja excluir esta linha?")) {
-                            excluirLinhaAtualizar(linha);
-                            destacarCPFsInvalidos();
-                        }
-                    };
-                    celulaAcoes.appendChild(botaoExcluir);
+            //     if (hasData) {
+            //         var botaoExcluir = document.createElement("button");
+            //         botaoExcluir.textContent = "Excluir";
+            //         botaoExcluir.className = 'btn table-btn';
+            //         botaoExcluir.onclick = function (event) {
+            //             event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
+            //             if (confirm("Tem certeza de que deseja excluir esta linha?")) {
+            //                 excluirLinhaAtualizar(linha);
+            //                 destacarCPFsInvalidos();
+            //             }
+            //         };
+            //         celulaAcoes.appendChild(botaoExcluir);
 
-                    var botaoAtualizar = document.createElement("button");
-                    botaoAtualizar.textContent = "Atualizar";
-                    botaoAtualizar.className = 'btn table-btn';
-                    botaoAtualizar.onclick = function (event) {
-                        event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
-                        carregarDadosParaEditar(linha);
-                        // Mostrar o botão de confirmação de atualização
-                        var botaoConfirmarAtualizacao = document.getElementById('botaoConfirmarAtualizacao');
-                        botaoConfirmarAtualizacao.setAttribute('data-pessoa-id', linha.cells[1].textContent); // Exemplo de atributo com CPF
-                        botaoConfirmarAtualizacao.style.display = 'inline-block';
-                    };
-                    celulaAcoes.appendChild(botaoAtualizar);
-                }
+            //         var botaoAtualizar = document.createElement("button");
+            //         botaoAtualizar.textContent = "Atualizar";
+            //         botaoAtualizar.className = 'btn table-btn';
+            //         botaoAtualizar.onclick = function (event) {
+            //             event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
+            //             carregarDadosParaEditar(linha);
+            //             // Mostrar o botão de confirmação de atualização
+            //             var botaoConfirmarAtualizacao = document.getElementById('botaoConfirmarAtualizacao');
+            //             botaoConfirmarAtualizacao.setAttribute('data-pessoa-id', linha.cells[1].textContent); // Exemplo de atributo com CPF
+            //             botaoConfirmarAtualizacao.style.display = 'inline-block';
+            //         };
+            //         celulaAcoes.appendChild(botaoAtualizar);
+            //     }
 
-                celulaAcoes.style.textAlign = "center"; // Centralizar os botões na célula
-                destacarCPFsInvalidos(); // Verificar CPFs da nova linha
-            }
+            //     celulaAcoes.style.textAlign = "center"; // Centralizar os botões na célula
+            //     destacarCPFsInvalidos(); // Verificar CPFs da nova linha
+            // }
 
-            function excluirLinhaAtualizar(linha) {
-                linha.parentElement.removeChild(linha);
-            }
+            // function excluirLinhaAtualizar(linha) {
+            //     linha.parentElement.removeChild(linha);
+            // }
 
             // //DANDO CONFLITO COM O CRIAR EVENTOS------------------------------------------------------------------------------------------
             // function carregarDadosParaEditar(linha) {
@@ -1940,58 +1940,58 @@
             // }
 
 
-            document.getElementById('btnConfirmarAtualizacao').onclick = function (event) {
-                event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
+            // document.getElementById('btnConfirmarAtualizacao').onclick = function (event) {
+            //     event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
 
-                // Obter a linha que está sendo editada
-                var linhas = document.querySelectorAll('#tabelaAtualizar tbody tr');
-                var linhaEditando = null;
+            //     // Obter a linha que está sendo editada
+            //     var linhas = document.querySelectorAll('#tabelaAtualizar tbody tr');
+            //     var linhaEditando = null;
 
-                linhas.forEach(function (linha) {
-                    if (linha.getAttribute('data-editing') === 'true') {
-                        linhaEditando = linha;
-                    }
-                });
+            //     linhas.forEach(function (linha) {
+            //         if (linha.getAttribute('data-editing') === 'true') {
+            //             linhaEditando = linha;
+            //         }
+            //     });
 
-                if (linhaEditando) {
-                    // Atualizar a linha com os novos dados dos campos de entrada
-                    linhaEditando.cells[0].textContent = document.getElementById('inputNomeAtualizar').value;
-                    linhaEditando.cells[1].textContent = document.getElementById('inputCPFAtualizar').value;
-                    linhaEditando.cells[2].textContent = document.getElementById('inputEmailAtualizar').value;
-                    linhaEditando.cells[3].textContent = document.getElementById('inputTextoAtualizar').value;
+            //     if (linhaEditando) {
+            //         // Atualizar a linha com os novos dados dos campos de entrada
+            //         linhaEditando.cells[0].textContent = document.getElementById('inputNomeAtualizar').value;
+            //         linhaEditando.cells[1].textContent = document.getElementById('inputCPFAtualizar').value;
+            //         linhaEditando.cells[2].textContent = document.getElementById('inputEmailAtualizar').value;
+            //         linhaEditando.cells[3].textContent = document.getElementById('inputTextoAtualizar').value;
 
-                    // Remover o atributo de edição
-                    linhaEditando.removeAttribute('data-editing');
+            //         // Remover o atributo de edição
+            //         linhaEditando.removeAttribute('data-editing');
 
-                    // Esconder o botão de confirmação de atualização
-                    document.getElementById('btnConfirmarAtualizacao').style.display = 'none';
-                }
-            }
+            //         // Esconder o botão de confirmação de atualização
+            //         document.getElementById('btnConfirmarAtualizacao').style.display = 'none';
+            //     }
+            // }
 
-            function destacarCPFsInvalidos() {
-                var tabela = document.getElementById('tabelaAtualizar');
-                var linhas = tabela.rows;
+            // function destacarCPFsInvalidos() {
+            //     var tabela = document.getElementById('tabelaAtualizar');
+            //     var linhas = tabela.rows;
 
-                for (var i = 1; i < linhas.length; i++) {
-                    var cpf = linhas[i].cells[1].textContent.trim(); // Coluna do CPF
+            //     for (var i = 1; i < linhas.length; i++) {
+            //         var cpf = linhas[i].cells[1].textContent.trim(); // Coluna do CPF
 
-                    if (!validarCPF(cpf)) {
-                        linhas[i].style.backgroundColor = '#f8d7da'; // Destacar linha com CPF inválido
-                    } else {
-                        linhas[i].style.backgroundColor = ''; // Remover destaque se CPF for válido
-                    }
-                }
-            }
+            //         if (!validarCPF(cpf)) {
+            //             linhas[i].style.backgroundColor = '#f8d7da'; // Destacar linha com CPF inválido
+            //         } else {
+            //             linhas[i].style.backgroundColor = ''; // Remover destaque se CPF for válido
+            //         }
+            //     }
+            // }
 
-            // Função para validar CPF 
-            function validarCPF(cpf) {
-                // Implemente aqui sua lógica de validação de CPF
-                // Retorna true se válido, false se inválido
-                return true; // Exemplo simples, ajuste conforme sua necessidade
-            }
+            // // Função para validar CPF 
+            // function validarCPF(cpf) {
+            //     // Implemente aqui sua lógica de validação de CPF
+            //     // Retorna true se válido, false se inválido
+            //     return true; // Exemplo simples, ajuste conforme sua necessidade
+            // }
 
-            // Event listener para chamar a função de importação ao selecionar um arquivo
-            document.getElementById('excelFileAtualizar').addEventListener('change', importarExcelAtualizar);
+            // // Event listener para chamar a função de importação ao selecionar um arquivo
+            // document.getElementById('excelFileAtualizar').addEventListener('change', importarExcelAtualizar);
 
 
 
