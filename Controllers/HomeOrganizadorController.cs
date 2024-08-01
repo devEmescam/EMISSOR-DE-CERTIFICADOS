@@ -7,6 +7,7 @@ using EMISSOR_DE_CERTIFICADOS.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using Newtonsoft.Json;
+using EMISSOR_DE_CERTIFICADOS.Interfaces;
 
 namespace EMISSOR_DE_CERTIFICADOS.Controllers
 {
@@ -16,16 +17,18 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         private readonly DBHelpers _dbHelper;
         private readonly ISessao _sessao;
         private readonly PessoaEventosRepository _pessoaEventosRepository;
+        private readonly IPessoaService _pessoaService;
 
-        public Home_OrganizadorController(DBHelpers dbHelper, ISessao sessao, PessoaEventosRepository pessoaEventosRepository)
+        public Home_OrganizadorController(DBHelpers dbHelper, ISessao sessao, PessoaEventosRepository pessoaEventosRepository,IPessoaService pessoaService)
         {
             _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelpers não pode ser nulo.");
             _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");
             _pessoaEventosRepository = pessoaEventosRepository ?? throw new ArgumentNullException(nameof(sessao), "O PessoaEventosRepository não pode ser nulo.");
+            _pessoaService = pessoaService ?? throw new ArgumentNullException(nameof(pessoaService), "O IPessoaService não pode ser nulo.");
         }
 
         #region *** IActionResults ***        
-        [HttpGet] // GET: EVENTOS
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             try
@@ -43,7 +46,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.Index] Erro: {ex.Message}");
             }
         }        
-        [HttpPost] // POST: /Home_Organizador/NovoEvento
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> NovoEvento(string nomeEvento, IFormFile arteCertificadoFile, string tableData)
         {
@@ -93,7 +96,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.ObterPessoasEvento]");
             }
         }
-
         //POST: /Home_Organizador/AdicionarPessoas: adiciona novas pessoas ao evento registrado em banco de dados
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -120,9 +122,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             {
                 return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.AdicionarPessoas]. Erro: {ex.Message}");
             }
-        } 
-
-        // POST: /Home_Organizador/LerPlanilha
+        }         
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> LerPlanilha(string caminhoArquivo, string evento)
@@ -224,7 +224,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, new { message = $"Ocorreu um erro em [Home_OrganizadorController.DetalhesEventoPessoas]. Erro: {ex.Message}" });
             }
         }        
-        [HttpPost] // POST:/Home_Organizador/EmitirCertificado
+        [HttpPost] 
         [ValidateAntiForgeryToken]
         //Rotina de Emissão de certificados                
         public async Task<IActionResult> EmitirCertificado(int id, List<int> idPessoas)
@@ -269,9 +269,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             {
                 return StatusCode(500, new { success = false, message = $"Ocorreu um erro em Home_OrganizadorController.ObterEmailConfig. Erro: {ex.Message}" });
             }        
-        }
-
-        // POST:/Home_Organizador/Logout        
+        }        
         [HttpPost]
         public IActionResult Logout()
         {
@@ -280,9 +278,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 // Limpe os dados da sessão para desconectar o usuário
                 HttpContext.Session.Clear();
                 _sessao.RemoverSessaoUsuario();
-                //return Ok(); // Precisa direcionar para esse local: https://certificados.emescam.br/organizador/login
-                // Redirecionar para a página de login do organizador
-                //return RedirectToAction("Index", "Login_organizador");
+                
+                // Redirecionar para a página de login do organizador                
                 return View("~/Views/Login_Organizador/Login_organizador.cshtml");
             }
             catch (Exception ex)
@@ -436,28 +433,24 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                         Nome = registro.Nome.Trim(),
                         CPF = registro.CPF.Trim(),
                         Email = registro.Email.Trim()
+                    };                   
+
+                    await _pessoaService.InserirPessoaAsync(pessoa);
+
+                    // Nesse momento o evento já foi cadastrado e a pessoa também
+                    // Necessário registrar em banco a relação da pessoa com o evento e seus respectivos textos
+                    sSQL = "";
+                    sSQL = "INSERT INTO EVENTO_PESSOA (ID_EVENTO, ID_PESSOA, TEXTO_FRENTE) " +
+                           "VALUES (@idEvento, @idPessoa, @texto)";
+
+                    var parametersEP = new Dictionary<string, object>
+                    {
+                        {"@idEvento",idEvento },
+                        {"@idPessoa", pessoa.Id},
+                        {"@texto", registro.Texto.Trim()}
                     };
 
-                    // Chama o método InserirPessoa do controlador PessoaController
-                    using (PessoaController pessoaController = new PessoaController(_dbHelper, _sessao, _pessoaEventosRepository))
-                    {
-                        await pessoaController.InserirPessoaAsync(pessoa, idUsuario);
-
-                        // Nesse momento o evento já foi cadastrado e a pessoa também
-                        // Necessário registrar em banco a relação da pessoa com o evento e seus respectivos textos
-                        sSQL = "";
-                        sSQL = "INSERT INTO EVENTO_PESSOA (ID_EVENTO, ID_PESSOA, TEXTO_FRENTE) " +
-                               "VALUES (@idEvento, @idPessoa, @texto)";
-
-                        var parametersEP = new Dictionary<string, object>
-                        {
-                            {"@idEvento",idEvento },
-                            {"@idPessoa", pessoa.Id},
-                            {"@texto", registro.Texto.Trim()}
-                        };
-
-                        await _dbHelper.ExecuteQueryAsync(sSQL, parametersEP);
-                    }
+                    await _dbHelper.ExecuteQueryAsync(sSQL, parametersEP);
                 }
             }
             catch (Exception ex)
@@ -492,44 +485,40 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                         Email = registro.Email.Trim()
                     };
 
-                    //Cria uma instancia de pessoaController para chamar os metodos contidos nessa classe
-                    using (PessoaController pessoaController = new PessoaController(_dbHelper,_sessao, _pessoaEventosRepository))
+                    //Necessário identificar se as pessoas percorridas em dadosTabela já existem no banco de dados para decidir sobre INSERIR ou ATUALIZAR                        
+                    if (!await _pessoaService.ExistePessoaComCPFAsync(pessoa.CPF, idUsuario))
                     {
-                        //Necessário identificar se as pessoas percorridas em dadosTabela já existem no banco de dados para decidir sobre INSERIR ou ATUALIZAR                        
-                        if (!await pessoaController.ExistePessoaComCPFAsync(pessoa.CPF, idUsuario))
-                        {
-                            //Chama o método InserirPessoa do controlador PessoaController
-                            await pessoaController.InserirPessoaAsync(pessoa, idUsuario);
+                        //Chama o método InserirPessoa do controlador PessoaController
+                        await _pessoaService.InserirPessoaAsync(pessoa);
 
-                            //Necessário registrar em banco a relação da pessoa com o evento e seus respectivos textos
-                            sSQL = "";
-                            sSQL = "INSERT INTO EVENTO_PESSOA (ID_EVENTO, ID_PESSOA, TEXTO_FRENTE) " +
-                                   "VALUES (@idEvento, @idPessoa, @texto)";
-                            var parametersEP = new Dictionary<string, object>
+                        //Necessário registrar em banco a relação da pessoa com o evento e seus respectivos textos
+                        sSQL = "";
+                        sSQL = "INSERT INTO EVENTO_PESSOA (ID_EVENTO, ID_PESSOA, TEXTO_FRENTE) " +
+                               "VALUES (@idEvento, @idPessoa, @texto)";
+                        var parametersEP = new Dictionary<string, object>
                             {
                                 {"@idEvento",id },
                                 {"@idPessoa", pessoa.Id},
                                 {"@texto", registro.Texto.Trim()}
                             };
 
-                            await _dbHelper.ExecuteQueryAsync(sSQL, parametersEP);
-                        }
-                        else 
-                        {
-                            //Nesse caso a pessoa existe e terá suas informações atualizadas
-                            //Decido atualizar todas que chegarem nesse fluxo para garantir que algum dado modificado em tela seja armazenado em banco de dados
+                        await _dbHelper.ExecuteQueryAsync(sSQL, parametersEP);
+                    }
+                    else
+                    {
+                        //Nesse caso a pessoa existe e terá suas informações atualizadas
+                        //Decido atualizar todas que chegarem nesse fluxo para garantir que algum dado modificado em tela seja armazenado em banco de dados
 
-                            //Busco o idPessoa para poder atualizar os registros corretos nas tabelas envolvidas
-                            pessoa.Id = await pessoaController.ObterIdPessoaPorCPFAsync(pessoa.CPF);
+                        //Busco o idPessoa para poder atualizar os registros corretos nas tabelas envolvidas
+                        pessoa.Id = await _pessoaService.ObterIdPessoaPorCPFAsync(pessoa.CPF);
 
-                            //Atualizo os dados da pessoa
-                            await pessoaController.AtualizarPessoaAsync(pessoa);
+                        //Atualizo os dados da pessoa
+                        await _pessoaService.AtualizarPessoaAsync(pessoa);
 
-                            //Necessário atualizar o texto do certificado da pessoa que foi atualizada
-                            sSQL = "";
-                            sSQL = $"UPDATE EVENTO_PESSOA SET TEXTO_FRENTE = '{registro.Texto}' WHERE ID_EVENTO = {id} AND ID_PESSOA = {pessoa.Id}";
-                            await _dbHelper.ExecuteQueryAsync(sSQL);
-                        }
+                        //Necessário atualizar o texto do certificado da pessoa que foi atualizada
+                        sSQL = "";
+                        sSQL = $"UPDATE EVENTO_PESSOA SET TEXTO_FRENTE = '{registro.Texto}' WHERE ID_EVENTO = {id} AND ID_PESSOA = {pessoa.Id}";
+                        await _dbHelper.ExecuteQueryAsync(sSQL);
                     }
                 }
             }
@@ -586,9 +575,9 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         private async Task EmitirCertificadoAsync(EventoModel evento, List<int> listaIdPessoas)
         {
             DataTable oDT = new DataTable();
-            var usuariosService = new UsuariosService(_dbHelper,_sessao, _pessoaEventosRepository);
-            var certificadoService = new CertificadosService(_dbHelper, _sessao, _pessoaEventosRepository);
-            var emailService = new EmailService(_dbHelper,_sessao, _pessoaEventosRepository);
+            var usuariosService = new UsuariosService(_dbHelper,_sessao, _pessoaEventosRepository, _pessoaService);
+            var certificadoService = new CertificadosService(_dbHelper, _sessao, _pessoaEventosRepository, _pessoaService);
+            var emailService = new EmailService(_dbHelper,_sessao, _pessoaEventosRepository, _pessoaService);
             string sSQL = "";
             int idUsuario = -1;
             string loginUsuarioADM = string.Empty;

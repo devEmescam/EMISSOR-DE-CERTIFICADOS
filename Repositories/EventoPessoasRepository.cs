@@ -42,7 +42,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                 throw new Exception($"Erro em [EventoPessoasRepository.CarregarDadosAsync]: {ex.Message}");
             }
         }
-
         private async Task<List<PessoaEvento>> CarregarPessoasEventoAsync(int idEvento, bool emitirCertificado)
         {
             string sSQL = string.Empty;
@@ -97,7 +96,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                 throw new Exception($"Erro em [EventoPessoasRepository.CarregarPessoasEventoAsync]: {ex.Message}");
             }
         }
-
         private IFormFile ConvertByteArrayToFormFile(byte[] byteArray, string fileName)
         {
             try

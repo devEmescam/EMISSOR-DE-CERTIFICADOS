@@ -6,6 +6,7 @@ using EMISSOR_DE_CERTIFICADOS.DBConnections;
 using EMISSOR_DE_CERTIFICADOS.Controllers;
 using EMISSOR_DE_CERTIFICADOS.Repositories;
 using EMISSOR_DE_CERTIFICADOS.Helpers;
+using EMISSOR_DE_CERTIFICADOS.Interfaces;
 
 namespace EMISSOR_DE_CERTIFICADOS.Services
 {
@@ -14,13 +15,14 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
         private readonly DBHelpers _dbHelper;
         private readonly ISessao _sessao;
         private readonly PessoaEventosRepository _pessoaEventosRepository;
+        private readonly IPessoaService _pessoaService;
 
-
-        public UsuariosService(DBHelpers dbHelper, ISessao sessao, PessoaEventosRepository pessoaEventosRepository)
+        public UsuariosService(DBHelpers dbHelper, ISessao sessao, PessoaEventosRepository pessoaEventosRepository, IPessoaService pessoaService)
         {
             _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelper não pode ser nulo.");
             _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");
             _pessoaEventosRepository = pessoaEventosRepository ?? throw new ArgumentNullException(nameof(dbHelper), "O PessoaEventosRepository não pode ser nulo.");
+            _pessoaService = pessoaService ?? throw new ArgumentNullException(nameof(pessoaService), "O IPessoaService não ser nulo.");
         }        
         public async Task<int> GerarUsuarioAsync(int idPessoa)
         {
@@ -103,10 +105,11 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
 
             try
             {
-                using (PessoaController pessoaController = new PessoaController(_dbHelper,_sessao, _pessoaEventosRepository))
-                {
-                    cpf = await pessoaController.ObterCPFPorIdPessoaAsync(idPessoa);
-                }
+                //using (PessoaController pessoaController = new PessoaController(_dbHelper,_sessao, _pessoaEventosRepository))
+                //{
+                //    cpf = await pessoaController.ObterCPFPorIdPessoaAsync(idPessoa);
+                //}
+                cpf = await _pessoaService.ObterCPFPorIdPessoaAsync(idPessoa);
                 return cpf;
             }
             catch (Exception ex)

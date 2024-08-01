@@ -10,8 +10,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
         {
             _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelper não pode ser nulo.");
         }
-
-        public async Task<List<Pessoa>> CarregarDadosAsync(string termo, int idUsuario) 
+        public async Task<List<Pessoa>> CarregarDadosAsync(string termo, int idUsuario, bool visaoOrganizador) 
         {
             try
             {
@@ -41,7 +40,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                         Nome = Convert.ToString(row["Nome"]),
                         CPF = Convert.ToString(row["CPF"]),
                         Email = Convert.ToString(row["Email"]),
-                        Eventos = await CarregarEventosPessoa(Convert.ToInt32(row["Id"]), idUsuario)
+                        Eventos = await CarregarEventosPessoa(Convert.ToInt32(row["Id"]), idUsuario, visaoOrganizador)
                     });
                 }   
 
@@ -52,31 +51,43 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                 throw new Exception($"Erro em [PessoaEventosRepository.CarregarDadosAsync]: {ex.Message}");
             }
         }
-
-        private async Task<List<EventoPessoa>> CarregarEventosPessoa(int idPessoa, int idUsuario) 
+        public async Task<List<EventoPessoa>> CarregarEventosPessoa(int idPessoa, int idUsuario, bool visaoOrganizador)
         {
             try
             {
+                // Inicializar a string SQL básica
                 var sSQL = @"SELECT E.NOME, EP.IMAGEM_CERTIFICADO 
-                             FROM EVENTO E
-                             JOIN EVENTO_PESSOA EP ON (E.ID = EP.ID_EVENTO)
-                             WHERE 1=1
-                             AND EP.CERTIFICADO_EMITIDO = 1
-                             AND EP.ID_PESSOA = @idPessoa
-                             AND E.ID_USUARIO_ADMINISTRATIVO = @idUsuario";
+                     FROM EVENTO E
+                     JOIN EVENTO_PESSOA EP ON (E.ID = EP.ID_EVENTO)
+                     WHERE EP.CERTIFICADO_EMITIDO = 1
+                     AND EP.ID_PESSOA = @idPessoa";
 
+                // Se for organizador adicionar filtro na consulta
+                if (visaoOrganizador)
+                {
+                    sSQL += " AND E.ID_USUARIO_ADMINISTRATIVO = @idUsuario";
+                }
+
+                // Definir os parâmetros
                 var parameters = new Dictionary<string, object>
                 {
-                    { "@idPessoa", idPessoa },
-                    { "@idUsuario", idUsuario}
+                    { "@idPessoa", idPessoa }
                 };
 
+                // Se for organizador adicionar filtro na consulta
+                if (visaoOrganizador)
+                {
+                    parameters.Add("@idUsuario", idUsuario);
+                }
+
+                // Executar a consulta
                 var oDT = await _dbHelper.ExecuteQueryAsync(sSQL, parameters);
                 if (oDT.Rows.Count == 0)
                 {
                     return null;
                 }
 
+                // Processar os resultados
                 var eventos = new List<EventoPessoa>();
                 foreach (DataRow row in oDT.Rows)
                 {
@@ -90,7 +101,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                     {
                         Nome = Convert.ToString(row["NOME"]),
                         ImagemCertificado = imagemCertificado
-
                     });
                 }
 
@@ -99,7 +109,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
             catch (Exception ex)
             {
                 throw new Exception($"Erro em [PessoaEventosRepository.CarregarEventosPessoa]: {ex.Message}");
-            }        
+            }
         }
 
         public class Pessoa 

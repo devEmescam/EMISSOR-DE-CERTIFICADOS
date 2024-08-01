@@ -3,7 +3,6 @@
     public class SessaoTimeoutHelper
     {
         private readonly RequestDelegate _next;
-
         public SessaoTimeoutHelper(RequestDelegate next)
         {
             _next = next;
@@ -36,9 +35,7 @@
                     }
                     return;
                 }
-
                 await _next(context);
-
             }
             catch (Exception ex)
             {
@@ -46,7 +43,6 @@
             }            
         }
     }
-
     public static class HttpRequestExtensions
     {
         public static bool IsAjaxRequest(this HttpRequest request)

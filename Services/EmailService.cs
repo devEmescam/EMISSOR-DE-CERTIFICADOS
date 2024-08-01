@@ -2,6 +2,7 @@
 using System.Text;
 using EMISSOR_DE_CERTIFICADOS.DBConnections;
 using EMISSOR_DE_CERTIFICADOS.Helpers;
+using EMISSOR_DE_CERTIFICADOS.Interfaces;
 using EMISSOR_DE_CERTIFICADOS.Models;
 using EMISSOR_DE_CERTIFICADOS.Repositories;
 using Newtonsoft.Json;
@@ -15,12 +16,14 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
         private readonly DBHelpers _dbHelper;
         private readonly PessoaEventosRepository _pessoaEventosRepository;
         private readonly ISessao _sessao;
+        private readonly IPessoaService _pessoaService;
 
-        public EmailService(DBHelpers dbHelper, ISessao sessao, PessoaEventosRepository pessoaEventosRepository)
+        public EmailService(DBHelpers dbHelper, ISessao sessao, PessoaEventosRepository pessoaEventosRepository, IPessoaService pessoaService)
         {
             _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelper não pode ser nulo.");
             _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");
             _pessoaEventosRepository = pessoaEventosRepository ?? throw new ArgumentNullException(nameof(dbHelper), "O PessoaEventosRepository não pode ser nulo.");
+            _pessoaService = pessoaService ?? throw new ArgumentNullException(nameof(pessoaService), "O IPessoaService não ser nulo.");
         }
         public async Task<(bool success, string retorno)> EnviarEmailAsync(string login, string senha, int idEventoPessoa)
         {
@@ -58,7 +61,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 //TO DO: SE FOR USADO SERÁ TRATADO TAMBÉM PELA CONFIGURAÇÃO DE EMAIL
 
                 // Buscar os dados do usuario
-                var usuarioService = new UsuariosService(_dbHelper,_sessao, _pessoaEventosRepository);
+                var usuarioService = new UsuariosService(_dbHelper,_sessao, _pessoaEventosRepository, _pessoaService);
                 var dadosUsuario = await usuarioService.ObterUsuarioESenhaAsync(idEventoPessoa);
 
                 await ObterNomeEventoAsync(idEventoPessoa);
