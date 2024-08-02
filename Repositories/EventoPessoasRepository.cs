@@ -7,12 +7,10 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
     internal class EventoPessoasRepository : IEventoPessoasRepository
     {
         private readonly IDBHelpers _dbHelper;
-
         public EventoPessoasRepository(IDBHelpers dbHelper)
         {
             _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelper não pode ser nulo.");
         }
-
         public async Task<Evento> CarregarDadosAsync(int idEvento, bool emitirCertificado)
         {
             try

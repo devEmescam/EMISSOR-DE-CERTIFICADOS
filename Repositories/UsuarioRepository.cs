@@ -36,7 +36,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
             }
             catch (Exception ex)
             {
-                throw new Exception($"Erro em [UsuariosService.GerarUsuarioAsync]: {ex.Message}");
+                throw new Exception($"Erro em [UsuarioRepository.GerarUsuarioAsync]: {ex.Message}");
             }
         }
         public async Task<bool> UsuarioExisteAsync(string usuario)

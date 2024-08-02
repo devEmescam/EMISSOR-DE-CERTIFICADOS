@@ -1,5 +1,4 @@
 ﻿using EMISSOR_DE_CERTIFICADOS.Models;
-using static EMISSOR_DE_CERTIFICADOS.Repositories.PessoaEventosRepository;
 
 namespace EMISSOR_DE_CERTIFICADOS.Interfaces
 {
