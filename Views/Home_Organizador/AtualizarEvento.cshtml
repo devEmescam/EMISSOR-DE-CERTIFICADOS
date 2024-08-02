@@ -1,0 +1,379 @@
+﻿
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Emissor de Certificados</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+    </head>
+</head>
+<body>
+
+    <header>
+        <img id="logo" src="/logoemescam.png" alt="Logo Emescam">
+        <nav>
+            <a href="#" onclick="mostrarCard('meus-eventos')">Meus Eventos</a>
+            <a href="#" onclick="mostrarCard('buscar-pessoas')">Buscar Pessoas</a>
+            <a href="#" onclick="mostrarCard('configuracoes')">Configurações</a>
+        </nav>
+        <div id="dropdown-container">
+            <div id="bem-vindo">Bem-Vindo, @ViewBag.Login!</div>
+            <div id="dropdown-content">
+                <a id="sair-link" href="#">Sair</a>
+            </div>
+        </div>
+    </header>
+   <div class="cartao-menu">
+        <div id="card-evento" class="card">
+
+                <h2>Atualizar Evento</h2>
+
+                <!-- Formulário para atualizar o evento -->
+                <form id="formAtualizarEvento" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                   
+                    <hr>
+
+                    <!-- Formulário de dados dos participantes -->
+                    <div id="divDadosAtualizar">
+                        <label for="inputNomeAtualizar">Nome:</label>
+                        <input type="text" id="inputNomeAtualizar" name="inputNomeAtualizar" placeholder="Nome">
+                        <label for="inputCPFAtualizar">CPF:</label>
+                        <input type="text" id="inputCPFAtualizar" name="inputCPFAtualizar" placeholder="CPF">
+                        <label for="inputEmail1Atualizar">Email:</label>
+                        <input type="text" id="inputEmail1Atualizar" name="inputEmail1Atualizar" placeholder="Email">
+                        <label for="inputTextoAtualizar">Texto:</label>
+                        <textarea id="inputTextoAtualizar" name="inputTextoAtualizar" placeholder="Texto"></textarea>
+                    </div>
+
+                    <!-- Botões de controle -->
+                    <button type="button" id="botaoConfirmarAtualizacao" style="display: none;">Confirmar Atualização</button>
+                    <button type="button" id="botaoAcaoAtualizar" onclick="adicionarDados()">Adicionar Dados</button>
+
+                    <hr>
+
+                    <!-- Tabela de participantes -->
+                    <div class="tabela-container2">
+                        <table id="tabelaAtualizar" class="display">
+                            <thead>
+                                <tr>
+                                    <th style="width: 20%">Nome</th>
+                                    <th style="width: 10%">CPF</th>
+                                    <th style="width: 15%">Email</th>
+                                    <th style="width: 40%">Texto</th>
+                                    <th style="width: 5%">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="eventos-tbody-atualizar">
+                                <!-- Os dados serão inseridos dinamicamente aqui -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Importação de arquivo Excel -->
+                    <div class="upload-container2">
+                        <input type="file" id="excelFileAtualizar" name="excelFileAtualizar" accept=".xlsx" style="display:none" onchange="importarExcelAtualizar()">
+                        <label for="excelFileAtualizar" class="custom-file-upload">
+                            Importar Pessoas
+                        </label>
+                        <span id="fileNameAtualizar" style="margin-left: 10px;"></span>
+                        <br>
+                    </div>
+
+                    <input type="hidden" id="tableDataAtualizar" name="tableDataAtualizar">
+                    <button type="submit" id="AtualizarEvento">Atualizar Evento</button>
+                </form>
+        </div>
+  </div>
+
+    <style>
+        /* Estilos para o corpo da página */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #01f949, #14086d);
+            font-family: Arial, sans-serif;
+            padding-top: 70px; /* Adiciona espaço para o cabeçalho fixo */
+            font-size: small;
+        }
+
+        .cartao-menu {
+            background-color: transparent; /* Transparência ajustada */
+            border-radius: 5px;
+            padding: 5%;
+            max-width: 50%;
+            height: 80%;
+            text-align: center;
+            position: fixed;
+            top: 55%;
+            left: 9%;
+            transform: translate(-50%, -50%);
+        }
+
+        .card {
+            background-color: white; /* Transparência ajustada */
+            padding: 5%;
+            width: 925%;
+            height: 106%;
+            text-align: center;
+            position: fixed;
+            top: -7%;
+            left: 0; /* Posiciona o card ao lado esquerdo da página */
+            border-radius: 5px;
+            display: none; /* Oculta o card por padrão */
+        }
+
+        #card-evento {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            background-color: white;
+        }
+
+        .dados-form {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+            .dados-form input, .dados-form textarea {
+                margin-bottom: 10px;
+            }
+
+            .dados-form input {
+                width: calc(70% - 10px);
+            }
+
+        #textareaTexto {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .tabela-container2 {
+            max-height: 320px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+            .tabela-container2 table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+                .tabela-container2 table thead {
+                    position: sticky;
+                    top: 0;
+                    background-color: #fff; /* Cor de fundo do cabeçalho */
+                    z-index: 1; /* Garante que o cabeçalho esteja acima das linhas da tabela */
+                }
+
+                .tabela-container2 table th, .tabela-container2 table td {
+                    vertical-align: middle; /* Centraliza verticalmente o conteúdo das células */
+                    text-align: center; /* Centraliza horizontalmente o conteúdo das células */
+                    border: 1px solid #ddd; /* Adiciona bordas às células */
+                    padding: 8px; /* Adiciona um pouco de espaço dentro das células */
+                }
+
+                .tabela-container2 table th {
+                    background-color: #f2f2f2; /* Cor de fundo do cabeçalho */
+                    font-weight: bold; /* Negrito para o texto do cabeçalho */
+                }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 3px;
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+        }
+
+            button:hover {
+                background-color: #0056b3;
+            }
+
+        #botaoAcaoAtualizar {
+            background-color: #007bff; /* Cor de fundo do botão */
+            color: white; /* Cor da fonte */
+            border: none; /* Sem borda */
+            padding: 3px 6px; /* Espaçamento interno para aumentar a área de clique */
+            font-size: 13px; /* Tamanho da fonte */
+            cursor: pointer; /* Cursor em forma de ponteiro quando passar o mouse sobre o botão */
+            border-radius: 2px; /* Bordas retangulares sem arredondamento */
+            margin-bottom: 10px;
+        }
+
+        /* Estilos para o cabeçalho */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Distribui o espaço entre o logo e o menu de navegação */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            padding: 0 20px; /* Adiciona algum espaço interno nas laterais do cabeçalho */
+        }
+
+        /* Logo */
+        #logo {
+            width: 150px;
+        }
+
+        /* Container do menu de navegação */
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Estilos para o dropdown */
+        #dropdown-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        #dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        #dropdown-container:hover #dropdown-content {
+            display: block;
+        }
+
+        #dropdown-content a {
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            color: #333;
+        }
+
+            #dropdown-content a:hover {
+                background-color: #f0f0f0;
+            }
+
+        /* Estilos para o formulário */
+        .custom-file-upload {
+            display: inline-block;
+            padding: 3px 6px;
+            cursor: pointer;
+            background-color: #007bff; /* Cor azul */
+            color: white;
+            border: none;
+            border-radius: 2px; /* Bordas arredondadas */
+            position: relative; /* Posicionamento alterado para relativo */
+            margin: 10px 5px; /* Margens adicionadas para espaçamento */
+        }
+
+        #fileNameAtualizar {
+            position: absolute; /* Posicionamento absoluto dentro de seu container */
+            left: 0; /* Alinha ao lado esquerdo do container */
+            bottom: -20px; /* Posiciona abaixo do botão */
+            color: #333; /* Cor do texto */
+            font-size: 12px; /* Tamanho da fonte */
+        }
+
+
+        /* Estilos para o cabeçalho */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Distribui o espaço entre o logo e o menu de navegação */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            padding: 0 20px; /* Adiciona algum espaço interno nas laterais do cabeçalho */
+        }
+
+        /* Logo */
+        #logo {
+            width: 150px;
+        }
+
+        /* Container do menu de navegação */
+        nav {
+            display: flex;
+            align-items: center;
+            margin-right: auto; /* Empurra o menu de navegação para a esquerda */
+        }
+
+            /* Links de navegação */
+            nav a {
+                margin: 0 10px;
+                text-decoration: none;
+                color: #333;
+                font-size: 16px;
+            }
+
+        /* Container do dropdown */
+        #dropdown-container {
+            position: relative; /* Necessário para o dropdown se posicionar em relação a este container */
+        }
+
+        /* Conteúdo do dropdown */
+        #dropdown-content {
+            display: none; /* Oculta o dropdown inicialmente */
+            position: absolute; /* Posiciona o dropdown relativo ao container */
+            right: 0;
+            top: 100%; /* Posiciona o dropdown abaixo do container */
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 5px;
+            z-index: 1000;
+        }
+
+        /* Mostrar o dropdown ao passar o mouse sobre o container */
+        #dropdown-container:hover #dropdown-content {
+            display: block; /* Mostra o dropdown ao passar o mouse sobre o container */
+        }
+
+        /* Links dentro do dropdown */
+        #dropdown-content a {
+            display: block; /* Exibe cada link em uma nova linha */
+            padding: 2px 4px;
+            color: #333;
+            text-decoration: none;
+        }
+
+            /* Estilo ao passar o mouse sobre os links do dropdown */
+            #dropdown-content a:hover {
+                background-color: #f0f0f0; /* Destaca o link ao passar o mouse */
+            }
+
+        /* Estilo do "Bem-Vindo" */
+        #bem-vindo {
+            font-size: 18px;
+            margin-left: auto; /* Empurra o "Bem-Vindo" para o lado direito */
+        }
+    </style>
+
+    <script></script>
+
+</body>
+</html>
