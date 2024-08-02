@@ -3,24 +3,23 @@ using System.Text;
 using EMISSOR_DE_CERTIFICADOS.DBConnections;
 using EMISSOR_DE_CERTIFICADOS.Helpers;
 using EMISSOR_DE_CERTIFICADOS.Interfaces;
+using EMISSOR_DE_CERTIFICADOS.Repositories;
 
 namespace EMISSOR_DE_CERTIFICADOS.Services
 {
     internal class UsuariosService : IUsuarioService
-    {
-        private readonly IDBHelpers _dbHelper;
+    {        
         private readonly ISessao _sessao;
         private readonly IPessoaEventosRepository _pessoaEventosRepository;
-        private readonly IPessoaService _pessoaService;
+        private readonly IPessoaRepository _pessoaRepository;
         private readonly IUsuarioRepository _usuarioRepository;
 
-        public UsuariosService(IDBHelpers dbHelper, ISessao sessao, IPessoaEventosRepository pessoaEventosRepository, IPessoaService pessoaService, IUsuarioRepository usuarioRepository)
-        {
-            _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelper não pode ser nulo.");
+        public UsuariosService(ISessao sessao, IPessoaEventosRepository pessoaEventosRepository, IPessoaRepository pessoaRepository, IUsuarioRepository usuarioRepository)
+        {          
             _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");
             _pessoaEventosRepository = pessoaEventosRepository ?? throw new ArgumentNullException(nameof(pessoaEventosRepository), "O PessoaEventosRepository não pode ser nulo.");
-            _pessoaService = pessoaService ?? throw new ArgumentNullException(nameof(pessoaService), "O IPessoaService não ser nulo.");
-            _usuarioRepository = usuarioRepository ?? throw new ArgumentNullException(nameof(pessoaService), "O IUsuarioRepository não ser nulo.");
+            _pessoaRepository = pessoaRepository ?? throw new ArgumentNullException(nameof(pessoaRepository), "O IPessoaService não ser nulo.");
+            _usuarioRepository = usuarioRepository ?? throw new ArgumentNullException(nameof(usuarioRepository), "O IUsuarioRepository não ser nulo.");
         }        
         public async Task<int> GerarUsuarioAsync(int idPessoa)
         {
@@ -39,7 +38,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 }
                 else
                 {
-                    idUsuario = await RetornarIdAsync(cpf); // Considere tornar este método assíncrono também
+                    idUsuario = await RetornarIdAsync(cpf); 
                 }
 
                 return idUsuario;
@@ -88,10 +87,9 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
         private async Task<string> RetornarCPFAsync(int idPessoa)
         {
             string cpf = string.Empty;
-
             try
             {                
-                cpf = await _pessoaService.ObterCPFPorIdPessoaAsync(idPessoa);
+                cpf = await _pessoaRepository.ObterCPFPorIdPessoaAsync(idPessoa);
                 return cpf;
             }
             catch (Exception ex)

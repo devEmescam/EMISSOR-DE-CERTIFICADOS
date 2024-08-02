@@ -2,5 +2,6 @@
 {
     public interface IParticipanteService
     {
+        Task<IEnumerable<EventoPessoa>> BuscarTodosCertificadosAsync();
     }
 }

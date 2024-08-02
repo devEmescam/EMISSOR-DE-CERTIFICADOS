@@ -10,7 +10,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Interfaces
         Task InserirEventoPessoaAsync(int idEvento, int idPessoa, string texto);
         Task AtualizarTextoFrenteEventoPessoaAsync(int idEvento, int idPessoa, string texto);
         Task<byte[]> BuscarBytesDaImagemNoBDAsync(int id);
-        Task InserirCertificadoAsync(int idEvento, int idPessoa);
         Task<DataTable> ObterEmailConfigAsync();
+        Task<DataTable> BuscarPessoasEventoAsync(int eventoId, string idPessoas);
+        Task AtualizarCertificadoEmitidoAsync(int idEventoPessoa, bool certificadoEmitido, string mensagemRetorno);
     }
 }

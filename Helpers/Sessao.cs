@@ -57,6 +57,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Helpers
             _httpContext.HttpContext.Session.Remove("Login");
             _httpContext.HttpContext.Session.Remove("Senha");
             _httpContext.HttpContext.Session.Remove("Tipo");
+            _httpContext.HttpContext.Session.Clear();
         }
         public int ObterUsuarioId()
         {
@@ -78,7 +79,19 @@ namespace EMISSOR_DE_CERTIFICADOS.Helpers
             }
             catch (Exception ex)
             {
-                throw new Exception($"Ocorreu um erro em Sessao.ObterUsuarioLogin. Erro: {ex.Message}");
+                throw new Exception($"Ocorreu um erro em [Sessao.ObterUsuarioLogin]. Erro: {ex.Message}");
+            }        
+        }
+
+        public string ObterUsuarioPassword() 
+        {
+            try
+            {
+                return _httpContext.HttpContext.Session.GetString("Senha") ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ocorreu um erro em [Sessao.ObterUsuarioPassword]. Erro: {ex.Message}");
             }
         
         }

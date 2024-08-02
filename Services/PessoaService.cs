@@ -41,7 +41,15 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
         }
         public async Task<PessoaModel> BuscarPessoaPorIdAsync(int id)
         {
-            return await _pessoaRepository.BuscarPessoaPorIdAsync(id);
+            try
+            {
+                return await _pessoaRepository.BuscarPessoaPorIdAsync(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [PessoaService.BuscarPessoaPorIdAsync]: {ex.Message}");
+            }
+            
         }
         public async Task<string> InserirPessoaAsync(PessoaModel pessoa)
         {
@@ -82,27 +90,69 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
         }
         public async Task AtualizarPessoaAsync(PessoaModel pessoa)
         {
-            await _pessoaRepository.AtualizarPessoaAsync(pessoa);
+            try
+            {
+                await _pessoaRepository.AtualizarPessoaAsync(pessoa);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [PessoaService.AtualizarPessoaAsync]: {ex.Message}");
+            }            
         }
         public async Task DeletarPessoaAsync(int id)
         {
-            await _pessoaRepository.DeletarPessoaAsync(id);
+            try
+            {
+                await _pessoaRepository.DeletarPessoaAsync(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [PessoaService.DeletarPessoaAsync]: {ex.Message}");
+            }            
         }
         public async Task<bool> ExistePessoaComCPFAsync(string cpf, int? userId = null)
         {
-            return await _pessoaRepository.ExistePessoaComCPFAsync(cpf, userId);
+            try
+            {
+                return await _pessoaRepository.ExistePessoaComCPFAsync(cpf, userId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [PessoaService.ExistePessoaComCPFAsync]: {ex.Message}");
+            }            
         }
         public async Task<int> ObterIdPessoaPorCPFAsync(string cpf)
         {
-            return await _pessoaRepository.ObterIdPessoaPorCPFAsync(cpf);
+            try
+            {
+                return await _pessoaRepository.ObterIdPessoaPorCPFAsync(cpf);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [PessoaService.ObterIdPessoaPorCPFAsync]: {ex.Message}");
+            }            
         }
         public async Task<string> ObterCPFPorIdPessoaAsync(int id)
         {
-            return await _pessoaRepository.ObterCPFPorIdPessoaAsync(id);
+            try
+            {
+                return await _pessoaRepository.ObterCPFPorIdPessoaAsync(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [PessoaService.ObterCPFPorIdPessoaAsync]: {ex.Message}");
+            }            
         }
         public async Task<string> ObterNomePorIdPessoaAsync(int id)
         {
-            return await _pessoaRepository.ObterNomePorIdPessoaAsync(id);
+            try
+            {
+                return await _pessoaRepository.ObterNomePorIdPessoaAsync(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [PessoaService.ObterNomePorIdPessoaAsync]: {ex.Message}");
+            }            
         }
     }
 }

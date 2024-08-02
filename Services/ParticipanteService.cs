@@ -1,22 +1,21 @@
 ﻿using EMISSOR_DE_CERTIFICADOS.Helpers;
 using EMISSOR_DE_CERTIFICADOS.Interfaces;
-using static EMISSOR_DE_CERTIFICADOS.Repositories.PessoaEventosRepository;
 
 namespace EMISSOR_DE_CERTIFICADOS.Services
 {
-    public class ParticipanteService
+    internal class ParticipanteService : IParticipanteService
     {
         private readonly ISessao _sessao;
-        private readonly IPessoaService _pessoaService;
+        private readonly IPessoaRepository _pessoaRepository;
         private readonly IPessoaEventosRepository _pessoaEventosRepository;
-        public ParticipanteService(ISessao sessao, IPessoaService pessoaService, IPessoaEventosRepository pessoaEventosRepository) 
+        public ParticipanteService(ISessao sessao, IPessoaRepository pessoaRepositry, IPessoaEventosRepository pessoaEventosRepository) 
         {
             _sessao = sessao;
-            _pessoaService = pessoaService;
+            _pessoaRepository = pessoaRepositry;
             _pessoaEventosRepository = pessoaEventosRepository;
         }
 
-        public async Task<IEnumerable<EventoPessoa>> BuscarTodosCeritificadosAsync()
+        public async Task<IEnumerable<EventoPessoa>> BuscarTodosCertificadosAsync()
         {
             string cpf = string.Empty;
             int idPessoa = -1;
@@ -31,13 +30,13 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 }
 
                 //Cria uma instancia de pessoaController para chamar os metodos contidos nessa classe                
-                idPessoa = await _pessoaService.ObterIdPessoaPorCPFAsync(cpf);
+                idPessoa = await _pessoaRepository.ObterIdPessoaPorCPFAsync(cpf);
                 var eventos = await _pessoaEventosRepository.CarregarEventosPessoa(idPessoa, -1, false);
                 return eventos;
             }
             catch (Exception ex)
             {
-                throw new Exception($"Erro em [Home_ParticipanteController.BuscarTodosCeritificadosAsync]: {ex.Message}");
+                throw new Exception($"Erro em [ParticipanteService.BuscarTodosCeritificadosAsync]: {ex.Message}");
             }
         }
     }
