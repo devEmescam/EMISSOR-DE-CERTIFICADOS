@@ -80,11 +80,33 @@ body {
     display: none; /* Oculta o card por padrão */
 }
 
+.card2 {
+    background-color: white; /* Transparência ajustada */
+    padding: 5%;
+    width: 95%;
+    height: 83%;
+    text-align: center;
+    position: fixed;
+    top: 10%;
+    left: 2.5%; /* Posiciona o card ao lado esquerdo da página */
+    border-radius: 5px;
+    display: none; /* Oculta o card por padrão */
+}
+
 #card-evento {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     background-color: white;
+}
+
+#card-evento2 {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background-color: white
+
+
 }
 
 #nomeEvento {
