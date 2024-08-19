@@ -40,6 +40,13 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             var pessoas = await _pessoaService.BuscarPorNomeCpfEmailAsync(termo);
             return Json(pessoas);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> BuscarEventosPessoa(int id)
+        {
+            var eventos = await _pessoaService.BuscarEventosPessoaAsync(id);
+            return Json(eventos);
+        }
         [HttpGet]
         public async Task<IActionResult> ObterIdPessoaPorCPF(string cpf)
         {

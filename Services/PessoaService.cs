@@ -28,12 +28,32 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                     throw new Exception("Falha ao identificar usuário logado.");
                 }
 
-                return await _pessoaEventosRepository.CarregarDadosAsync(termo, userId, false);
+                return await _pessoaEventosRepository.CarregarDadosAsync(termo, userId, true);
             }
             catch (Exception ex)
             {
                 throw new Exception($"Erro em [PessoaService.BuscarPorNomeCpfEmailAsync]: {ex.Message}");
             }
+        }
+
+        public async Task<IEnumerable<EventoPessoa>> BuscarEventosPessoaAsync(int id) 
+        {
+            try
+            {
+                int userId = _sessao.ObterUsuarioId();
+                if (userId == 0)
+                {
+                    throw new Exception("Falha ao identificar usuário logado.");
+                }
+
+                return await _pessoaEventosRepository.CarregarEventosPessoaAsync(id, userId, true);
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [PessoaService.BuscarEventosPessoa]: {ex.Message}");
+            }
+        
         }
         public async Task<IEnumerable<PessoaModel>> BuscarTodasPessoasAsync()
         {
