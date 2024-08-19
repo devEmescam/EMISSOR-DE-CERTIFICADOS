@@ -9,23 +9,21 @@ using Newtonsoft.Json;
 
 namespace EMISSOR_DE_CERTIFICADOS.Services
 {
-    public class EmailService
+    internal class EmailService : IEmailService
     {
         private string _token;
-        private string _evento;
-        private readonly IDBHelpers _dbHelper;
-        private readonly IPessoaEventosRepository _pessoaEventosRepository;
-        private readonly ISessao _sessao;
-        private readonly IPessoaService _pessoaService;
-        private readonly IUsuarioService _usuarioService;
+        private string _evento;                
+        private readonly ISessao _sessao;        
+        private readonly IUsuarioService _usuarioService;        
+        private readonly IEmailRepository _emailRepository;
+        private readonly IEmailConfigService _emailConfigService;
 
-        public EmailService(IDBHelpers dbHelper, ISessao sessao, IPessoaEventosRepository pessoaEventosRepository, IPessoaService pessoaService, IUsuarioService usuarioService)
-        {
-            _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O IDBHelper não pode ser nulo.");
-            _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");
-            _pessoaEventosRepository = pessoaEventosRepository ?? throw new ArgumentNullException(nameof(dbHelper), "O IPessoaEventosRepository não pode ser nulo.");
-            _pessoaService = pessoaService ?? throw new ArgumentNullException(nameof(pessoaService), "O IPessoaService não ser nulo.");
-            _usuarioService = usuarioService ?? throw new ArgumentNullException(nameof(pessoaService), "O IUsuarioService não ser nulo.");
+        public EmailService(ISessao sessao, IUsuarioService usuarioService, IEmailRepository emailRepository, IEmailConfigService emailConfigService)
+        {            
+            _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");            
+            _usuarioService = usuarioService ?? throw new ArgumentNullException(nameof(usuarioService), "O IUsuarioService não pode ser nulo.");
+            _emailRepository = emailRepository ?? throw new ArgumentNullException(nameof(emailRepository), "O IEmailService não pode ser nulo.");
+            _emailConfigService = emailConfigService ?? throw new ArgumentNullException(nameof(emailConfigService), "O IEmailService não pode ser nulo.");
         }
         public async Task<(bool success, string retorno)> EnviarEmailAsync(string login, string senha, int idEventoPessoa)
         {
@@ -37,15 +35,14 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             string destinatario = string.Empty;
             string[] cc = null;
             string assunto = string.Empty;
-            var emailConfigModel = new EmailConfigModel();
-            var emailConfigRepo = new EmailConfigRepository(_dbHelper);
+            var emailConfigModel = new EmailConfigModel();            
             string loginUsuario = string.Empty;
             string senhaUsuario = string.Empty;
 
             try
             {
                 // Buscar as configurações do email
-                emailConfigModel = await emailConfigRepo.CarregarDadosAsync();
+                emailConfigModel = await _emailConfigService.CarregarDadosAsync();
                 if (emailConfigModel == null)
                 {
                     throw new Exception("Nenhuma configuração de e-mail encontrada.");
@@ -91,9 +88,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                     throw new Exception("Falha ao obter token de autenticação.");
                 }
 
-                // Chamar método para enviar o email
-                //return await EnviarEmail(emailConfig, destinatario, assunto, corpo, cc, anexoImagem, assinaturaImagem);
-                var resultadoEnvio = await EnviarEmail(emailConfigModel, destinatario, assunto, corpo, cc, anexoImagem); //, assinaturaImagem
+                // Chamar método para enviar o email                
+                var resultadoEnvio = await EnviarEmail(emailConfigModel, destinatario, assunto, corpo, cc, anexoImagem); 
                 return resultadoEnvio;
             }
             catch (Exception ex)
@@ -101,26 +97,15 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 throw new Exception($"Erro em [EmailService.EnviarEmailAsync]: {ex.Message}");
             }
         }       
-        private async Task ObterNomeEventoAsync(int idEventoPessoa)
+        public async Task ObterNomeEventoAsync(int idEventoPessoa)
         {
-            string sSQL = string.Empty;
-
             try
             {
-                sSQL = "SELECT E.NOME FROM EVENTO_PESSOA EP" +
-                      " JOIN EVENTO E ON (EP.ID_EVENTO = E.ID)" +
-                      " WHERE EP.ID = @IdEventoPessoa";
-
-                var parameters = new Dictionary<string, object>
-                {
-                    { "@IdEventoPessoa", idEventoPessoa }
-                };
-
-                _evento = await _dbHelper.ExecuteScalarAsync<string>(sSQL, parameters);
+                _evento = await _emailRepository.RetornarNomeEventoAsync(idEventoPessoa);
             }
             catch (Exception ex)
             {
-                throw new Exception($"Erro em [EmailService.RetornarNomeEventoAsync]: {ex.Message}");
+                throw new Exception($"Erro em [EmailService.ObterNomeEventoAsync]: {ex.Message}");
             }
         }
         private async Task<string> ObterTextoCorpoAsync(int idEventoPessoa, string usuario, string senha)
@@ -157,29 +142,10 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             }
         }
         private async Task<string> ObterNomePessoaAsync(int idEventoPessoa)
-        {
-            string sSQL = string.Empty;
-            string retorno = string.Empty;
-
+        {   
             try
             {
-                sSQL = "SELECT P.NOME FROM EVENTO_PESSOA EP" +
-                     " JOIN PESSOA P ON (EP.ID_PESSOA = P.ID)" +
-                     " WHERE EP.ID = @IdEventoPessoa";
-
-                var parameters = new Dictionary<string, object>
-                {
-                    { "@IdEventoPessoa", idEventoPessoa }
-                };
-
-                retorno = await _dbHelper.ExecuteScalarAsync<string>(sSQL, parameters);
-
-                if (string.IsNullOrEmpty(retorno))
-                {
-                    throw new Exception("Nenhum nomePessoa encontrado para o idEventoPessoa fornecido.");
-                }
-
-                return retorno;
+                return await _emailRepository.RetornarNomePessoaAsync(idEventoPessoa);                               
             }
             catch (Exception ex)
             {
@@ -187,31 +153,12 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             }
         }
         private async Task<string> ObterEmailPessoaAsync(int idEventoPessoa)
-        {
-            string sSQL = string.Empty;
+        {            
             string retorno = string.Empty;
 
             try
             {
-
-                sSQL = "SELECT P.EMAIL FROM EVENTO_PESSOA EP" +
-                    " JOIN PESSOA P ON (EP.ID_PESSOA = P.ID)" +
-                    " WHERE EP.ID = @IdEventoPessoa";
-
-                var parameters = new Dictionary<string, object>
-                {
-                    { "@IdEventoPessoa", idEventoPessoa }
-                };
-
-                retorno = await _dbHelper.ExecuteScalarAsync<string>(sSQL, parameters);
-
-                if (string.IsNullOrEmpty(retorno))
-                {
-                    throw new Exception("Nenhum nomePessoa encontrado para o idEventoPessoa fornecido.");
-                }
-
-                return retorno;
-
+                return await _emailRepository.RetornarEmailPessoaAsync(idEventoPessoa);
             }
             catch (Exception ex)
             {
@@ -222,13 +169,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
         {
             try
             {
-                // Comando SQL para selecionar a imagem do evento com o ID fornecido
-                string sql = "SELECT IMAGEM_CERTIFICADO FROM EVENTO_PESSOA WHERE ID = @Id";
-
-                byte[] imagemBytes = await _dbHelper.ExecuteQueryArrayBytesAsync(sql, idEventoPessoa);
-
-                return imagemBytes;
-
+                return await _emailRepository.RetornarCertificadoAsync(idEventoPessoa);
             }
             catch (Exception ex)
             {

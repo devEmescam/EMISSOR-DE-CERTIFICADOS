@@ -41,7 +41,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                         Nome = Convert.ToString(row["Nome"]),
                         CPF = Convert.ToString(row["CPF"]),
                         Email = Convert.ToString(row["Email"]),
-                        Eventos = await CarregarEventosPessoa(Convert.ToInt32(row["Id"]), idUsuario, visaoOrganizador)
+                        //Eventos = await CarregarEventosPessoa(Convert.ToInt32(row["Id"]), idUsuario, visaoOrganizador)
                     });
                 }   
 

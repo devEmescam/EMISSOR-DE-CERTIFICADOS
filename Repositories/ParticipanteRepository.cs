@@ -1,6 +1,8 @@
-﻿namespace EMISSOR_DE_CERTIFICADOS.Repositories
+﻿using EMISSOR_DE_CERTIFICADOS.Interfaces;
+
+namespace EMISSOR_DE_CERTIFICADOS.Repositories
 {
-    public class ParticipanteRepository
+    internal class ParticipanteRepository : IParticipanteRepository
     {
     }
 }

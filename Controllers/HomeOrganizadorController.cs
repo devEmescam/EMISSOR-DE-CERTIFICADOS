@@ -1,9 +1,5 @@
-using ClosedXML.Excel;
-using EMISSOR_DE_CERTIFICADOS.DBConnections;
 using EMISSOR_DE_CERTIFICADOS.Models;
 using EMISSOR_DE_CERTIFICADOS.Helpers;
-using EMISSOR_DE_CERTIFICADOS.Services;
-using EMISSOR_DE_CERTIFICADOS.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using Newtonsoft.Json;
@@ -11,6 +7,7 @@ using EMISSOR_DE_CERTIFICADOS.Interfaces;
 
 namespace EMISSOR_DE_CERTIFICADOS.Controllers
 {
+    
     //CONTROLLER QUE TRATA OS EVENTOS
     public class Home_OrganizadorController : Controller
     {        
@@ -41,6 +38,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.Index] Erro: {ex.Message}");
             }
         }        
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> NovoEvento(string nomeEvento, IFormFile arteCertificadoFile, string tableData)
@@ -74,7 +72,9 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.NovoEvento]. Erro: {ex.Message}");
             }
         }        
-        [HttpGet] //GET: /Home_Organizador/ObterPessoasEvento: Usado para carregar dados no card que adicionará novas pessoas ao evento registrado em banco de dados
+        
+        [HttpGet]
+        //Usado para carregar dados no card que adicionará novas pessoas ao evento registrado em banco de dados
         public async Task<IActionResult> ObterPessoasEvento(int id)
         {
             try
@@ -91,9 +91,10 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.ObterPessoasEvento]");
             }
         }
-        //POST: /Home_Organizador/AdicionarPessoas: adiciona novas pessoas ao evento registrado em banco de dados
-        [HttpPost]
+        
+        [HttpPost] 
         [ValidateAntiForgeryToken]
+        //Adiciona novas pessoas ao evento registrado em banco de dados        
         public async Task<IActionResult> AtualizarPessoasEvento(int id, string tableData)
         {
             try
@@ -118,6 +119,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.AdicionarPessoas]. Erro: {ex.Message}");
             }
         }                 
+        
         public async Task<IActionResult> VisualizarImagem(int id)
         {
             try
@@ -133,7 +135,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Erro em [Home_OrganizadorController.VisualizarImagem]. Erro: {ex.Message}");
             }
         }
-        //Home_Organizador/DetalhesEventoPessoas: Chamado pela ação de tela referente a emissão dos certificados das pessoas do evento        
+        
+        //Chamado pela ação de tela referente a emissão dos certificados das pessoas do evento        
         public async Task<IActionResult> DetalhesEventoPessoas(int idEvento)
         {
             try
@@ -155,6 +158,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, new { message = $"Ocorreu um erro em [Home_OrganizadorController.DetalhesEventoPessoas]. Erro: {ex.Message}" });
             }
         }        
+        
         [HttpPost] 
         [ValidateAntiForgeryToken]
         //Rotina de Emissão de certificados                
@@ -189,6 +193,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, new { success = false, message = $"Ocorreu um erro em Home_OrganizadorController.EmitirCertificado. Erro: {ex.Message}" });
             }
         }
+
         public async Task<IActionResult> ObterEmailConfig() 
         {
             try
@@ -201,6 +206,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, new { success = false, message = $"Ocorreu um erro em Home_OrganizadorController.ObterEmailConfig. Erro: {ex.Message}" });
             }        
         }        
+
         [HttpPost]
         public IActionResult Logout()
         {
@@ -218,6 +224,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Erro ao encerrar a sessão: {ex.Message}");
             }
         }
+        
         [HttpGet]
         public IActionResult CheckSession()
         {

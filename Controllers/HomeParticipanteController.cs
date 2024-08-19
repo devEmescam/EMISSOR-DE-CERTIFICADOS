@@ -12,12 +12,14 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         private readonly ISessao _sessao;
         private readonly IPessoaEventosRepository _pessoaEventosRepository;
         private readonly IPessoaService _pessoaService;
+        private readonly IParticipanteService _participanteService;
 
-        public Home_ParticipanteController(ISessao sessao, IPessoaEventosRepository pessoaEventosRepository, IPessoaService pessoaService)
-        {     
+        public Home_ParticipanteController(ISessao sessao, IPessoaEventosRepository pessoaEventosRepository, IPessoaService pessoaService, IParticipanteService participanteService)
+        {
             _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");
             _pessoaEventosRepository = pessoaEventosRepository ?? throw new ArgumentNullException(nameof(pessoaEventosRepository), "O PessoaEventosRepository não pode ser nulo.");
             _pessoaService = pessoaService ?? throw new ArgumentNullException(nameof(pessoaService), "O IPessoaService não pode ser nulo.");
+            _participanteService = participanteService ?? throw new ArgumentNullException(nameof(participanteService), "O IParticipanteService não pode ser nulo.");
         }
 
         #region *** IActionResults ***     
@@ -27,7 +29,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             try
             {               
                 // Recupera todos os eventos do banco de dados
-                var eventos = await BuscarTodosCeritificadosAsync();
+                var eventos = await _participanteService.BuscarTodosCertificadosAsync();
                 // Passa o login para a view através do modelo
                 ViewBag.Login = HttpContext.Session.GetString("Login");
                 return View(eventos);
@@ -42,8 +44,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         {
             try
             {
-                // Limpe os dados da sessão para desconectar o usuário
-                HttpContext.Session.Clear();
+                // Limpe os dados da sessão para desconectar o usuário                
                 _sessao.RemoverSessaoUsuario();
 
                 // Redirecionar para a página de login do organizador         
@@ -64,35 +65,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             }
             return Ok();
         }
-        #endregion
-
-        #region *** METODOS ***
-        private async Task<IEnumerable<EventoPessoa>> BuscarTodosCeritificadosAsync()
-        {
-            string cpf = string.Empty;
-            int idPessoa = -1;           
-
-            try
-            {
-                // Usuario participante loga com cpf
-                cpf = HttpContext.Session.GetString("Login");
-
-                if (cpf == null)
-                {
-                    throw new Exception("Login do usuário não encontrado na sessão.");
-                }
-
-                //Cria uma instancia de pessoaController para chamar os metodos contidos nessa classe                
-
-                idPessoa = await _pessoaService.ObterIdPessoaPorCPFAsync(cpf);
-                var eventos = await _pessoaEventosRepository.CarregarEventosPessoa(idPessoa, -1, false);
-                return eventos;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Erro em [Home_ParticipanteController.BuscarTodosCeritificadosAsync]: {ex.Message}");
-            }
-        }
-        #endregion
+        #endregion       
     }
 }

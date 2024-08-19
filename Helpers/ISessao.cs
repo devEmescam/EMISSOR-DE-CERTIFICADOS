@@ -9,5 +9,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Helpers
         LoginModel BuscarSessaodoUsuario();
         int ObterUsuarioId();
         string ObterUsuarioLogin();
+        string ObterUsuarioPassword();
     }
 }

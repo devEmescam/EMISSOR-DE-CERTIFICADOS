@@ -9,35 +9,50 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Registrando injeções de dependências no container 
-builder.Services.AddScoped<IPessoaEventosRepository, PessoaEventosRepository>();
-builder.Services.AddScoped<IEventoPessoasRepository, EventoPessoasRepository>();
-builder.Services.AddScoped<IPessoaService, PessoaService>();
-builder.Services.AddScoped<IPessoaRepository, PessoaRepository>();
-builder.Services.AddScoped<IOrganizadorService, OrganizadorService>();
-builder.Services.AddScoped<IOrganizadorRepository, OrganizadorRepository>();
-builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-builder.Services.AddScoped<IUsuarioService, UsuariosService>();
-builder.Services.AddScoped<ICertificadosService, CertificadosService>();
-builder.Services.AddScoped<ICertificadosRepository, CertificadosRepository>();
-
+// Registrando injeÃ§Ãµes de dependÃªncias no container 
 var connectionStrings = new Dictionary<string, string>
 {
     { "CertificadoConnection", builder.Configuration.GetConnectionString("CertificadoConnection") },
 };
 builder.Services.AddSingleton<IDBHelpers>(provider => new DBHelpers(connectionStrings));
 
+builder.Services.AddScoped<IPessoaEventosRepository, PessoaEventosRepository>();
+builder.Services.AddScoped<IEventoPessoasRepository, EventoPessoasRepository>();
+
+builder.Services.AddScoped<IPessoaService, PessoaService>();
+builder.Services.AddScoped<IPessoaRepository, PessoaRepository>();
+
+builder.Services.AddScoped<IOrganizadorService, OrganizadorService>();
+builder.Services.AddScoped<IOrganizadorRepository, OrganizadorRepository>();
+
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<IUsuarioService, UsuariosService>();
+
+builder.Services.AddScoped<ICertificadosService, CertificadosService>();
+builder.Services.AddScoped<ICertificadosRepository, CertificadosRepository>();
+
+builder.Services.AddScoped<IParticipanteRepository, ParticipanteRepository>();
+builder.Services.AddScoped<IParticipanteService, ParticipanteService>();
+
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IEmailRepository, EmailRepository>();
+
+builder.Services.AddScoped<IEmailConfigRepository, EmailConfigRepository>();
+builder.Services.AddScoped<IEmailConfigService, EmailConfigService>();
+
 builder.Logging.AddConsole();
-// Configura o nível mínimo de logging para Debug
+// Configura o nÃ­vel mÃ­nimo de logging para Debug
 builder.Logging.SetMinimumLevel(LogLevel.Debug);
 // Add IHttpContextAccessor to the services
 builder.Services.AddHttpContextAccessor();
 
 //===========================================================================================
-//Injetar dependencia do "HttpContext" e "Sessao" para usar o controle de sessão da aplicacao
+//Injetar dependencia do "HttpContext" e "Sessao" para usar o controle de sessÃ£o da aplicacao
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<ISessao, Sessao>();
-//Configurar os Cookies da Sessão
+// Configurar serviÃ§os de sessÃ£o
+builder.Services.AddDistributedMemoryCache(); // Usar cache em memÃ³ria para armazenar sessÃµes
+//Configurar os Cookies da SessÃ£o
 builder.Services.AddSession(o =>
 {
     o.IdleTimeout = TimeSpan.FromMinutes(60);
@@ -64,8 +79,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 //Configurar o uso da Sessao
 app.UseSession();
-// Adicionar o middleware de verificação de sessão
-//app.UseMiddleware<SessaoTimeoutHelper>();
+
 app.UseRouting();
 app.UseAuthorization();
 
