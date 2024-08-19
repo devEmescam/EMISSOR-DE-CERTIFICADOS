@@ -134,3 +134,36 @@ body {
         transform: scale(1);
     }
 }
+
+
+
+
+
+
+/* Adiciona um container para centralizar o botão */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 210px; /* Ajuste a margem conforme necessário */
+}
+
+.btn-primary {
+    background-color: white; /* Fundo transparente */
+    color: black; /* Texto branco */
+    border: 2px solid white; /* Borda branca e um pouco mais grossa */
+    font-size: 13px; /* Fonte menor (equivalente a 14px) */
+    font-weight: bold; /* Fonte em negrito */
+    padding: 0.375rem 0.75rem; /* Padding ajustado para tamanho menor */
+    border-radius: 10px; /* Bordas arredondadas (opcional) */
+    text-align: center; /* Alinhamento do texto ao centro */
+    width: 250px;
+    white-space: nowrap; /* Impede a quebra de linha do texto */
+}
+
+    .btn-primary:hover {
+        background-color: transparent; 
+        color: white; /* Texto branco */
+        border-color: white; /* Borda branca */
+    }
+

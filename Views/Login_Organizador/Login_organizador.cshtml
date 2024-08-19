@@ -1,38 +1,53 @@
-﻿@{
-    ViewBag.Title = "Login Organizador";
-}
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>login Organizador</title>
+    <title>Login Organizador</title>
     <div id="logoEmescam"><img src="/logoemescam2.png" alt="logo"></div>
     <link rel="stylesheet" href="~/css/Login_organizador.css">
-
 </head>
 <body>
-
     <div>
         <div class="cartao-login">
             <h3 style="color: white;">LOGIN</h3>
             <h7 style="color: white;">ORGANIZADOR</h7>
-
-            <!-- Exibir mensagens de erro -->
             <div asp-validation-summary="All" class="text-danger"></div>
-
-            <form method="post" asp-action="LoginOrganizador" asp-controller="Login">
+            <form id="login-form" method="post" asp-action="LoginOrganizador" asp-controller="Login">
                 <div>
                     <input type="text" placeholder="Usuário" name="Login" required style="background: white; border: 2px solid white; color: black;">
                     <input type="password" placeholder="Senha" name="Senha" required style="background: white; border: 2px solid white; color: black;">
-                    <button style="background: transparent; border: 2px solid white; border-radius: 5px; padding: 10px; font-size: 16px; cursor: pointer; transition: all 0.3s ease; width: 100%; color: white; font-weight: bold;" onmouseover="this.style.background='white'; this.style.color='black';" onmouseout="this.style.background='transparent'; this.style.color='white';">Entrar</button>
+                    <button type="submit" style="background: transparent; border: 2px solid white; border-radius: 5px; padding: 10px; font-size: 16px; cursor: pointer; transition: all 0.3s ease; width: 100%; color: white; font-weight: bold;" onmouseover="this.style.background='white'; this.style.color='black';" onmouseout="this.style.background='transparent'; this.style.color='white';">Entrar</button>
                 </div>
             </form>
         </div>
     </div>
+
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loader">
+            <img src="~/loading.png"> <!-- Substitua pelo caminho correto da sua imagem -->
+            <div class="loader-dots">
+                <div class="loader-dot"></div>
+                <div class="loader-dot"></div>
+                <div class="loader-dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('login-form');
+            const loadingOverlay = document.getElementById('loading-overlay');
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault(); // Evita o envio imediato do formulário
+                loadingOverlay.style.display = 'flex'; // Exibe o carregamento
+
+                setTimeout(function () {
+                    form.submit(); // Envia o formulário após 2 segundos
+                }, 2000); // 2000 milissegundos = 2 segundos
+            });
+        });
+    </script>
 </body>
 </html>
-
-
-    
