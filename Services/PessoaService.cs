@@ -35,7 +35,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 throw new Exception($"Erro em [PessoaService.BuscarPorNomeCpfEmailAsync]: {ex.Message}");
             }
         }
-
         public async Task<IEnumerable<EventoPessoa>> BuscarEventosPessoaAsync(int id) 
         {
             try
@@ -173,6 +172,18 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             {
                 throw new Exception($"Erro em [PessoaService.ObterNomePorIdPessoaAsync]: {ex.Message}");
             }            
+        }
+
+        public async Task<string> ObterNomePorCPFAsync(string cpf) 
+        {
+            try
+            {
+                return await _pessoaRepository.ObterNomePorCPFAsync(cpf);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [PessoaService.ObterNomePorCPFAsync]: {ex.Message}");
+            }
         }
     }
 }
