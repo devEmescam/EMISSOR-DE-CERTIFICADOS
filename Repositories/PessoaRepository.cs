@@ -68,8 +68,12 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
         {
             try
             {
-                var query = $"INSERT INTO PESSOA (NOME, CPF, EMAIL, ID_USUARIO_ADMINISTRATIVO, DATA_CADASTRO) VALUES ('{pessoa.Nome}', '{pessoa.CPF}', '{pessoa.Email}', {idUsuarioAdministrativo}, GETDATE())";
-                await _dbHelper.ExecuteQueryAsync(query);
+                var query = $"INSERT INTO PESSOA (NOME, CPF, EMAIL, ID_USUARIO_ADMINISTRATIVO, DATA_CADASTRO) VALUES ('{pessoa.Nome}', '{pessoa.CPF}', '{pessoa.Email}', {idUsuarioAdministrativo}, GETDATE())" +
+                    "SELECT SCOPE_IDENTITY();"; 
+                //await _dbHelper.ExecuteQueryAsync(query);
+
+                var result = await _dbHelper.ExecuteScalarAsync<int>(query);
+                pessoa.Id =  result;
             }
             catch (Exception ex)
             {
