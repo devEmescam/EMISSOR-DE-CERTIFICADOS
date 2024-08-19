@@ -18,6 +18,8 @@
             <a href="#" onclick="mostrarCard('buscar-pessoas')">Buscar Pessoas</a>
             <a href="#" onclick="mostrarCard('configuracoes')">Configurações</a>
         </nav>
+
+
         <div id="dropdown-container">
             <div id="bem-vindo">Bem-Vindo, @ViewBag.Login!</div>
             <div id="dropdown-content">
@@ -47,14 +49,13 @@
                         <input type="text" id="inputEmail1" placeholder="Email">
                         <input type="text" id="tipoPessoa" placeholder="Tipo Pessoa">
                     </div>
-                    <textarea id="textareaTexto" placeholder="Texto"></textarea>
+                    <textarea id="textareaTexto" placeholder="Texto que irá para o certificado"></textarea>
                 </div>
                 <button type="button" id="botaoAcao" onclick="adicionarLinha()">Adicionar Dados</button>
                 <button type="button" id="confirmarAtualizacaoBtn" onclick="confirmarAtualizacao()" style="display:none;">Confirmar Atualização</button>
                 <hr>
                 <!-- Tabela que será preenchida -->
 
-                <button id="btnLimparTabela" onclick="limparTabela()">Limpar Tabela</button>
 
                 <div class="tabela-container">
                     <table id="tabela" class="display">
@@ -90,6 +91,8 @@
                 </div>
                 <input type="hidden" id="tableData" name="tableData">
                 <button type="submit" id="CadastrarEvento">Cadastrar Evento</button>
+                <button id="btnLimparTabela" onclick="limparTabela()">Limpar Tabela</button>
+
             </form>
         </div>
 
@@ -124,7 +127,7 @@
                                 </td>
                                 <td style="text-align: center;">
                                     <button class="btn btn-emitir" onclick="abrirCardEmitirCertificado('@evento.Id')">Emitir Certificado</button>
-                                    <button class="btn btn-atualizar" onclick="atualizarEvento('@evento.Id', '@evento.Nome')">Incluir Pessoas</button>
+                                    <button class="btn btn-atualizar" onclick="atualizarEvento('@evento.Id', '@evento.Nome')">Atualizar</button>
 
                                 </td>
                             </tr>
@@ -1799,28 +1802,28 @@
             // });
 
 
-            // document.addEventListener("DOMContentLoaded", function () {
-            //     const sairLink = document.getElementById("sair-link");
+            document.addEventListener("DOMContentLoaded", function () {
+                const sairLink = document.getElementById("sair-link");
 
-            //     sairLink.addEventListener("click", function (event) {
-            //         event.preventDefault(); // Evita o comportamento padrão do link
+                sairLink.addEventListener("click", function (event) {
+                    event.preventDefault(); // Evita o comportamento padrão do link
 
-            //         fetch('/Login/Sair', {
-            //             method: 'GET',
-            //             headers: {
-            //                 'Content-Type': 'application/json'
-            //             }
-            //         })
-            //             .then(response => {
-            //                 if (response.redirected) {
-            //                     window.location.href = response.url;
-            //                 }
-            //             })
-            //             .catch(error => {
-            //                 console.error('Erro ao sair:', error);
-            //             });
-            //     });
-            // });
+                    fetch('/Login/Sair', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => {
+                            if (response.redirected) {
+                                window.location.href = response.url;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erro ao sair:', error);
+                        });
+                });
+            });
 
 
             

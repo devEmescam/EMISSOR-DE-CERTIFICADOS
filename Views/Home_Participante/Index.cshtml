@@ -1,8 +1,4 @@
-﻿@{
-    ViewData["Title"] = "Home Organizador";
-}
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -11,66 +7,75 @@
     <link rel="stylesheet" href="~/css/Home_Participante.css" asp-append-version="true" />
 </head>
 <body>
-    <img src="https://apps.emescam.br/site/emissor_certificado/logoemescam.png" class="logo" asp-append-version="true" />
 
-    <div class="card-section">
-        <div class="card">
-            <h6>Bem-Vindo, usuário</h6>
-            <div class="card-title">Painel Inicial</div>
+    <header>
+        <img id="logo" src="/logoemescam.png" alt="Logo Emescam">
+        <nav>
+            <a href="#" onclick="mostrarCard('meus-eventos')">Meus Eventos</a>
+        </nav>
+
+
+        <div id="dropdown-container">
+            <div id="bem-vindo">Bem-Vindo, @ViewBag.Login!</div>
+            <div id="dropdown-content">
+                <a id="sair-link" href="#">Sair</a>
+            </div>
         </div>
-        <div class="card card-principal">
-            <h5>Título do Card Principal</h5>
-        </div>
+    </header>
+
+    <!-- EVENTOS -->
+    <div id="Eventos">
+        <h4>Meus Eventos</h4>
+
+        <!-- Campo de pesquisa -->
+        <input type="text" id="pesquisa-evento" placeholder="Pesquisar eventos..." onkeyup="filtrarEventos()">
+
+        <!-- Tabela de resultados -->
+        <table id="tabela-eventos">
+            <thead>
+                <tr>
+                    <th>Nome do Evento</th>
+                    <th>Data do Evento</th>
+                    <th>Visualizar Certificado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- As linhas da tabela serão preenchidas dinamicamente aqui -->
+            </tbody>
+        </table>
     </div>
+
+    <script>
+        const eventos = [
+            { nome: 'Evento 1', data: '2024-08-01', certificadoUrl: '#certificado1' },
+            { nome: 'Evento 2', data: '2024-09-10', certificadoUrl: '#certificado2' },
+            { nome: 'Evento 3', data: '2024-10-20', certificadoUrl: '#certificado3' },
+            // Adicione mais eventos conforme necessário
+        ];
+
+        function atualizarTabela(eventosFiltrados) {
+            const tabelaCorpo = document.querySelector('#tabela-eventos tbody');
+            tabelaCorpo.innerHTML = '';
+
+            eventosFiltrados.forEach(evento => {
+                const linha = document.createElement('tr');
+                linha.innerHTML = `
+                            <td>${evento.nome}</td>
+                            <td>${evento.data}</td>
+                            <td><a href="${evento.certificadoUrl}" target="_blank">Visualizar</a></td>
+                        `;
+                tabelaCorpo.appendChild(linha);
+            });
+        }
+
+        function filtrarEventos() {
+            const filtro = document.querySelector('#pesquisa-evento').value.toLowerCase();
+            const eventosFiltrados = eventos.filter(evento => evento.nome.toLowerCase().includes(filtro));
+            atualizarTabela(eventosFiltrados);
+        }
+
+        // Inicialmente, exibir todos os eventos
+        atualizarTabela(eventos);
+    </script>
 </body>
 </html>
-
-
-<style>
-    body {
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background: linear-gradient(135deg, #01f949, #14086d);
-        font-family: Arial, sans-serif;
-        position: relative;
-    }
-
-    .logo {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        width: 320px;
-    }
-
-    .card-section {
-        display: flex;
-    }
-
-    .card {
-        background-color: rgba(250, 235, 215, 0.5);
-        padding: 5%;
-        border-radius: 15px;
-        box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.2);
-        height: 700px;
-        width: 300px;
-        margin-right: 20px; /* Espaçamento entre os cards */
-        left: -40px;
-    }
-
-    .card-principal {
-        background-color: rgba(250, 235, 215, 0.5);
-        padding: 20px;
-        border-radius: 15px;
-        width: 100%;
-    }
-
-    ul {
-        list-style-type: none;
-        padding: 0;
-    }
-
-</style>

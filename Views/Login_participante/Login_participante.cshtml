@@ -1,103 +1,58 @@
-﻿
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Organizador</title>
-    <link rel="stylesheet" href="~/css/[SeuArquivoCSS].css" asp-append-version="true" /> <!-- Ajuste o caminho do CSS -->
+    <title>Login Participante</title>
+    <link rel="stylesheet" href="~/css/Login_Participante.css">
 </head>
 <body>
-    <div id="logoEmescam"><img src="/logoemescam.png" alt="logo" asp-append-version="true" /></div>
+    <div id="logoEmescam"><img src="/logoemescam2.png" alt="logo"></div>
+    <div class="cartao-login">
+        <h3 style="color: white;">LOGIN</h3>
+        <h7 style="color: white;">PARTICIPANTE</h7>
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <form id="login-form" method="post" asp-action="LoginParticipante" asp-controller="Login">
+            <div>
+                <input type="text" placeholder="Usuário" name="Login" required style="background: white; border: 2px solid white; color: black;">
+                <input type="password" placeholder="Senha" name="Senha" required style="background: white; border: 2px solid white; color: black;">
+                <button type="submit" style="background: transparent; border: 2px solid white; border-radius: 5px; padding: 10px; font-size: 16px; cursor: pointer; transition: all 0.3s ease; width: 100%; color: white; font-weight: bold;" onmouseover="this.style.background='white'; this.style.color='black';" onmouseout="this.style.background='transparent'; this.style.color='white';">Entrar</button>
+            </div>
+        </form>
+    </div>
 
-    <div>
-        <div class="cartao-login">
-            <h3 style="color: white;">LOGIN</h3>
-            <h7 style="color: white;">PARTICIPANTES</h7>
+    <div class="container">
+        <!-- BOTÃO AUTENTICADOR -->
+        <a href="@Url.Action("Index", "Autenticador")" class="btn btn-primary">
+            Verificar Autenticidade de Certificado
+        </a>
+    </div>
 
-            <!-- Exibir mensagens de erro -->
-            <div asp-validation-summary="All" class="text-danger"></div>
-
-            <form method="post" asp-action="LoginParticipante" asp-controller="Login">
-                <div>
-                    <input type="text" placeholder="Usuário" name="Login" required style="background: white; border: 2px solid white; color: black;">
-                    <input type="password" placeholder="Senha" name="Senha" required style="background: white; border: 2px solid white; color: black;">
-                    <button style="background: transparent; border: 2px solid white; border-radius: 5px; padding: 10px; font-size: 16px; cursor: pointer; transition: all 0.3s ease; width: 100%; color: white; font-weight: bold;" onmouseover="this.style.background='white'; this.style.color='black';" onmouseout="this.style.background='transparent'; this.style.color='white';">Entrar</button>
-                </div>
-            </form>
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loader">
+            <img src="~/loading.png">
+            <div class="loader-dots">
+                <div class="loader-dot"></div>
+                <div class="loader-dot"></div>
+                <div class="loader-dot"></div>
+            </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('login-form');
+            const loadingOverlay = document.getElementById('loading-overlay');
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault(); // Evita o envio imediato do formulário
+                loadingOverlay.style.display = 'flex'; // Exibe o carregamento
+
+                setTimeout(function () {
+                    form.submit(); // Envia o formulário após 2 segundos
+                }, 2000); // 2000 milissegundos = 2 segundos
+            });
+        });
+    </script>
 </body>
 </html>
-
-<style>
-
-    #logoEmescam {
-        position: fixed;
-        top: 10%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        border-radius: 5px;
-        width: 300px;
-        text-align: center;
-    }
-
-        #logoEmescam img {
-            width: 300px;
-        }
-
-    body {
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background: linear-gradient(135deg, #01f949, #14086d);
-        font-family: Arial, sans-serif;
-    }
-
-    .cartao-login {
-        background: transparent;
-        border-radius: 15px;
-        padding: 40px;
-        width: 300px;
-        max-width: 90%;
-        text-align: center;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        border: 2px solid white;
-    }
-
-        .cartao-login h2 {
-            margin-bottom: 20px;
-            color: white;
-        }
-
-        .cartao-login input[type="text"],
-        .cartao-login input[type="password"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 2px solid white;
-            border-radius: 5px;
-            box-sizing: border-box;
-            outline: none;
-            background: transparent;
-            color: white;
-        }
-
-        .cartao-login button {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            background: linear-gradient(135deg, #01f949, #14086d);
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-</style>

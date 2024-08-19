@@ -1,5 +1,5 @@
 ﻿
-// Função para verificar a sessão periodicamente
+ Função para verificar a sessão periodicamente
 function checkSession() {
     console.log('checkSession called'); // Log de depuração
     $.ajax({

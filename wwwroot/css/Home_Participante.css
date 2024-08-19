@@ -1,0 +1,140 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #01f949, #14086d);
+    font-family: Arial, sans-serif;
+    padding-top: 70px; /* Adiciona espaço para o cabeçalho fixo */
+    font-size: small;
+}
+
+#Eventos {
+    position: absolute;
+    left: 2%;
+    width: 96%;
+    max-height: 750px;
+    height: 750px;
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    text-align: center;
+}
+
+
+
+
+
+/* Estilos para o cabeçalho */
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Distribui o espaço entre o logo e o menu de navegação */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    padding: 0 20px; /* Adiciona algum espaço interno nas laterais do cabeçalho */
+}
+
+/* Logo */
+#logo {
+    width: 150px;
+}
+
+/* Container do menu de navegação */
+nav {
+    display: flex;
+    align-items: center;
+    margin-right: auto; /* Empurra o menu de navegação para a esquerda */
+}
+
+    /* Links de navegação */
+    nav a {
+        margin: 0 10px;
+        text-decoration: none;
+        color: #333;
+        font-size: 16px;
+    }
+
+/* Container do dropdown */
+#dropdown-container {
+    position: relative; /* Necessário para o dropdown se posicionar em relação a este container */
+}
+
+/* Conteúdo do dropdown */
+#dropdown-content {
+    display: none; /* Oculta o dropdown inicialmente */
+    position: absolute; /* Posiciona o dropdown relativo ao container */
+    right: 0;
+    top: 100%; /* Posiciona o dropdown abaixo do container */
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 5px;
+    z-index: 1000;
+}
+
+/* Mostrar o dropdown ao passar o mouse sobre o container */
+#dropdown-container:hover #dropdown-content {
+    display: block; /* Mostra o dropdown ao passar o mouse sobre o container */
+}
+
+/* Links dentro do dropdown */
+#dropdown-content a {
+    display: block; /* Exibe cada link em uma nova linha */
+    padding: 2px 4px;
+    color: #333;
+    text-decoration: none;
+}
+
+    /* Estilo ao passar o mouse sobre os links do dropdown */
+    #dropdown-content a:hover {
+        background-color: #f0f0f0; /* Destaca o link ao passar o mouse */
+    }
+
+/* Estilo do "Bem-Vindo" */
+#bem-vindo {
+    font-size: 18px;
+    margin-left: auto; /* Empurra o "Bem-Vindo" para o lado direito */
+}
+
+
+
+#pesquisa-evento {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#tabela-eventos {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    #tabela-eventos th, #tabela-eventos td {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+
+    #tabela-eventos th {
+        background-color: #f4f4f4;
+    }
+
+    #tabela-eventos a {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+        #tabela-eventos a:hover {
+            text-decoration: underline;
+        }
+   
+
+

@@ -65,7 +65,7 @@ app.UseStaticFiles();
 //Configurar o uso da Sessao
 app.UseSession();
 // Adicionar o middleware de verificação de sessão
-app.UseMiddleware<SessaoTimeoutHelper>();
+//app.UseMiddleware<SessaoTimeoutHelper>();
 app.UseRouting();
 app.UseAuthorization();
 
