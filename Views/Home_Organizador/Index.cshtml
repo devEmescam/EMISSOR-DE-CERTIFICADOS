@@ -978,11 +978,17 @@
                     data: { termo: termo },
                     success: function (data) {
                         var resultList = $("#resultList");
-                        resultList.find(".result-item, .detalhes").remove(); // Limpar resultados anteriores
+                        resultList.find(".result-item, .certificado").remove(); // Limpar resultados anteriores
+
+                        if (data.length === 0) {
+                            resultList.append("<div class='result-item'>Nenhum resultado encontrado.</div>");
+                            return;
+                        }
 
                         data.forEach(function (pessoa) {
                             var detalhesInline = "<span class='detalhes-inline'> " +
                                 pessoa.cpf + " &#x2714; " + pessoa.email + "</span>";
+
                             var item = $("<div class='result-item'></div>")
                                 .append("<span class='col-id'>" + pessoa.id + "</span>")
                                 .append("<span class='col-nome'>" + pessoa.nome + detalhesInline + "</span>")
@@ -991,19 +997,16 @@
                                         .append("<button class='acoes-btn' onclick='toggleDropdown(this)'>Ações</button>")
                                         .append(
                                             $("<div class='acoes-dropdown-content'>")
-                                                .append("<button onclick='exibirCertificado(this)'>Exibir Certificado</button>")
+                                                .append("<button onclick='exibirCertificado(this, " + pessoa.id + ")'>Exibir Certificado</button>")
                                                 .append("<button onclick='acao2()'>Reenviar Instruções</button>")
                                                 .append("<button onclick='acao3()'>Atualizar</button>")
                                         )
                                 )
                                 .data("id", pessoa.id)
                                 .data("cpf", pessoa.cpf)
-                                .data("email", pessoa.email)
-                                .data("certificado", pessoa.certificado);
+                                .data("email", pessoa.email);
 
-                            var certificado = pessoa.certificado ? pessoa.certificado : "undefined";
-                            var certificadoDiv = $("<div class='certificado'></div>")
-                                .append("<a class='certificado-link' href='#' onclick='abrirCertificado(\"" + pessoa.certificado + "\")'>" + certificado + "</a>");
+                            var certificadoDiv = $("<div class='certificado' style='display:none;'></div>");
 
                             resultList.append(item).append(certificadoDiv);
                         });
@@ -1017,14 +1020,57 @@
         }
 
 
+
         function toggleDropdown(button) {
             $(button).next(".acoes-dropdown-content").toggle();
         }
 
-        function exibirCertificado(button) {
+        function exibirCertificado(button, pessoaId) {
             var item = $(button).closest('.result-item');
-            item.next(".certificado").slideToggle("slow"); // Aplica o efeito de deslizamento lento
+            var certificadoDiv = item.next(".certificado");
+
+            if (certificadoDiv.is(':visible')) {
+                certificadoDiv.slideUp("slow");
+                return;
+            }
+
+            // Se o certificado ainda não foi carregado, faça a requisição para carregá-lo
+            if (certificadoDiv.is(':empty')) {
+                $.ajax({
+                    url: 'Pessoa/BuscarEventosPessoa', // Ajuste esta URL para onde o certificado pode ser acessado
+                    type: 'GET',
+                    data: { id: pessoaId },
+                    success: function (data) {
+                        if (data && data.imagemCertificado) {
+                            // Converta o arquivo para uma URL utilizável
+                            var reader = new FileReader();
+                            reader.onload = function (e) {
+                                certificadoDiv.html(
+                                    $("<img class='certificado-imagem' />")
+                                        .attr("src", e.target.result)
+                                        .attr("alt", "Certificado")
+                                        .css("max-width", "100%")
+                                );
+                                certificadoDiv.slideDown("slow");
+                            };
+
+                            reader.readAsDataURL(data.imagemCertificado);
+                        } else {
+                            certificadoDiv.text("Certificado não disponível");
+                            certificadoDiv.slideDown("slow");
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Erro ao buscar certificado:", error);
+                        certificadoDiv.text("Erro ao carregar o certificado. Consulte o console para mais detalhes.");
+                        certificadoDiv.slideDown("slow");
+                    }
+                });
+            } else {
+                certificadoDiv.slideDown("slow");
+            }
         }
+
 
         function abrirCertificado(certificadoUrl) {
             if (certificadoUrl && certificadoUrl !== "undefined") {
