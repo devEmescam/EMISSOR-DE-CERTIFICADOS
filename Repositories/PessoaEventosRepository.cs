@@ -41,7 +41,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                         Nome = Convert.ToString(row["Nome"]),
                         CPF = Convert.ToString(row["CPF"]),
                         Email = Convert.ToString(row["Email"]),
-                        //Eventos = await CarregarEventosPessoa(Convert.ToInt32(row["Id"]), idUsuario, visaoOrganizador)
+                        //Eventos = await CarregarEventosPessoaAsync(Convert.ToInt32(row["Id"]), idUsuario, visaoOrganizador)
                     });
                 }   
 
@@ -52,7 +52,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                 throw new Exception($"Erro em [PessoaEventosRepository.CarregarDadosAsync]: {ex.Message}");
             }
         }
-        public async Task<List<EventoPessoa>> CarregarEventosPessoa(int idPessoa, int idUsuario, bool visaoOrganizador)
+        public async Task<List<EventoPessoa>> CarregarEventosPessoaAsync(int idPessoa, int idUsuario, bool visaoOrganizador)
         {
             try
             {
@@ -109,7 +109,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
             }
             catch (Exception ex)
             {
-                throw new Exception($"Erro em [PessoaEventosRepository.CarregarEventosPessoa]: {ex.Message}");
+                throw new Exception($"Erro em [PessoaEventosRepository.CarregarEventosPessoaAsync]: {ex.Message}");
             }
         }
        

@@ -5,6 +5,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Interfaces
     public interface IPessoaService
     {
         Task<IEnumerable<Pessoa>> BuscarPorNomeCpfEmailAsync(string termo);
+        Task<IEnumerable<EventoPessoa>> BuscarEventosPessoaAsync(int id);
         Task<IEnumerable<PessoaModel>> BuscarTodasPessoasAsync();
         Task<PessoaModel> BuscarPessoaPorIdAsync(int id);
         Task<string> InserirPessoaAsync(PessoaModel pessoa);
