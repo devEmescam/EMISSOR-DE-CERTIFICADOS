@@ -1,9 +1,5 @@
-using ClosedXML.Excel;
-using EMISSOR_DE_CERTIFICADOS.DBConnections;
 using EMISSOR_DE_CERTIFICADOS.Models;
 using EMISSOR_DE_CERTIFICADOS.Helpers;
-using EMISSOR_DE_CERTIFICADOS.Services;
-using EMISSOR_DE_CERTIFICADOS.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using Newtonsoft.Json;
@@ -11,6 +7,7 @@ using EMISSOR_DE_CERTIFICADOS.Interfaces;
 
 namespace EMISSOR_DE_CERTIFICADOS.Controllers
 {
+    
     //CONTROLLER QUE TRATA OS EVENTOS
     public class Home_OrganizadorController : Controller
     {        

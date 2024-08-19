@@ -50,6 +50,8 @@ builder.Services.AddHttpContextAccessor();
 //Injetar dependencia do "HttpContext" e "Sessao" para usar o controle de sessão da aplicacao
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<ISessao, Sessao>();
+// Configurar serviços de sessão
+builder.Services.AddDistributedMemoryCache(); // Usar cache em memória para armazenar sessões
 //Configurar os Cookies da Sessão
 builder.Services.AddSession(o =>
 {
@@ -77,7 +79,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 //Configurar o uso da Sessao
 app.UseSession();
-// Adicionar o middleware de verificação de sessão
+//// Adicionar o middleware de verificação de sessão
 app.UseMiddleware<SessaoTimeoutHelper>();
 app.UseRouting();
 app.UseAuthorization();

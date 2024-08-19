@@ -27,7 +27,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         public IActionResult Sair()
         {
             // Limpe os dados da sessão para desconectar o usuário
-            HttpContext.Session.Clear();
+            //HttpContext.Session.Clear();
             _sessao.RemoverSessaoUsuario();            
             // Redirecionar para a página de login do organizador
             return RedirectToAction("Index", "Home");
