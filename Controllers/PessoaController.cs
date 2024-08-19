@@ -2,16 +2,19 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using EMISSOR_DE_CERTIFICADOS.Models;
-using EMISSOR_DE_CERTIFICADOS.Interfaces; // Adicione o namespace onde o IPessoaService está localizado
+using EMISSOR_DE_CERTIFICADOS.Interfaces;
+using EMISSOR_DE_CERTIFICADOS.Helpers; // Adicione o namespace onde o IPessoaService está localizado
 
 namespace EMISSOR_DE_CERTIFICADOS.Controllers
 {
     public class PessoaController : Controller
     {
+        private readonly ISessao _sessao;
         private readonly IPessoaService _pessoaService;
-        public PessoaController(IPessoaService pessoaService)
+        public PessoaController(IPessoaService pessoaService, ISessao sessao)
         {
             _pessoaService = pessoaService ?? throw new ArgumentNullException(nameof(pessoaService), "O IPessoaService não pode ser nulo.");
+            _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");
         }
 
         #region *** IActionResults ***        
@@ -114,6 +117,17 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             // Exclui a pessoa do banco de dados
             await _pessoaService.DeletarPessoaAsync(id);
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public IActionResult CheckSession()
+        {
+            var user = _sessao.BuscarSessaodoUsuario();
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+            return Ok();
         }
         #endregion
     }

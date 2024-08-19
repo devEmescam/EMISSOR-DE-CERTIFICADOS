@@ -32,7 +32,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Helpers
             {
                 string valor = JsonConvert.SerializeObject(login);
 
-                _httpContext.HttpContext.Session.SetString("sessaoUsuarioLogado", valor);                
+                _httpContext.HttpContext.Session.SetString("sessaoUsuarioLogado", valor);
                 _httpContext.HttpContext.Session.SetInt32("UserId", login.Id);
                 _httpContext.HttpContext.Session.SetString("Login", login.Login.ToLower());
                 _httpContext.HttpContext.Session.SetString("Senha", login.Senha);
@@ -40,7 +40,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Helpers
                 {
                     _httpContext.HttpContext.Session.SetString("Tipo", "organizador");
                 }
-                else 
+                else
                 {
                     _httpContext.HttpContext.Session.SetString("Tipo", "nao_definido");
                 }
@@ -63,14 +63,14 @@ namespace EMISSOR_DE_CERTIFICADOS.Helpers
         {
             try
             {
-                 return _httpContext.HttpContext.Session.GetInt32("UserId") ?? 0;
+                return _httpContext.HttpContext.Session.GetInt32("UserId") ?? 0;
             }
             catch (Exception ex)
             {
                 throw new Exception($"Ocorreu um erro em Sessao.ObterUsuarioId. Erro: {ex.Message}");
             }
         }
-        public string ObterUsuarioLogin() 
+        public string ObterUsuarioLogin()
         {
             try
             {
@@ -80,10 +80,9 @@ namespace EMISSOR_DE_CERTIFICADOS.Helpers
             catch (Exception ex)
             {
                 throw new Exception($"Ocorreu um erro em [Sessao.ObterUsuarioLogin]. Erro: {ex.Message}");
-            }        
+            }
         }
-
-        public string ObterUsuarioPassword() 
+        public string ObterUsuarioPassword()
         {
             try
             {
@@ -93,7 +92,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Helpers
             {
                 throw new Exception($"Ocorreu um erro em [Sessao.ObterUsuarioPassword]. Erro: {ex.Message}");
             }
-        
+
         }
     }
 }
