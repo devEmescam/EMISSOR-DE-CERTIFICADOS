@@ -1,7 +1,5 @@
 ﻿using EMISSOR_DE_CERTIFICADOS.DBConnections;
-using EMISSOR_DE_CERTIFICADOS.Helpers;
 using EMISSOR_DE_CERTIFICADOS.Interfaces;
-using EMISSOR_DE_CERTIFICADOS.Services;
 using System.Data;
 
 namespace EMISSOR_DE_CERTIFICADOS.Repositories

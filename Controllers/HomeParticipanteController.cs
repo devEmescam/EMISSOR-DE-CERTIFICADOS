@@ -1,9 +1,6 @@
-﻿using EMISSOR_DE_CERTIFICADOS.DBConnections;
-using EMISSOR_DE_CERTIFICADOS.Helpers;
+﻿using EMISSOR_DE_CERTIFICADOS.Helpers;
 using EMISSOR_DE_CERTIFICADOS.Interfaces;
-using EMISSOR_DE_CERTIFICADOS.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using static EMISSOR_DE_CERTIFICADOS.Repositories.PessoaEventosRepository;
 
 namespace EMISSOR_DE_CERTIFICADOS.Controllers
 {
@@ -13,7 +10,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         private readonly IPessoaEventosRepository _pessoaEventosRepository;
         private readonly IPessoaService _pessoaService;
         private readonly IParticipanteService _participanteService;
-
         public Home_ParticipanteController(ISessao sessao, IPessoaEventosRepository pessoaEventosRepository, IPessoaService pessoaService, IParticipanteService participanteService)
         {
             _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");
@@ -29,9 +25,13 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             try
             {               
                 // Recupera todos os eventos do banco de dados
-                var eventos = await _participanteService.BuscarTodosCertificadosAsync();
-                // Passa o login para a view através do modelo
-                ViewBag.Login = HttpContext.Session.GetString("Login");
+                var eventos = await _participanteService.BuscarTodosCertificadosAsync();                
+                
+                //Busca o nome do usuario para passar para view
+                var cpf =  HttpContext.Session.GetString("Login");
+                string usuario = await _pessoaService.ObterNomePorCPFAsync(cpf);
+                ViewBag.Login = usuario;
+
                 return View(eventos);
             }
             catch (Exception ex)

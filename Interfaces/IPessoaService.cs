@@ -15,5 +15,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Interfaces
         Task<int> ObterIdPessoaPorCPFAsync(string cpf);
         Task<string> ObterCPFPorIdPessoaAsync(int id);
         Task<string> ObterNomePorIdPessoaAsync(int id);
+        Task<string> ObterNomePorCPFAsync(string cpf);
     }
 }

@@ -2,5 +2,7 @@
 {
     public interface IValidarCertificadoService
     {
+        Task<bool> Validar(string codigo);
+        Task<IFormFile> ObterImagemCertificadoPorCodigo(string codigo);
     }
 }

@@ -40,6 +40,9 @@ builder.Services.AddScoped<IEmailRepository, EmailRepository>();
 builder.Services.AddScoped<IEmailConfigRepository, EmailConfigRepository>();
 builder.Services.AddScoped<IEmailConfigService, EmailConfigService>();
 
+builder.Services.AddScoped<IValidarCertificadoRepository, ValidarCertificadoRepository>();
+builder.Services.AddScoped<IValidarCertificadoService, ValidarCertificadoService>();
+
 builder.Logging.AddConsole();
 // Configura o nível mínimo de logging para Debug
 builder.Logging.SetMinimumLevel(LogLevel.Debug);
