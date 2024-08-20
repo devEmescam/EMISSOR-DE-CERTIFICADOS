@@ -11,12 +11,16 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
         private readonly IPessoaRepository _pessoaRepository;
         private readonly ISessao _sessao;
         private readonly IPessoaEventosRepository _pessoaEventosRepository;
+        private readonly IEmailService _emailService;
+        private readonly IOrganizadorRepository _organizadorRepository;
 
-        public PessoaService(IPessoaRepository pessoaRepository, ISessao sessao, IPessoaEventosRepository pessoaEventosRepository)
+        public PessoaService(IPessoaRepository pessoaRepository, ISessao sessao, IPessoaEventosRepository pessoaEventosRepository, IEmailService emailService, IOrganizadorRepository organizadorRepository)
         {
             _pessoaRepository = pessoaRepository;
             _sessao = sessao;
             _pessoaEventosRepository = pessoaEventosRepository;
+            _emailService = emailService;
+            _organizadorRepository = organizadorRepository;
         }
         public async Task<IEnumerable<Pessoa>> BuscarPorNomeCpfEmailAsync(string termo)
         {
@@ -35,7 +39,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 throw new Exception($"Erro em [PessoaService.BuscarPorNomeCpfEmailAsync]: {ex.Message}");
             }
         }
-        public async Task<IEnumerable<EventoPessoa>> BuscarEventosPessoaAsync(int id) 
+        public async Task<IEnumerable<EventoPessoa>> BuscarEventosPessoaAsync(int id)
         {
             try
             {
@@ -53,6 +57,39 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 throw new Exception($"Erro em [PessoaService.BuscarEventosPessoa]: {ex.Message}");
             }
         
+        }
+        public async Task<bool> ReenviarInstrucoesAsync(int idEventoPessoa)
+        {
+            string loginUsuarioADM = string.Empty;
+            string senhaUsuarioADM = string.Empty;
+
+            try
+            {
+                loginUsuarioADM = _sessao.ObterUsuarioLogin();
+                senhaUsuarioADM = _sessao.ObterUsuarioPassword();
+
+                var (success, retorno) = await _emailService.EnviarEmailAsync(loginUsuarioADM, senhaUsuarioADM, idEventoPessoa);
+
+                if (success)
+                {
+                    await _organizadorRepository.AtualizarCertificadoEmitidoAsync(idEventoPessoa, true, "");
+                    return true;
+                }
+                else
+                {
+                    if (retorno.Length > 500)
+                    {
+                        retorno = retorno.Substring(0, 500);
+                    }
+
+                    await _organizadorRepository.AtualizarCertificadoEmitidoAsync(idEventoPessoa, false, retorno);
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [PessoaService.ReenviarInstrucoes]: {ex.Message}");
+            }
         }
         public async Task<IEnumerable<PessoaModel>> BuscarTodasPessoasAsync()
         {
@@ -118,6 +155,17 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 throw new Exception($"Erro em [PessoaService.AtualizarPessoaAsync]: {ex.Message}");
             }            
         }
+        public async Task AtualizarEmailAsync(int id, string email) 
+        {
+            try
+            {
+                await _pessoaRepository.AtualizarEmailAsync(id, email);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [PessoaService.AtualizarEmailAsync]: {ex.Message}");
+            }
+        }
         public async Task DeletarPessoaAsync(int id)
         {
             try
@@ -173,7 +221,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 throw new Exception($"Erro em [PessoaService.ObterNomePorIdPessoaAsync]: {ex.Message}");
             }            
         }
-
         public async Task<string> ObterNomePorCPFAsync(string cpf) 
         {
             try

@@ -57,7 +57,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
             try
             {
                 // Inicializar a string SQL básica
-                var sSQL = @"SELECT E.NOME, EP.IMAGEM_CERTIFICADO 
+                var sSQL = @"SELECT E.ID, E.NOME, EP.IMAGEM_CERTIFICADO 
                      FROM EVENTO E
                      JOIN EVENTO_PESSOA EP ON (E.ID = EP.ID_EVENTO)
                      WHERE EP.CERTIFICADO_EMITIDO = 1
@@ -100,6 +100,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
 
                     eventos.Add(new EventoPessoa
                     {
+                        IdEventoPessoa = Convert.ToInt32(row["ID"]),
                         Nome = Convert.ToString(row["NOME"]),
                         ImagemCertificado = imagemCertificado
                     });
@@ -125,6 +126,7 @@ public class Pessoa
 }
 public class EventoPessoa
 {
+    public int IdEventoPessoa { get; set; }
     public string Nome { get; set; }
     public IFormFile ImagemCertificado { get; set; }
 }
