@@ -92,6 +92,18 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                 throw new Exception($"Erro em [PessoaRepository.AtualizarPessoaAsync]: {ex.Message}");
             }            
         }
+        public async Task AtualizarEmailAsync(int id, string email) 
+        {
+            try
+            {
+                var query = $"UPDATE PESSOA SET EMAIL = '{email}' WHERE ID = {id}";
+                await _dbHelper.ExecuteQueryAsync(query);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [PessoaRepository.AtualizarEmailAsync]: {ex.Message}");
+            }               
+        }
         public async Task DeletarPessoaAsync(int id)
         {
             try

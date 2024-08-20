@@ -8,6 +8,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Interfaces
         Task<PessoaModel> BuscarPessoaPorIdAsync(int id);
         Task InserirPessoaAsync(PessoaModel pessoa, int idUsuarioAdministrativo);
         Task AtualizarPessoaAsync(PessoaModel pessoa);
+        Task AtualizarEmailAsync(int id, string email);
         Task DeletarPessoaAsync(int id);
         Task<bool> ExistePessoaComCPFAsync(string cpf, int? userId = null);
         Task<int> ObterIdPessoaPorCPFAsync(string cpf);
