@@ -56,13 +56,12 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                 if (!emitirCertificado)
                 {
                     // As duas linhas abaixo garantem que sejam retornados somente registros que não tiveram certificados emitidos
-                    sSQL += "AND CERTIFICADO_EMITIDO <> 1 ";
+                    sSQL += "AND (CERTIFICADO_EMITIDO = 0 OR CERTIFICADO_EMITIDO IS NULL)";
                     sSQL += "AND (DATA_EMISSAO IS NULL OR DATA_EMISSAO = '' OR DATA_EMISSAO = '1900-01-01')";                    
                 }
 
-
-
                 var oDT = await _dbHelper.ExecuteQueryAsync(sSQL);
+
                 var pessoasEventoList = new List<PessoaEvento>();
 
                 foreach (DataRow row in oDT.Rows)
