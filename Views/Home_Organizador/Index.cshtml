@@ -180,14 +180,16 @@
             <h3>Atualizar Evento</h3>
             <hr>
 
-            <form id="formAtualizarEvento">
+            <form id="formAtualizarEvento" asp-controller="Home_Organizador" asp-action="AtualizarEvento" method="post" enctype="multipart/form-data">
                 <!-- Input para o nome do evento -->
                 @Html.AntiForgeryToken()
                 <input type="text" id="idEventoAtualizar" name="idEventoAtualizar" placeholder="ID do Evento" readonly>
                 <input type="text" id="nomeEventoAtualizar" name="nomeEventoAtualizar" placeholder="Nome do Evento" readonly>
 
+               
+
                 <hr>
-                <!-- Aqui preenchem os dados -->
+                <!--Aqui preenchem os dados-->
                 <div id="divDadosAtualizar">
                     <input type="text" id="inputNomeAtualizar" placeholder="Nome">
                     <input type="text" id="inputCPFAtualizar" placeholder="CPF">
@@ -195,11 +197,12 @@
                     <textarea id="inputTextoAtualizar" placeholder="Texto"></textarea>
                 </div>
 
-                <button type="button" id="botaoConfirmarAtualizacao2" style="display: none;" onclick="confirmarAtualizacaoEvento()">Confirmar Atualização</button>
+                <button type="button" id="botaoConfirmarAtualizacao" style="display: none;">Confirmar Atualização</button>
+
                 <button type="button" id="botaoAcaoAtualizar" onclick="adicionarDados()">Adicionar Dados</button>
                 <hr>
 
-                <!-- Tabela que será preenchida -->
+                <!--Tabela que será preenchida-->
                 <div class="tabela-container2">
                     <table id="tabelaAtualizar" class="display">
                         <thead>
@@ -224,13 +227,13 @@
                     </label>
                     <span id="fileNameAtualizar" style="margin-left: 10px;"></span>
                     <br>
+                  
                 </div>
 
                 <input type="hidden" id="tableDataAtualizar" name="tableDataAtualizar">
-                <button type="button" id="AtualizarEvento">Atualizar Evento</button>
+                <button type="submit" id="AtualizarEvento">Atualizar Evento</button>
             </form>
         </div>
-
 
         <!-- BUSCAR PESSOAS -->
         <div id="card-buscar-pessoas" class="card">
@@ -966,8 +969,8 @@
         });
 
 
-        //FUNCIONANDO PERFEITAMENTE!!!
-        // Função para buscar pessoas e adicionar botões de ação
+
+        // Atualizando a função para processar a resposta da busca de pessoas
         function buscarPessoas() {
             var termo = $("#searchInput").val();
             if (termo.length >= 3) { // Buscar apenas se o nome tiver 3 ou mais caracteres
@@ -1018,12 +1021,12 @@
             }
         }
 
-        // Função para alternar a visibilidade do dropdown
+
+
         function toggleDropdown(button) {
             $(button).next(".acoes-dropdown-content").toggle();
         }
 
-        // Função para exibir o nome do evento abaixo do nome da pessoa
         function exibirCertificado(button, pessoaId) {
             var item = $(button).closest('.result-item');
             var certificadoDiv = item.next(".certificado");
@@ -1033,36 +1036,36 @@
                 return;
             }
 
-            // Se o conteúdo ainda não foi carregado, faça a requisição para carregá-lo
+            // Se o certificado ainda não foi carregado, faça a requisição para carregá-lo
             if (certificadoDiv.is(':empty')) {
                 $.ajax({
-                    url: `/Pessoa/BuscarEventosPessoa/${pessoaId}`, // URL da API para buscar eventos
+                    url: 'Pessoa/BuscarEventosPessoa', // Ajuste esta URL para onde o certificado pode ser acessado
                     type: 'GET',
-                    dataType: 'json', // Espera-se que a resposta seja JSON
+                    data: { id: pessoaId },
                     success: function (data) {
-                        if (data && data.length > 0) {
-                            // Acessa o nome do primeiro evento no array
-                            var nomeEvento = data[0].nome; // A chave correta é 'nome'
+                        if (data && data.imagemCertificado) {
+                            // Converta o arquivo para uma URL utilizável
+                            var reader = new FileReader();
+                            reader.onload = function (e) {
+                                certificadoDiv.html(
+                                    $("<img class='certificado-imagem' />")
+                                        .attr("src", e.target.result)
+                                        .attr("alt", "Certificado")
+                                        .css("max-width", "100%")
+                                );
+                                certificadoDiv.slideDown("slow");
+                            };
 
-                            // Cria o link clicável para o nome do evento
-                            var nomeEventoLink = $("<a href='#' class='nome-evento'></a>")
-                                .text(nomeEvento)
-                                .on('click', function (e) {
-                                    e.preventDefault();
-                                    // Ação futura ao clicar no nome do evento
-                                    console.log("Nome do evento clicado:", nomeEvento);
-                                    // Insira sua ação futura aqui
-                                });
-
-                            // Atualiza o conteúdo da div certificado com o nome do evento clicável
-                            certificadoDiv.html(nomeEventoLink).slideDown("slow");
+                            reader.readAsDataURL(data.imagemCertificado);
                         } else {
-                            certificadoDiv.text("Nenhum evento encontrado").slideDown("slow");
+                            certificadoDiv.text("Certificado não disponível");
+                            certificadoDiv.slideDown("slow");
                         }
                     },
                     error: function (xhr, status, error) {
-                        console.error("Erro ao buscar nome do evento:", error);
-                        certificadoDiv.text("Erro ao carregar o evento. Consulte o console para mais detalhes.").slideDown("slow");
+                        console.error("Erro ao buscar certificado:", error);
+                        certificadoDiv.text("Erro ao carregar o certificado. Consulte o console para mais detalhes.");
+                        certificadoDiv.slideDown("slow");
                     }
                 });
             } else {
@@ -1070,6 +1073,14 @@
             }
         }
 
+
+        function abrirCertificado(certificadoUrl) {
+            if (certificadoUrl && certificadoUrl !== "undefined") {
+                window.open(certificadoUrl, '_blank');
+            } else {
+                alert("Certificado não disponível");
+            }
+        }
 
         function acao2() {
             alert("Ação 2 executada");
@@ -1605,228 +1616,435 @@
                 }
             }
 
+            function preencherTabela(eventoPessoas) {
+                const tbody = document.getElementById('eventos-tbody-atualizar');
+                tbody.innerHTML = ''; // Limpa o conteúdo atual do tbody
 
+                if (eventoPessoas && eventoPessoas.pessoasEventos && eventoPessoas.pessoasEventos.length > 0) {
+                    eventoPessoas.pessoasEventos.forEach(pessoa => {
+                        const row = document.createElement('tr');
 
+                        // Nome
+                        const tdNome = document.createElement('td');
+                        tdNome.textContent = pessoa.nome; // Exibir o nome da pessoa
+                        row.appendChild(tdNome);
 
-           
-           
+                        // CPF
+                        const tdCPF = document.createElement('td');
+                        tdCPF.textContent = pessoa.cpf; // Exibir o CPF da pessoa
+                        row.appendChild(tdCPF);
 
-        document.getElementById("emitirCertificado").addEventListener("click", function () {
-            location.reload(); // Atualiza a página
-        });
+                        // Email
+                        const tdEmail = document.createElement('td');
+                        tdEmail.textContent = pessoa.email; // Exibir o email da pessoa
+                        row.appendChild(tdEmail);
 
-        //ATUALIZAR EVENTO ------------------------------------------------------------------------------------------
+                        // Texto
+                        const tdTexto = document.createElement('td');
+                        tdTexto.textContent = pessoa.texto; // Exibir o texto da pessoa
+                        row.appendChild(tdTexto);
 
+                        // Ações
+                        const tdAcoes = document.createElement('td');
 
-        function preencherTabela(eventoPessoas) {
-            const tbody = document.getElementById('eventos-tbody-atualizar');
-            tbody.innerHTML = ''; // Limpa o conteúdo atual do tbody
+                        if (pessoa.dataEmissao === null) {
+                            // Botão Excluir
+                            const botaoExcluir = document.createElement("button");
+                            botaoExcluir.textContent = "Excluir";
+                            botaoExcluir.className = 'btn table-btn';
+                            botaoExcluir.onclick = function (event) {
+                                event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
 
-            if (eventoPessoas && eventoPessoas.pessoasEventos && eventoPessoas.pessoasEventos.length > 0) {
-                eventoPessoas.pessoasEventos.forEach(pessoa => {
+                                if (confirm("Tem certeza de que deseja excluir esta pessoa?")) {
+                                    // Obter a linha a ser excluída
+                                    const linha = event.target.closest('tr');
+
+                                    // Remover a linha da tabela
+                                    linha.remove();
+
+                                    // Aqui coloca a função para excluir a pessoa do backend
+                                    // excluirPessoa(pessoa.id);
+                                }
+                            };
+                            tdAcoes.appendChild(botaoExcluir);
+
+                            // Botão Atualizar
+                            const botaoAtualizar = document.createElement("button");
+                            botaoAtualizar.textContent = "Atualizar";
+                            botaoAtualizar.className = 'btn table-btn';
+                            botaoAtualizar.onclick = function (event) {
+                                event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
+
+                                // Transferir dados para os campos de edição
+                                document.getElementById('inputNomeAtualizar').value = pessoa.nome;
+                                document.getElementById('inputCPFAtualizar').value = pessoa.cpf;
+                                document.getElementById('inputEmail1Atualizar').value = pessoa.email;
+                                document.getElementById('inputTextoAtualizar').value = pessoa.texto;
+
+                                // Adiciona o ID da pessoa ao botão de confirmação para referência
+                                document.getElementById('botaoConfirmarAtualizacao').setAttribute('data-pessoa-id', pessoa.id);
+
+                                // Mostrar o botão de confirmação
+                                document.getElementById('botaoConfirmarAtualizacao').style.display = 'inline-block';
+                            };
+
+                            tdAcoes.appendChild(botaoAtualizar);
+                        } else {
+                            // Indicar que a pessoa não pode ser atualizada ou excluída
+                            tdAcoes.textContent = 'Não pode ser editado ou excluído';
+                        }
+
+                        row.appendChild(tdAcoes);
+                        tbody.appendChild(row);
+                    });
+                } else {
                     const row = document.createElement('tr');
-
-                    // Nome
-                    const tdNome = document.createElement('td');
-                    tdNome.textContent = pessoa.nome; // Exibir o nome da pessoa
-                    row.appendChild(tdNome);
-
-                    // CPF
-                    const tdCPF = document.createElement('td');
-                    tdCPF.textContent = pessoa.cpf; // Exibir o CPF da pessoa
-                    row.appendChild(tdCPF);
-
-                    // Email
-                    const tdEmail = document.createElement('td');
-                    tdEmail.textContent = pessoa.email; // Exibir o email da pessoa
-                    row.appendChild(tdEmail);
-
-                    // Texto
-                    const tdTexto = document.createElement('td');
-                    tdTexto.textContent = pessoa.texto; // Exibir o texto da pessoa
-                    row.appendChild(tdTexto);
-
-                    // Ações
                     const tdAcoes = document.createElement('td');
-
-                    if (pessoa.dataEmissao === null) {
-                        // Botão Excluir
-                        const botaoExcluir = document.createElement("button");
-                        botaoExcluir.textContent = "Excluir";
-                        botaoExcluir.className = 'btn table-btn';
-                        botaoExcluir.onclick = function (event) {
-                            event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
-
-                            if (confirm("Tem certeza de que deseja excluir esta pessoa?")) {
-                                // Obter a linha a ser excluída
-                                const linha = event.target.closest('tr');
-
-                                // Remover a linha da tabela
-                                linha.remove();
-
-                                // Aqui coloca a função para excluir a pessoa do backend
-                                // excluirPessoa(pessoa.id);
-                            }
-                        };
-                        tdAcoes.appendChild(botaoExcluir);
-
-                        // Botão Atualizar
-                        const botaoAtualizar = document.createElement("button");
-                        botaoAtualizar.textContent = "Atualizar";
-                        botaoAtualizar.className = 'btn table-btn';
-                        botaoAtualizar.onclick = function (event) {
-                            event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
-
-                            // Transferir dados para os campos de edição
-                            document.getElementById('inputNomeAtualizar').value = pessoa.nome;
-                            document.getElementById('inputCPFAtualizar').value = pessoa.cpf;
-                            document.getElementById('inputEmail1Atualizar').value = pessoa.email;
-                            document.getElementById('inputTextoAtualizar').value = pessoa.texto;
-
-                            // Tornar o campo CPF ineditável
-                            document.getElementById('inputCPFAtualizar').readOnly = true; // Impede que o CPF seja editado
-
-
-                            // Tornar o campo de email editável
-                            document.getElementById('inputEmail1Atualizar').readOnly = false;
-
-                            // Define a linha editável atual
-                            linhaEditavelAtualizar = row; // Adiciona a linha atual à variável
-
-                            // Adiciona o ID da pessoa ao botão de confirmação para referência
-                            document.getElementById('botaoConfirmarAtualizacao2').setAttribute('data-pessoa-id', pessoa.id);
-
-                            // Mostrar o botão de confirmação
-                            document.getElementById('botaoConfirmarAtualizacao2').style.display = 'inline-block';
-                        };
-
-                        tdAcoes.appendChild(botaoAtualizar);
-                    } else {
-                        // Indicar que a pessoa não pode ser atualizada ou excluída
-                        tdAcoes.textContent = 'Não pode ser editado ou excluído';
-                    }
-
+                    tdAcoes.colSpan = 5; // Ajuste conforme o número de colunas na tabela
+                    tdAcoes.textContent = 'Nenhum participante encontrado.';
                     row.appendChild(tdAcoes);
                     tbody.appendChild(row);
-                });
-            } else {
-                const row = document.createElement('tr');
-                const tdAcoes = document.createElement('td');
-                tdAcoes.colSpan = 5; // Ajuste conforme o número de colunas na tabela
-                tdAcoes.textContent = 'Nenhum participante encontrado.';
-                row.appendChild(tdAcoes);
-                tbody.appendChild(row);
+                }
             }
-        }
 
-        // Evento de clique para o botão de atualização do evento
-        document.getElementById('AtualizarEvento').addEventListener('click', async function (event) {
-            event.preventDefault(); // Prevenir o comportamento padrão do botão
 
-            // Obter a tabela e os dados dela
-            const tabela = document.querySelector('.tabela-container2 tbody');
-            const linhas = tabela.querySelectorAll('tr');
-            const dadosTabela = [];
+        // //DANDO CONFLITO COM O CRIAR EVENTOS------------------------------------------------------------------------------------------
 
-            // Extrair os dados das linhas da tabela
-            linhas.forEach(linha => {
-                const colunas = linha.querySelectorAll('td');
-                const pessoa = {
-                    nome: colunas[0].textContent.trim(),
-                    cpf: colunas[1].textContent.trim(),
-                    email: colunas[2].textContent.trim(),
-                    texto: colunas[3].textContent.trim()
-                };
-                dadosTabela.push(pessoa);
+            // // Função para confirmar a atualização
+            // function confirmarAtualizacao() {
+            //     const pessoaId = document.getElementById('botaoConfirmarAtualizacao').getAttribute('data-pessoa-id');
+            //     const nomeNovo = document.getElementById('inputNomeAtualizar').value;
+            //     const cpfNovo = document.getElementById('inputCPFAtualizar').value;
+            //     const emailNovo = document.getElementById('inputEmail1Atualizar').value;
+            //     const textoNovo = document.getElementById('inputTextoAtualizar').value;
+
+            //     // Lógica para atualizar os dados da pessoa no backend com base no ID (pessoaId)
+
+            //     // Esconder o botão de confirmação após a atualização
+            //     document.getElementById('botaoConfirmarAtualizacao').style.display = 'none';
+
+            //     // Atualizar a linha na tabela correspondente à pessoa
+            //     const linhas = document.querySelectorAll('#eventos-tbody-atualizar tr');
+            //     linhas.forEach(linha => {
+            //         const tds = linha.querySelectorAll('td');
+            //         if (tds[1].textContent === cpfNovo) { // Comparar com o CPF para encontrar a linha correta
+            //             tds[0].textContent = nomeNovo;
+            //             tds[2].textContent = emailNovo;
+            //             tds[3].textContent = textoNovo;
+            //         }
+            //     });
+
+            //     // Limpar os campos de edição
+            //     limparCamposAtualizacao();
+            // }
+
+            // Adiciona um evento ao botão de confirmação para chamar a função confirmarAtualizacao
+            // document.getElementById('botaoConfirmarAtualizacao').addEventListener('click', confirmarAtualizacao);
+
+            // // Função para limpar os campos de atualização
+            // function limparCamposAtualizacao() {
+            //     document.getElementById('inputNomeAtualizar').value = '';
+            //     document.getElementById('inputCPFAtualizar').value = '';
+            //     document.getElementById('inputEmail1Atualizar').value = '';
+            //     document.getElementById('inputTextoAtualizar').value = '';
+            // }
+
+            // // Adiciona um evento ao botão "Adicionar Dados" para chamar a função adicionarDados
+            // document.getElementById('botaoAcaoAtualizar').addEventListener('click', adicionarDados);
+
+            // function validarCPF(cpf) {
+            //     cpf = cpf.replace(/[^\d]+/g, '');
+            //     if (cpf.length !== 11) return false;
+
+            //     let soma;
+            //     let resto;
+            //     soma = 0;
+            //     if (cpf == "00000000000" || cpf == "11111111111" || cpf == "22222222222" || cpf == "33333333333" ||
+            //         cpf == "44444444444" || cpf == "55555555555" || cpf == "66666666666" || cpf == "77777777777" ||
+            //         cpf == "88888888888" || cpf == "99999999999")
+            //         return false;
+
+            //     for (let i = 1; i <= 9; i++) soma = soma + parseInt(cpf.substring(i - 1, i)) * (11 - i);
+            //     resto = (soma * 10) % 11;
+
+            //     if ((resto == 10) || (resto == 11)) resto = 0;
+            //     if (resto != parseInt(cpf.substring(9, 10))) return false;
+
+            //     soma = 0;
+            //     for (let i = 1; i <= 10; i++) soma = soma + parseInt(cpf.substring(i - 1, i)) * (12 - i);
+            //     resto = (soma * 10) % 11;
+
+            //     if ((resto == 10) || (resto == 11)) resto = 0;
+            //     if (resto != parseInt(cpf.substring(10, 11))) return false;
+            //     return true;
+            // }
+
+            // function permitirSomenteNumeros(event) {
+            //     const charCode = event.which ? event.which : event.keyCode;
+            //     if (charCode < 48 || charCode > 57) {
+            //         event.preventDefault();
+            //     }
+            // }
+
+            // document.getElementById('inputCPFAtualizar').addEventListener('keypress', permitirSomenteNumeros);
+
+
+            // document.getElementById('AtualizarEvento').addEventListener('click', async function (event) {
+            //     event.preventDefault(); // Prevenir o comportamento padrão do botão
+
+            //     const tabela = document.querySelector('.tabela-container2 tbody');
+            //     const linhas = tabela.querySelectorAll('tr');
+            //     const dadosTabela = [];
+
+            //     linhas.forEach(linha => {
+            //         const colunas = linha.querySelectorAll('td');
+            //         const pessoa = {
+            //             nome: colunas[0].textContent,
+            //             cpf: colunas[1].textContent,
+            //             email: colunas[2].textContent,
+            //             texto: colunas[3].textContent
+            //         };
+            //         dadosTabela.push(pessoa);
+            //     });
+
+            //     const idEvento = document.getElementById('idEventoAtualizar').value;
+
+            //     if (!idEvento || idEvento <= 0) {
+            //         alert('ID do evento inválido.');
+            //         return;
+            //     }
+
+            //     if (dadosTabela.length === 0) {
+            //         alert('Nenhum dado na tabela para enviar.');
+            //         return;
+            //     }
+
+            //     try {
+            //         const response = await fetch('/Home_Organizador/AdicionarPessoas', {
+            //             method: 'POST',
+            //             headers: {
+            //                 'Content-Type': 'application/x-www-form-urlencoded',
+            //                 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            //             },
+            //             body: new URLSearchParams({
+            //                 id: idEvento, // Certifique-se de que o ID é enviado como string
+            //                 tableData: JSON.stringify(dadosTabela)
+            //             })
+            //         });
+
+            //         if (!response.ok) {
+            //             throw new Error(`HTTP error! Status: ${response.status}`);
+            //         }
+
+            //         const result = await response.json();
+            //         if (result.success) {
+            //             alert('Dados enviados com sucesso.');
+            //             // Aqui você pode adicionar qualquer ação que queira realizar após o sucesso do envio
+            //         } else {
+            //             alert('Erro ao enviar os dados: ' + result.message);
+            //         }
+            //     } catch (error) {
+            //         console.error('Erro ao enviar os dados:', error);
+            //         alert('Erro ao enviar os dados: ' + error.message);
+            //     }
+            // });
+
+
+            document.addEventListener("DOMContentLoaded", function () {
+                const sairLink = document.getElementById("sair-link");
+
+                sairLink.addEventListener("click", function (event) {
+                    event.preventDefault(); // Evita o comportamento padrão do link
+
+                    fetch('/Login/Sair', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => {
+                            if (response.redirected) {
+                                window.location.href = response.url;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erro ao sair:', error);
+                        });
+                });
             });
 
-            // Obter o ID do evento
-            const idEvento = document.getElementById('idEventoAtualizar').value;
 
-            // Validação simples
-            if (!idEvento || idEvento <= 0) {
-                alert('ID do evento inválido.');
-                return;
-            }
+            
+            // //FUNÇÃO PARA IMPORTAR PLANILHA
 
-            if (dadosTabela.length === 0) {
-                alert('Nenhum dado na tabela para enviar.');
-                return;
-            }
+            // function importarExcelAtualizar() {
+            //     var input = document.getElementById('excelFileAtualizar');
+            //     if (!input.files || input.files.length === 0) {
+            //         alert('Por favor, selecione um arquivo Excel.');
+            //         return;
+            //     }
+            //     var file = input.files[0];
+            //     var reader = new FileReader();
 
-            try {
-                // Fazer a requisição para a action no controller correto
-                const response = await fetch('/Home_Organizador/AtualizarPessoasEvento', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                    },
-                    body: new URLSearchParams({
-                        id: idEvento,
-                        tableData: JSON.stringify(dadosTabela) // Converter os dados da tabela para string JSON
-                    })
-                });
+            //     reader.onload = function (e) {
+            //         var data = new Uint8Array(e.target.result);
+            //         var workbook = XLSX.read(data, { type: 'array' });
+            //         var sheetName = workbook.SheetNames[0];
+            //         var worksheet = workbook.Sheets[sheetName];
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
+            //         var expectedColumns = ['NOME_PESSOA', 'CPF_PESSOA', 'EMAIL_PESSOA', 'TEXTO'];
+            //         var headerRow = XLSX.utils.sheet_to_json(worksheet, { header: 1, range: 'A1:D1' })[0];
+            //         var isValidModel = expectedColumns.every(function (col, index) {
+            //             return headerRow[index] === col;
+            //         });
 
-                const result = await response.json();
-                if (result.success) {
-                    alert('Dados enviados com sucesso.');
-                } else {
-                    alert('Erro ao enviar os dados: ' + result.message);
-                }
-            } catch (error) {
-                console.error('Erro ao enviar os dados:', error);
-                alert('Erro ao enviar os dados: ' + error.message);
-            }
-        });
+            //         if (!isValidModel) {
+            //             alert('O modelo da planilha selecionada está incorreto.');
+            //             return;
+            //         }
 
-        var linhaEditavelAtualizar = null;
+            //         var table = document.getElementById('tabelaAtualizar').getElementsByTagName('tbody')[0];
+            //         var rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, range: 1 });
 
-        function confirmarAtualizacaoEvento() {
-            if (!linhaEditavelAtualizar) return;
+            //         rows.forEach(function (row) {
+            //             if (row.some(cellContent => cellContent.trim() !== "")) { // Verificar se algum dado da linha está preenchido
+            //                 var newRow = table.insertRow(-1);
+            //                 var cellIndex = 0;
 
-            var nome = document.getElementById("inputNomeAtualizar").value.trim();
-            var cpf = document.getElementById("inputCPFAtualizar").value.trim();
-            var email = document.getElementById("inputEmail1Atualizar").value.trim();
-            var texto = document.getElementById("inputTextoAtualizar").value.trim();
+            //                 for (const key in row) {
+            //                     if (row.hasOwnProperty(key)) {
+            //                         var cell = newRow.insertCell(cellIndex++);
+            //                         cell.textContent = row[key];
+            //                     }
+            //                 }
 
-            // Validação simples dos campos
-            if (nome === "" || cpf === "" || email === "" || texto === "") {
-                alert("Por favor, preencha todos os campos.");
-                return;
-            }
+            //                 var celulaAcoes = newRow.insertCell(cellIndex); // Adicionar célula para ações
+            //                 adicionarBotoesLinhaAtualizar(celulaAcoes, newRow); // Chamar a função para adicionar botões
+            //             }
+            //         });
 
-            // Atualiza as células da linha editável
-            var celulas = linhaEditavelAtualizar.getElementsByTagName("td");
-            celulas[0].textContent = nome;
-            celulas[1].textContent = cpf;
-            celulas[2].textContent = email;
-            celulas[3].textContent = texto;
+            //         destacarCPFsInvalidos(); // Verifica CPFs inválidos após adicionar novas linhas
+            //     };
+            //     reader.readAsArrayBuffer(file);
+            // }
 
-            // Limpar a linha selecionada
-            linhaEditavelAtualizar = null;
+            // function adicionarBotoesLinhaAtualizar(celulaAcoes, linha) {
+            //     // Verificar se a linha contém dados antes de adicionar os botões
+            //     var hasData = Array.from(linha.cells).some(cell => cell.textContent.trim() !== "");
 
-            // Oculta o botão de confirmação e exibe o botão de adicionar
-            document.getElementById("botaoAcaoAtualizar").style.display = 'inline-block';
-            document.getElementById("botaoConfirmarAtualizacao2").style.display = 'none';
+            //     if (hasData) {
+            //         var botaoExcluir = document.createElement("button");
+            //         botaoExcluir.textContent = "Excluir";
+            //         botaoExcluir.className = 'btn table-btn';
+            //         botaoExcluir.onclick = function (event) {
+            //             event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
+            //             if (confirm("Tem certeza de que deseja excluir esta linha?")) {
+            //                 excluirLinhaAtualizar(linha);
+            //                 destacarCPFsInvalidos();
+            //             }
+            //         };
+            //         celulaAcoes.appendChild(botaoExcluir);
 
-            // Limpa os campos do formulário
-            limparCamposAtualizar();
-        }
+            //         var botaoAtualizar = document.createElement("button");
+            //         botaoAtualizar.textContent = "Atualizar";
+            //         botaoAtualizar.className = 'btn table-btn';
+            //         botaoAtualizar.onclick = function (event) {
+            //             event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
+            //             carregarDadosParaEditar(linha);
+            //             // Mostrar o botão de confirmação de atualização
+            //             var botaoConfirmarAtualizacao = document.getElementById('botaoConfirmarAtualizacao');
+            //             botaoConfirmarAtualizacao.setAttribute('data-pessoa-id', linha.cells[1].textContent); // Exemplo de atributo com CPF
+            //             botaoConfirmarAtualizacao.style.display = 'inline-block';
+            //         };
+            //         celulaAcoes.appendChild(botaoAtualizar);
+            //     }
 
-        function limparCamposAtualizar() {
-            document.getElementById("inputNomeAtualizar").value = "";
-            document.getElementById("inputCPFAtualizar").value = "";
-            document.getElementById("inputEmail1Atualizar").value = "";
-            document.getElementById("inputTextoAtualizar").value = "";
-        }
+            //     celulaAcoes.style.textAlign = "center"; // Centralizar os botões na célula
+            //     destacarCPFsInvalidos(); // Verificar CPFs da nova linha
+            // }
 
-        // Adicionar evento de clique para o botão de confirmação de atualização
-        document.getElementById('botaoConfirmarAtualizacao2').addEventListener('click', confirmarAtualizacaoEvento);
+            // function excluirLinhaAtualizar(linha) {
+            //     linha.parentElement.removeChild(linha);
+            // }
+
+            // //DANDO CONFLITO COM O CRIAR EVENTOS------------------------------------------------------------------------------------------
+            // function carregarDadosParaEditar(linha) {
+            //     // Obter os dados da linha
+            //     var nome = linha.cells[0].textContent;
+            //     var cpf = linha.cells[1].textContent;
+            //     var email = linha.cells[2].textContent;
+            //     var texto = linha.cells[3].textContent;
+
+            //     // Preencher os campos de entrada com os dados da linha
+            //     document.getElementById('inputNomeAtualizar').value = nome;
+            //     document.getElementById('inputCPFAtualizar').value = cpf;
+            //     document.getElementById('inputEmail1Atualizar').value = email; // Ajustado para o ID correto
+            //     document.getElementById('inputTextoAtualizar').value = texto;
+
+            //     // Exibir o botão de confirmação de atualização
+            //     document.getElementById('botaoConfirmarAtualizacao').style.display = 'inline-block'; // Ajustado para o ID correto
+
+            //     // Adicionar um atributo à linha para identificá-la durante a confirmação
+            //     linha.setAttribute('data-editing', 'true');
+
+            //     // Lógica adicional, se necessário, para manipular a linha selecionada
+            // }
+
+
+            // document.getElementById('btnConfirmarAtualizacao').onclick = function (event) {
+            //     event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
+
+            //     // Obter a linha que está sendo editada
+            //     var linhas = document.querySelectorAll('#tabelaAtualizar tbody tr');
+            //     var linhaEditando = null;
+
+            //     linhas.forEach(function (linha) {
+            //         if (linha.getAttribute('data-editing') === 'true') {
+            //             linhaEditando = linha;
+            //         }
+            //     });
+
+            //     if (linhaEditando) {
+            //         // Atualizar a linha com os novos dados dos campos de entrada
+            //         linhaEditando.cells[0].textContent = document.getElementById('inputNomeAtualizar').value;
+            //         linhaEditando.cells[1].textContent = document.getElementById('inputCPFAtualizar').value;
+            //         linhaEditando.cells[2].textContent = document.getElementById('inputEmailAtualizar').value;
+            //         linhaEditando.cells[3].textContent = document.getElementById('inputTextoAtualizar').value;
+
+            //         // Remover o atributo de edição
+            //         linhaEditando.removeAttribute('data-editing');
+
+            //         // Esconder o botão de confirmação de atualização
+            //         document.getElementById('btnConfirmarAtualizacao').style.display = 'none';
+            //     }
+            // }
+
+            // function destacarCPFsInvalidos() {
+            //     var tabela = document.getElementById('tabelaAtualizar');
+            //     var linhas = tabela.rows;
+
+            //     for (var i = 1; i < linhas.length; i++) {
+            //         var cpf = linhas[i].cells[1].textContent.trim(); // Coluna do CPF
+
+            //         if (!validarCPF(cpf)) {
+            //             linhas[i].style.backgroundColor = '#f8d7da'; // Destacar linha com CPF inválido
+            //         } else {
+            //             linhas[i].style.backgroundColor = ''; // Remover destaque se CPF for válido
+            //         }
+            //     }
+            // }
+
+            // // Função para validar CPF 
+            // function validarCPF(cpf) {
+            //     // Implemente aqui sua lógica de validação de CPF
+            //     // Retorna true se válido, false se inválido
+            //     return true; // Exemplo simples, ajuste conforme sua necessidade
+            // }
+
+            // // Event listener para chamar a função de importação ao selecionar um arquivo
+            // document.getElementById('excelFileAtualizar').addEventListener('change', importarExcelAtualizar);
+
+
 
         
 
