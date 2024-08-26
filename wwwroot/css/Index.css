@@ -128,3 +128,15 @@ body {
         height: 30px; /* Ajuste para botões menores */
     }
 }
+#eventosContainer {
+    margin-top: 20px;
+}
+
+.evento {
+    padding: 10px;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+

@@ -948,4 +948,19 @@ nav {
     background-color:red;
 }
 
+.cpf-ineditavel {
+    background-color: #f0f0f0; /* Cor de fundo mais clara */
+    color: #a0a0a0; /* Cor do texto mais clara */
+    cursor: not-allowed; /* Cursor indicando que não pode ser editado */
+}
+
+
+
+
+
+
+
+
+
+
 

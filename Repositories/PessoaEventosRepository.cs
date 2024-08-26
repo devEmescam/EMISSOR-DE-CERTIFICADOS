@@ -102,7 +102,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                     {
                         IdEventoPessoa = Convert.ToInt32(row["ID"]),
                         Nome = Convert.ToString(row["NOME"]),
-                        ImagemCertificado = imagemCertificado
+                       //ImagemCertificado = imagemCertificado
                     });
                 }
 
@@ -128,5 +128,5 @@ public class EventoPessoa
 {
     public int IdEventoPessoa { get; set; }
     public string Nome { get; set; }
-    public IFormFile ImagemCertificado { get; set; }
+    //public IFormFile ImagemCertificado { get; set; }
 }
