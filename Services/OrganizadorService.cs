@@ -30,14 +30,16 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
         public async Task<IEnumerable<EventoModel>> BuscarTodosEventosAsync()
         {
             try
-            {                
+            {
                 int userId = _sessao.ObterUsuarioId();
+                string username = _sessao.ObterUsuarioLogin();
+
                 if (userId == null || userId == 0)
                 {
                     throw new Exception("Falha ao identificar usuário logado.");
                 }
 
-                var dataTable = await _organizadorRepository.BuscarTodosEventosAsync(userId);
+                var dataTable = await _organizadorRepository.BuscarTodosEventosAsync(userId, username);
                 var eventos = new List<EventoModel>();
 
                 foreach (DataRow row in dataTable.Rows)

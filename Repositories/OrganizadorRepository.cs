@@ -12,18 +12,55 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
         {
             _dbHelper = dbHelper;
         }
-        public async Task<DataTable> BuscarTodosEventosAsync(int userId)
+        public async Task<DataTable> BuscarTodosEventosAsync(int userId, string username)
         {
             try
             {
-                var query = $"SELECT ID, NOME, IMAGEM_CERTIFICADO FROM EVENTO WHERE ID_USUARIO_ADMINISTRATIVO = {userId}";
+                string query;
+
+                // Verifica se o usuário é "autorizado"
+                if (username.Equals("ray.oliveira", StringComparison.OrdinalIgnoreCase) ||
+                username.Equals("lucas.guimaraes", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Se for, busca todos os eventos com nome do administrador
+                    query = @"
+                SELECT 
+                    E.ID, 
+                    E.NOME, 
+                    E.IMAGEM_CERTIFICADO, 
+                    E.ID_USUARIO_ADMINISTRATIVO, 
+                    U.USUARIO AS NOME_ADMINISTRADOR 
+                FROM 
+                    EVENTO E
+                LEFT JOIN 
+                    USUARIO U ON E.ID_USUARIO_ADMINISTRATIVO = U.ID";
+                }
+                else
+                {
+                    // Se não for, busca apenas os eventos do usuário específico com nome do administrador
+                    query = $@"
+                SELECT 
+                    E.ID, 
+                    E.NOME, 
+                    E.IMAGEM_CERTIFICADO, 
+                    E.ID_USUARIO_ADMINISTRATIVO, 
+                    U.USUARIO AS NOME_ADMINISTRADOR 
+                FROM 
+                    EVENTO E
+                LEFT JOIN 
+                    USUARIO U ON E.ID_USUARIO_ADMINISTRATIVO = U.ID
+                WHERE 
+                    E.ID_USUARIO_ADMINISTRATIVO = {userId}";
+                }
+
                 return await _dbHelper.ExecuteQueryAsync(query);
             }
             catch (Exception ex)
             {
                 throw new Exception($"Erro em [OrganizadorRepository.BuscarTodosEventosAsync]: {ex.Message}");
-            }            
+            }
         }
+
         public async Task<DataTable> BuscarEventoPorIdAsync(int id)
         {
             try
