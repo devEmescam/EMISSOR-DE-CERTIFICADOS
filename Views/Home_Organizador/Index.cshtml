@@ -30,7 +30,7 @@
 
 
     <div class="cartao-menu">
-       
+
 
         <!--CADASTRAR EVENTO-->
         <!-- Formulário para cadastro de evento -->
@@ -126,13 +126,17 @@
                                          onclick="window.open('@Url.Action("VisualizarImagem", "Home_Organizador", new { Id = evento.Id })')">
                                 </td>
                                 <td style="text-align: center;">
-                                    <button class="btn btn-emitir" onclick="abrirCardEmitirCertificado('@evento.Id')">Emitir Certificado</button>
+                                    @if (ViewBag.Login == "lucas.guimaraes" || ViewBag.Login == "ray.oliveira")
+                                    {
+                                        <button class="btn btn-emitir" onclick="abrirCardEmitirCertificado('@evento.Id')">Emitir Certificado</button>
+                                    }
                                     <button class="btn btn-atualizar" onclick="atualizarEvento('@evento.Id', '@evento.Nome')">Atualizar</button>
-
                                 </td>
                             </tr>
                         }
                     </tbody>
+
+
                 </table>
             </div>
         </div>
@@ -188,12 +192,18 @@
 
                 <hr>
                 <!-- Aqui preenchem os dados -->
-                <div id="divDadosAtualizar">
-                    <input type="text" id="inputNomeAtualizar" placeholder="Nome">
-                    <input type="text" id="inputCPFAtualizar" placeholder="CPF">
-                    <input type="text" id="inputEmail1Atualizar" placeholder="Email">
+                <div id="dados-form2">
+                    <div id="divDadosAtualizar">
+                        <input type="text" id="inputNomeAtualizar" placeholder="Nome">
+                        <input type="text" id="inputCPFAtualizar" placeholder="CPF">
+                        <input type="text" id="inputEmail1Atualizar" placeholder="Email">
+
+                    </div>
                     <textarea id="inputTextoAtualizar" placeholder="Texto"></textarea>
                 </div>
+
+
+
 
                 <button type="button" id="botaoConfirmarAtualizacao2" style="display: none;" onclick="confirmarAtualizacaoEvento()">Confirmar Atualização</button>
                 <button type="button" id="botaoAcaoAtualizar" onclick="adicionarDados()">Adicionar Dados</button>
@@ -219,7 +229,7 @@
                 <div class="upload-container2">
                     <!-- Botão de importar EXCEL -->
                     <input type="file" id="excelFileAtualizar" accept=".xlsx" style="display:none" onchange="importarExcelAtualizar()">
-                    <label for="excelFileAtualizar" class="custom-file-upload">
+                    <label for="excelFileAtualizar" class="custom-file-upload2">
                         Importar Pessoas
                     </label>
                     <span id="fileNameAtualizar" style="margin-left: 10px;"></span>
@@ -230,6 +240,7 @@
                 <button type="button" id="AtualizarEvento">Atualizar Evento</button>
             </form>
         </div>
+
 
         <!-- BUSCAR PESSOAS -->
         <div id="card-buscar-pessoas" class="card">
@@ -290,13 +301,21 @@
         </div>
 
 
-       
-
-           
-
-
-
     </div>
+
+    <!-- loading... -->
+
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loader">
+            <img src="~/loading.png">
+            <div class="loader-dots">
+                <div class="loader-dot"></div>
+                <div class="loader-dot"></div>
+                <div class="loader-dot"></div>
+            </div>
+        </div>
+    </div>
+
 
     <script>
         window.onload = function () {
@@ -965,8 +984,8 @@
         });
 
 
-
-        // Atualizando a função para processar a resposta da busca de pessoas
+        //FUNCIONANDO PERFEITAMENTE!!!
+        // Função para buscar pessoas e adicionar botões de ação
         function buscarPessoas() {
             var termo = $("#searchInput").val();
             if (termo.length >= 3) { // Buscar apenas se o nome tiver 3 ou mais caracteres
@@ -995,8 +1014,7 @@
                                         .append("<button class='acoes-btn' onclick='toggleDropdown(this)'>Ações</button>")
                                         .append(
                                             $("<div class='acoes-dropdown-content'>")
-                                                .append("<button onclick='exibirCertificado(this, " + pessoa.id + ")'>Exibir Certificado</button>")
-                                                .append("<button onclick='acao2()'>Reenviar Instruções</button>")
+                                                .append("<button onclick='exibirCertificado(this, " + pessoa.id + ")'>Exibir Eventos</button>")
                                                 .append("<button onclick='acao3()'>Atualizar</button>")
                                         )
                                 )
@@ -1017,12 +1035,12 @@
             }
         }
 
-
-
+        // Função para alternar a visibilidade do dropdown
         function toggleDropdown(button) {
             $(button).next(".acoes-dropdown-content").toggle();
         }
 
+        // Função para exibir o nome do evento abaixo do nome da pessoa
         function exibirCertificado(button, pessoaId) {
             var item = $(button).closest('.result-item');
             var certificadoDiv = item.next(".certificado");
@@ -1032,36 +1050,74 @@
                 return;
             }
 
-            // Se o certificado ainda não foi carregado, faça a requisição para carregá-lo
+            // Se o conteúdo ainda não foi carregado, faça a requisição para carregá-lo
             if (certificadoDiv.is(':empty')) {
                 $.ajax({
-                    url: 'Pessoa/BuscarEventosPessoa', // Ajuste esta URL para onde o certificado pode ser acessado
+                    url: `/Pessoa/BuscarEventosPessoa/${pessoaId}`, // URL da API para buscar eventos
                     type: 'GET',
-                    data: { id: pessoaId },
+                    dataType: 'json', // Espera-se que a resposta seja JSON
                     success: function (data) {
-                        if (data && data.imagemCertificado) {
-                            // Converta o arquivo para uma URL utilizável
-                            var reader = new FileReader();
-                            reader.onload = function (e) {
-                                certificadoDiv.html(
-                                    $("<img class='certificado-imagem' />")
-                                        .attr("src", e.target.result)
-                                        .attr("alt", "Certificado")
-                                        .css("max-width", "100%")
-                                );
-                                certificadoDiv.slideDown("slow");
-                            };
+                        if (data && data.length > 0) {
+                            // Acessa o nome do primeiro evento no array
+                            var nomeEvento = data[0].nome; // A chave correta é 'nome'
+                            var idEventoPessoa = data[0].id; // Supondo que exista um ID do evento
 
-                            reader.readAsDataURL(data.imagemCertificado);
+                            // Cria o link clicável para o nome do evento
+                            var nomeEventoLink = $("<a href='#' class='nome-evento'></a>")
+                                .text(nomeEvento)
+                                .on('click', function (e) {
+                                    e.preventDefault();
+                                    console.log("Nome do evento clicado:", nomeEvento);
+                                    // Insira sua ação futura aqui
+                                });
+
+                            // Botão para "Reenviar instruções"
+                            var reenviarBtn = $('<button class="btn-reenviar"></button>')
+                                .text('Reenviar instruções')
+                                .on('click', function () {
+                                    // Chamada AJAX para ReenviarInstrucoesAsync
+                                    $.ajax({
+                                        url: `/Pessoa/ReenviarInstrucoes/${idEventoPessoa}`, // URL da action no servidor
+                                        type: 'POST',
+                                        success: function (response) {
+                                            if (response) {
+                                                alert("Instruções reenviadas com sucesso.");
+                                            } else {
+                                                alert("Falha ao reenviar as instruções.");
+                                            }
+                                        },
+                                        error: function (xhr, status, error) {
+                                            console.error("Erro ao reenviar instruções:", error);
+                                            alert("Erro ao tentar reenviar as instruções.");
+                                        }
+                                    });
+                                });
+
+                            // Botão para "Visualizar certificado"
+                            var visualizarBtn = $('<button class="btn-visualizar"></button>')
+                                .text('Visualizar certificado')
+                                .on('click', function () {
+                                    // Ação para visualizar o certificado
+                                    console.log("Visualizar certificado para:", pessoaId);
+                                    // Insira a lógica para visualizar o certificado aqui
+                                });
+
+                            // Atualiza o conteúdo da div certificado com o nome do evento e os botões
+                            certificadoDiv
+                                .empty() // Limpa qualquer conteúdo anterior
+                                .append(nomeEventoLink) // Adiciona o nome do evento
+                                .append(" ") // Espaço entre o nome do evento e os botões
+                                .append(reenviarBtn) // Adiciona o botão de reenviar instruções
+                                .append(" ") // Espaço entre os botões
+                                .append(visualizarBtn) // Adiciona o botão de visualizar certificado
+                                .slideDown("slow");
                         } else {
-                            certificadoDiv.text("Certificado não disponível");
-                            certificadoDiv.slideDown("slow");
+                            certificadoDiv.text("Nenhum evento encontrado").slideDown("slow");
                         }
                     },
                     error: function (xhr, status, error) {
-                        console.error("Erro ao buscar certificado:", error);
-                        certificadoDiv.text("Erro ao carregar o certificado. Consulte o console para mais detalhes.");
-                        certificadoDiv.slideDown("slow");
+                        console.error("Erro ao buscar nome do evento:", error);
+                        certificadoDiv.text("Erro ao carregar o evento. Consulte o console para mais detalhes.").slideDown("slow");
                     }
                 });
             } else {
@@ -1070,13 +1126,6 @@
         }
 
 
-        function abrirCertificado(certificadoUrl) {
-            if (certificadoUrl && certificadoUrl !== "undefined") {
-                window.open(certificadoUrl, '_blank');
-            } else {
-                alert("Certificado não disponível");
-            }
-        }
 
         function acao2() {
             alert("Ação 2 executada");
@@ -1282,7 +1331,7 @@
         //     }
         // }
 
-    
+
 
         let allSelected = false;
 
@@ -1301,7 +1350,7 @@
             input.value = input.value.replace(/\D/g, '');
         }
 
-  
+
         document.getElementById('emitirCertificado').addEventListener('click', function () {
             const eventoId = document.getElementById('eventoId').value;
             const checkboxes = document.querySelectorAll('#certificados-tbody input[type="checkbox"]:checked');
@@ -1332,13 +1381,13 @@
                 .then(data => {
                     if (data.success) {
                         alert('Ação efetuada com sucesso!');
+                        location.reload(); // Recarrega a página
                     } else {
                         alert('Falha ao emitir certificados: ' + (data.message || 'Erro desconhecido'));
                     }
                 })
                 .catch(error => {
-                    console.error('Erro ao emitir certificados:', error);
-                    alert('Erro ao emitir certificados: ' + error.message);
+                    alert('Erro: ' + error.message);
                 });
         });
 
@@ -1434,305 +1483,201 @@
 
 
 
-            //ADICIONAR PESSOAS------------------------------------------
+        //ADICIONAR PESSOAS------------------------------------------
 
-            // Função para adicionar uma nova linha na tabela com os dados dos inputs
-            function adicionarDados() {
-                const nome = document.getElementById('inputNomeAtualizar').value;
-                const cpf = document.getElementById('inputCPFAtualizar').value;
-                const email = document.getElementById('inputEmail1Atualizar').value;
-                const texto = document.getElementById('inputTextoAtualizar').value;
+        // Função para adicionar uma nova linha na tabela com os dados dos inputs
+        function adicionarDados() {
+            const nome = document.getElementById('inputNomeAtualizar').value;
+            const cpf = document.getElementById('inputCPFAtualizar').value;
+            const email = document.getElementById('inputEmail1Atualizar').value;
+            const texto = document.getElementById('inputTextoAtualizar').value;
 
-                if (!nome || !cpf || !email || !texto) {
-                    alert("Adicionada com sucesso.");
-                    return;
-                }
+            if (!nome || !cpf || !email || !texto) {
+                alert("Adicionada com sucesso.");
+                return;
+            }
 
-                if (!validarCPF(cpf)) {
-                    alert("CPF inválido. Por favor, insira um CPF válido.");
-                    return;
-                }
+            if (!validarCPF(cpf)) {
+                alert("CPF inválido. Por favor, insira um CPF válido.");
+                return;
+            }
 
-                const tbody = document.getElementById('eventos-tbody-atualizar');
-                const row = document.createElement('tr');
+            const tbody = document.getElementById('eventos-tbody-atualizar');
+            const row = document.createElement('tr');
 
-                // Nome
-                const tdNome = document.createElement('td');
-                tdNome.textContent = nome;
-                row.appendChild(tdNome);
+            // Nome
+            const tdNome = document.createElement('td');
+            tdNome.textContent = nome;
+            row.appendChild(tdNome);
 
-                // CPF
-                const tdCPF = document.createElement('td');
-                tdCPF.textContent = cpf;
-                row.appendChild(tdCPF);
+            // CPF
+            const tdCPF = document.createElement('td');
+            tdCPF.textContent = cpf;
+            row.appendChild(tdCPF);
 
-                // Email
-                const tdEmail = document.createElement('td');
-                tdEmail.textContent = email;
-                row.appendChild(tdEmail);
+            // Email
+            const tdEmail = document.createElement('td');
+            tdEmail.textContent = email;
+            row.appendChild(tdEmail);
 
-                // Texto
-                const tdTexto = document.createElement('td');
-                tdTexto.textContent = texto;
-                row.appendChild(tdTexto);
+            // Texto
+            const tdTexto = document.createElement('td');
+            tdTexto.textContent = texto;
+            row.appendChild(tdTexto);
 
-                // Ações
-                const tdAcoes = document.createElement('td');
+            // Ações
+            const tdAcoes = document.createElement('td');
 
-                // Botão Excluir
-                const botaoExcluir = document.createElement("button");
-                botaoExcluir.textContent = "Excluir";
-                botaoExcluir.className = 'btn table-btn';
-                botaoExcluir.onclick = function (event) {
-                    event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
-                    if (confirm("Tem certeza de que deseja excluir esta pessoa?")) {
-                        // Obter a linha a ser excluída
-                        const linha = event.target.closest('tr');
-                        // Remover a linha da tabela
-                        linha.remove();
-                    }
-                };
-                tdAcoes.appendChild(botaoExcluir);
-
-                // Botão Atualizar
-                const botaoAtualizar = document.createElement("button");
-                botaoAtualizar.textContent = "Atualizar";
-                botaoAtualizar.className = 'btn table-btn';
-                botaoAtualizar.onclick = function (event) {
-                    event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
-
-                    // Obter a linha a ser editada
+            // Botão Excluir
+            const botaoExcluir = document.createElement("button");
+            botaoExcluir.textContent = "Excluir";
+            botaoExcluir.className = 'btn table-btn';
+            botaoExcluir.onclick = function (event) {
+                event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
+                if (confirm("Tem certeza de que deseja excluir esta pessoa?")) {
+                    // Obter a linha a ser excluída
                     const linha = event.target.closest('tr');
+                    // Remover a linha da tabela
+                    linha.remove();
+                }
+            };
+            tdAcoes.appendChild(botaoExcluir);
 
-                    // Obter os elementos de TD dentro da linha
-                    const tds = linha.querySelectorAll('td');
+            // Botão Atualizar
+            const botaoAtualizar = document.createElement("button");
+            botaoAtualizar.textContent = "Atualizar";
+            botaoAtualizar.className = 'btn table-btn';
+            botaoAtualizar.onclick = function (event) {
+                event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
 
-                    // Extrair os valores atuais da pessoa da linha
-                    const nomeAtual = tds[0].textContent;
-                    const cpfAtual = tds[1].textContent;
-                    const emailAtual = tds[2].textContent;
-                    const textoAtual = tds[3].textContent;
+                // Obter a linha a ser editada
+                const linha = event.target.closest('tr');
 
-                    // Transferir dados para os campos de edição
-                    document.getElementById('inputNomeAtualizar').value = nomeAtual;
-                    document.getElementById('inputCPFAtualizar').value = cpfAtual;
-                    document.getElementById('inputEmail1Atualizar').value = emailAtual;
-                    document.getElementById('inputTextoAtualizar').value = textoAtual;
+                // Obter os elementos de TD dentro da linha
+                const tds = linha.querySelectorAll('td');
 
-                    // Adicionar o ID da pessoa ao botão de confirmação para referência
-                    document.getElementById('botaoConfirmarAtualizacao').setAttribute('data-pessoa-id', pessoa.id);
+                // Extrair os valores atuais da pessoa da linha
+                const nomeAtual = tds[0].textContent;
+                const cpfAtual = tds[1].textContent;
+                const emailAtual = tds[2].textContent;
+                const textoAtual = tds[3].textContent;
 
-                    // Mostrar o botão de confirmação
-                    document.getElementById('botaoConfirmarAtualizacao').style.display = 'inline-block';
+                // Transferir dados para os campos de edição
+                document.getElementById('inputNomeAtualizar').value = nomeAtual;
+                document.getElementById('inputCPFAtualizar').value = cpfAtual;
+                document.getElementById('inputEmail1Atualizar').value = emailAtual;
+                document.getElementById('inputTextoAtualizar').value = textoAtual;
 
-                    // Ocultar o botão de atualização e exclusão
-                    tdAcoes.innerHTML = '';
+                // Adicionar o ID da pessoa ao botão de confirmação para referência
+                document.getElementById('botaoConfirmarAtualizacao').setAttribute('data-pessoa-id', pessoa.id);
 
-                    // Adicionar botão Confirmar Atualização
-                    const botaoConfirmar = document.createElement("button");
-                    botaoConfirmar.textContent = "Confirmar";
-                    botaoConfirmar.className = 'btn table-btn';
-                    botaoConfirmar.onclick = function (event) {
-                        event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
+                // Mostrar o botão de confirmação
+                document.getElementById('botaoConfirmarAtualizacao').style.display = 'inline-block';
 
-                        // Obter os novos valores dos inputs
-                        const nomeNovo = document.getElementById('inputNomeAtualizar').value;
-                        const cpfNovo = document.getElementById('inputCPFAtualizar').value;
-                        const emailNovo = document.getElementById('inputEmail1Atualizar').value;
-                        const textoNovo = document.getElementById('inputTextoAtualizar').value;
+                // Ocultar o botão de atualização e exclusão
+                tdAcoes.innerHTML = '';
 
-                        // Atualizar os valores na linha da tabela
-                        tds[0].textContent = nomeNovo;
-                        tds[1].textContent = cpfNovo;
-                        tds[2].textContent = emailNovo;
-                        tds[3].textContent = textoNovo;
+                // Adicionar botão Confirmar Atualização
+                const botaoConfirmar = document.createElement("button");
+                botaoConfirmar.textContent = "Confirmar";
+                botaoConfirmar.className = 'btn table-btn';
+                botaoConfirmar.onclick = function (event) {
+                    event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
 
-                        // Limpar os campos de edição
-                        limparCamposAtualizacao();
+                    // Obter os novos valores dos inputs
+                    const nomeNovo = document.getElementById('inputNomeAtualizar').value;
+                    const cpfNovo = document.getElementById('inputCPFAtualizar').value;
+                    const emailNovo = document.getElementById('inputEmail1Atualizar').value;
+                    const textoNovo = document.getElementById('inputTextoAtualizar').value;
 
-                        // Exibir novamente o botão Atualizar e Excluir
-                        tdAcoes.innerHTML = ''; // Limpa ações atuais
-                        tdAcoes.appendChild(botaoAtualizar);
-                        tdAcoes.appendChild(botaoExcluir); // Adicionar botão excluir de volta
-                    };
+                    // Atualizar os valores na linha da tabela
+                    tds[0].textContent = nomeNovo;
+                    tds[1].textContent = cpfNovo;
+                    tds[2].textContent = emailNovo;
+                    tds[3].textContent = textoNovo;
 
-                    // Adicionar o botão Confirmar na célula de Ações
-                    tdAcoes.appendChild(botaoConfirmar);
+                    // Limpar os campos de edição
+                    limparCamposAtualizacao();
+
+                    // Exibir novamente o botão Atualizar e Excluir
+                    tdAcoes.innerHTML = ''; // Limpa ações atuais
+                    tdAcoes.appendChild(botaoAtualizar);
+                    tdAcoes.appendChild(botaoExcluir); // Adicionar botão excluir de volta
                 };
 
+                // Adicionar o botão Confirmar na célula de Ações
+                tdAcoes.appendChild(botaoConfirmar);
+            };
 
-                tdAcoes.appendChild(botaoAtualizar);
-                row.appendChild(tdAcoes);
-                tbody.appendChild(row);
 
-                // Limpar os campos de edição
-                limparCamposAtualizacao();
+            tdAcoes.appendChild(botaoAtualizar);
+            row.appendChild(tdAcoes);
+            tbody.appendChild(row);
+
+            // Limpar os campos de edição
+            limparCamposAtualizacao();
+        }
+
+        // Função para limpar os campos de atualização
+        function limparCamposAtualizacao() {
+            document.getElementById('inputNomeAtualizar').value = '';
+            document.getElementById('inputCPFAtualizar').value = '';
+            document.getElementById('inputEmail1Atualizar').value = '';
+            document.getElementById('inputTextoAtualizar').value = '';
+        }
+
+        // Adiciona um evento ao botão "Adicionar Dados" para chamar a função adicionarDados
+        document.getElementById('botaoAcaoAtualizar').addEventListener('click', adicionarDados);
+
+        // Função para atualizar os detalhes do evento e preencher a tabela
+        async function atualizarEvento(eventoId, eventoNome) {
+            if (!eventoId) {
+                console.error('Evento ID não definido.');
+                return;
             }
 
-            // Função para limpar os campos de atualização
-            function limparCamposAtualizacao() {
-                document.getElementById('inputNomeAtualizar').value = '';
-                document.getElementById('inputCPFAtualizar').value = '';
-                document.getElementById('inputEmail1Atualizar').value = '';
-                document.getElementById('inputTextoAtualizar').value = '';
-            }
+            try {
+                // Preencher os campos de ID e Nome do Evento
+                document.getElementById('idEventoAtualizar').value = eventoId;
+                document.getElementById('idEventoAtualizar').readOnly = true;
 
-            // Adiciona um evento ao botão "Adicionar Dados" para chamar a função adicionarDados
-            document.getElementById('botaoAcaoAtualizar').addEventListener('click', adicionarDados);
+                document.getElementById('nomeEventoAtualizar').value = eventoNome;
+                document.getElementById('nomeEventoAtualizar').readOnly = true;
 
-            // Função para atualizar os detalhes do evento e preencher a tabela
-            async function atualizarEvento(eventoId, eventoNome) {
-                if (!eventoId) {
-                    console.error('Evento ID não definido.');
-                    return;
+                const response = await fetch(`/Home_Organizador/ObterPessoasEvento?id=${eventoId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
                 }
 
-                try {
-                    // Preencher os campos de ID e Nome do Evento
-                    document.getElementById('idEventoAtualizar').value = eventoId;
-                    document.getElementById('idEventoAtualizar').readOnly = true;
+                const eventoPessoas = await response.json();
+                console.log('Dados do evento recebidos:', eventoPessoas); // Log para depuração
 
-                    document.getElementById('nomeEventoAtualizar').value = eventoNome;
-                    document.getElementById('nomeEventoAtualizar').readOnly = true;
+                preencherTabela(eventoPessoas);
 
-                    const response = await fetch(`/Home_Organizador/ObterPessoasEvento?id=${eventoId}`);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-
-                    const eventoPessoas = await response.json();
-                    console.log('Dados do evento recebidos:', eventoPessoas); // Log para depuração
-
-                    preencherTabela(eventoPessoas);
-
-                    // Exibir o card "card-atualizar-evento"
-                    document.getElementById('card-atualizar-evento').style.display = 'block';
-                } catch (error) {
-                    console.error('Erro ao obter detalhes do evento e pessoas:', error);
-                }
+                // Exibir o card "card-atualizar-evento"
+                document.getElementById('card-atualizar-evento').style.display = 'block';
+            } catch (error) {
+                console.error('Erro ao obter detalhes do evento e pessoas:', error);
             }
-
-            function preencherTabela(eventoPessoas) {
-                const tbody = document.getElementById('eventos-tbody-atualizar');
-                tbody.innerHTML = ''; // Limpa o conteúdo atual do tbody
-
-                if (eventoPessoas && eventoPessoas.pessoasEventos && eventoPessoas.pessoasEventos.length > 0) {
-                    eventoPessoas.pessoasEventos.forEach(pessoa => {
-                        const row = document.createElement('tr');
-
-                        // Nome
-                        const tdNome = document.createElement('td');
-                        tdNome.textContent = pessoa.nome; // Exibir o nome da pessoa
-                        row.appendChild(tdNome);
-
-                        // CPF
-                        const tdCPF = document.createElement('td');
-                        tdCPF.textContent = pessoa.cpf; // Exibir o CPF da pessoa
-                        row.appendChild(tdCPF);
-
-                        // Email
-                        const tdEmail = document.createElement('td');
-                        tdEmail.textContent = pessoa.email; // Exibir o email da pessoa
-                        row.appendChild(tdEmail);
-
-                        // Texto
-                        const tdTexto = document.createElement('td');
-                        tdTexto.textContent = pessoa.texto; // Exibir o texto da pessoa
-                        row.appendChild(tdTexto);
-
-                        // Ações
-                        const tdAcoes = document.createElement('td');
-
-                        if (pessoa.dataEmissao === null) {
-                            // Botão Excluir
-                            const botaoExcluir = document.createElement("button");
-                            botaoExcluir.textContent = "Excluir";
-                            botaoExcluir.className = 'btn table-btn';
-                            botaoExcluir.onclick = function (event) {
-                                event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
-
-                                if (confirm("Tem certeza de que deseja excluir esta pessoa?")) {
-                                    // Obter a linha a ser excluída
-                                    const linha = event.target.closest('tr');
-
-                                    // Remover a linha da tabela
-                                    linha.remove();
-
-                                    // Aqui coloca a função para excluir a pessoa do backend
-                                    // excluirPessoa(pessoa.id);
-                                }
-                            };
-                            tdAcoes.appendChild(botaoExcluir);
-
-                            // Botão Atualizar
-                            const botaoAtualizar = document.createElement("button");
-                            botaoAtualizar.textContent = "Atualizar";
-                            botaoAtualizar.className = 'btn table-btn';
-                            botaoAtualizar.onclick = function (event) {
-                                event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
-
-                                // Transferir dados para os campos de edição
-                                document.getElementById('inputNomeAtualizar').value = pessoa.nome;
-                                document.getElementById('inputCPFAtualizar').value = pessoa.cpf;
-                                document.getElementById('inputEmail1Atualizar').value = pessoa.email;
-                                document.getElementById('inputTextoAtualizar').value = pessoa.texto;
-
-                                // Adiciona o ID da pessoa ao botão de confirmação para referência
-                                document.getElementById('botaoConfirmarAtualizacao').setAttribute('data-pessoa-id', pessoa.id);
-
-                                // Mostrar o botão de confirmação
-                                document.getElementById('botaoConfirmarAtualizacao').style.display = 'inline-block';
-                            };
-
-                            tdAcoes.appendChild(botaoAtualizar);
-                        } else {
-                            // Indicar que a pessoa não pode ser atualizada ou excluída
-                            tdAcoes.textContent = 'Não pode ser editado ou excluído';
-                        }
-
-                        row.appendChild(tdAcoes);
-                        tbody.appendChild(row);
-                    });
-                } else {
-                    const row = document.createElement('tr');
-                    const tdAcoes = document.createElement('td');
-                    tdAcoes.colSpan = 5; // Ajuste conforme o número de colunas na tabela
-                    tdAcoes.textContent = 'Nenhum participante encontrado.';
-                    row.appendChild(tdAcoes);
-                    tbody.appendChild(row);
-                }
-            }
+        }
 
 
-            document.addEventListener("DOMContentLoaded", function () {
-                const sairLink = document.getElementById("sair-link");
 
-                sairLink.addEventListener("click", function (event) {
-                    event.preventDefault(); // Evita o comportamento padrão do link
 
-                    fetch('/Login/Sair', {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                        .then(response => {
-                            if (response.redirected) {
-                                window.location.href = response.url;
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Erro ao sair:', error);
-                        });
-                });
-            });
 
+
+
+        // document.getElementById("emitirCertificado").addEventListener("click", function () {
+        //     location.reload(); // Atualiza a página
+        // });
 
         //ATUALIZAR EVENTO ------------------------------------------------------------------------------------------
 
+
         function preencherTabela(eventoPessoas) {
             const tbody = document.getElementById('eventos-tbody-atualizar');
-            tbody.innerHTML = ''; // Limpa o conteúdo atual do tbody
+            // Comentado para evitar a exclusão das pessoas já presentes na tabela:
+            // tbody.innerHTML = '';
 
             if (eventoPessoas && eventoPessoas.pessoasEventos && eventoPessoas.pessoasEventos.length > 0) {
                 eventoPessoas.pessoasEventos.forEach(pessoa => {
@@ -1740,22 +1685,22 @@
 
                     // Nome
                     const tdNome = document.createElement('td');
-                    tdNome.textContent = pessoa.nome; // Exibir o nome da pessoa
+                    tdNome.textContent = pessoa.nome;
                     row.appendChild(tdNome);
 
                     // CPF
                     const tdCPF = document.createElement('td');
-                    tdCPF.textContent = pessoa.cpf; // Exibir o CPF da pessoa
+                    tdCPF.textContent = pessoa.cpf;
                     row.appendChild(tdCPF);
 
                     // Email
                     const tdEmail = document.createElement('td');
-                    tdEmail.textContent = pessoa.email; // Exibir o email da pessoa
+                    tdEmail.textContent = pessoa.email;
                     row.appendChild(tdEmail);
 
                     // Texto
                     const tdTexto = document.createElement('td');
-                    tdTexto.textContent = pessoa.texto; // Exibir o texto da pessoa
+                    tdTexto.textContent = pessoa.texto;
                     row.appendChild(tdTexto);
 
                     // Ações
@@ -1767,17 +1712,11 @@
                         botaoExcluir.textContent = "Excluir";
                         botaoExcluir.className = 'btn table-btn';
                         botaoExcluir.onclick = function (event) {
-                            event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
+                            event.preventDefault(); // Prevenir a ação padrão
 
                             if (confirm("Tem certeza de que deseja excluir esta pessoa?")) {
-                                // Obter a linha a ser excluída
                                 const linha = event.target.closest('tr');
-
-                                // Remover a linha da tabela
                                 linha.remove();
-
-                                // Aqui coloca a função para excluir a pessoa do backend
-                                // excluirPessoa(pessoa.id);
                             }
                         };
                         tdAcoes.appendChild(botaoExcluir);
@@ -1787,30 +1726,20 @@
                         botaoAtualizar.textContent = "Atualizar";
                         botaoAtualizar.className = 'btn table-btn';
                         botaoAtualizar.onclick = function (event) {
-                            event.preventDefault(); // Prevenir a ação padrão de submissão do formulário
+                            event.preventDefault(); // Prevenir a ação padrão
 
-                            // Transferir dados para os campos de edição
                             document.getElementById('inputNomeAtualizar').value = pessoa.nome;
                             document.getElementById('inputCPFAtualizar').value = pessoa.cpf;
                             document.getElementById('inputEmail1Atualizar').value = pessoa.email;
                             document.getElementById('inputTextoAtualizar').value = pessoa.texto;
 
-                            // Tornar o campo de email editável
-                            document.getElementById('inputEmail1Atualizar').readOnly = false;
+                            linhaEditavelAtualizar = row;
 
-                            // Define a linha editável atual
-                            linhaEditavelAtualizar = row; // Adiciona a linha atual à variável
-
-                            // Adiciona o ID da pessoa ao botão de confirmação para referência
                             document.getElementById('botaoConfirmarAtualizacao2').setAttribute('data-pessoa-id', pessoa.id);
-
-                            // Mostrar o botão de confirmação
                             document.getElementById('botaoConfirmarAtualizacao2').style.display = 'inline-block';
                         };
-
                         tdAcoes.appendChild(botaoAtualizar);
                     } else {
-                        // Indicar que a pessoa não pode ser atualizada ou excluída
                         tdAcoes.textContent = 'Não pode ser editado ou excluído';
                     }
 
@@ -1820,12 +1749,13 @@
             } else {
                 const row = document.createElement('tr');
                 const tdAcoes = document.createElement('td');
-                tdAcoes.colSpan = 5; // Ajuste conforme o número de colunas na tabela
+                tdAcoes.colSpan = 5;
                 tdAcoes.textContent = 'Nenhum participante encontrado.';
                 row.appendChild(tdAcoes);
                 tbody.appendChild(row);
             }
         }
+
 
         // Evento de clique para o botão de atualização do evento
         document.getElementById('AtualizarEvento').addEventListener('click', async function (event) {
@@ -1894,38 +1824,34 @@
 
         var linhaEditavelAtualizar = null;
 
+        // Função para confirmar a atualização de uma linha
         function confirmarAtualizacaoEvento() {
             if (!linhaEditavelAtualizar) return;
 
-            var nome = document.getElementById("inputNomeAtualizar").value.trim();
-            var cpf = document.getElementById("inputCPFAtualizar").value.trim();
-            var email = document.getElementById("inputEmail1Atualizar").value.trim();
-            var texto = document.getElementById("inputTextoAtualizar").value.trim();
+            const nome = document.getElementById("inputNomeAtualizar").value.trim();
+            const cpf = document.getElementById("inputCPFAtualizar").value.trim();
+            const email = document.getElementById("inputEmail1Atualizar").value.trim();
+            const texto = document.getElementById("inputTextoAtualizar").value.trim();
 
-            // Validação simples dos campos
             if (nome === "" || cpf === "" || email === "" || texto === "") {
                 alert("Por favor, preencha todos os campos.");
                 return;
             }
 
-            // Atualiza as células da linha editável
-            var celulas = linhaEditavelAtualizar.getElementsByTagName("td");
-            celulas[0].textContent = nome;
-            celulas[1].textContent = cpf;
-            celulas[2].textContent = email;
-            celulas[3].textContent = texto;
+            // Atualizar a linha editada
+            linhaEditavelAtualizar.cells[0].textContent = nome;
+            linhaEditavelAtualizar.cells[1].textContent = cpf;
+            linhaEditavelAtualizar.cells[2].textContent = email;
+            linhaEditavelAtualizar.cells[3].textContent = texto;
 
-            // Limpar a linha selecionada
-            linhaEditavelAtualizar = null;
-
-            // Oculta o botão de confirmação e exibe o botão de adicionar
-            document.getElementById("botaoAcaoAtualizar").style.display = 'inline-block';
-            document.getElementById("botaoConfirmarAtualizacao2").style.display = 'none';
-
-            // Limpa os campos do formulário
             limparCamposAtualizar();
+            document.getElementById('botaoConfirmarAtualizacao2').style.display = 'none';
+            linhaEditavelAtualizar = null;
         }
 
+
+
+        // Função para limpar os campos de edição
         function limparCamposAtualizar() {
             document.getElementById("inputNomeAtualizar").value = "";
             document.getElementById("inputCPFAtualizar").value = "";
@@ -1933,9 +1859,338 @@
             document.getElementById("inputTextoAtualizar").value = "";
         }
 
+
         // Adicionar evento de clique para o botão de confirmação de atualização
         document.getElementById('botaoConfirmarAtualizacao2').addEventListener('click', confirmarAtualizacaoEvento);
-        
+
+
+        // Função para preencher a tabela com um objeto JSON
+        function preencherTabela(eventoPessoas) {
+            const tbody = document.getElementById('eventos-tbody-atualizar');
+
+            if (eventoPessoas && eventoPessoas.pessoasEventos && eventoPessoas.pessoasEventos.length > 0) {
+                eventoPessoas.pessoasEventos.forEach(pessoa => {
+                    const row = document.createElement('tr');
+
+                    const tdNome = document.createElement('td');
+                    tdNome.textContent = pessoa.nome;
+                    row.appendChild(tdNome);
+
+                    const tdCPF = document.createElement('td');
+                    tdCPF.textContent = pessoa.cpf;
+                    row.appendChild(tdCPF);
+
+                    const tdEmail = document.createElement('td');
+                    tdEmail.textContent = pessoa.email;
+                    row.appendChild(tdEmail);
+
+                    const tdTexto = document.createElement('td');
+                    tdTexto.textContent = pessoa.texto;
+                    row.appendChild(tdTexto);
+
+                    const tdAcoes = document.createElement('td');
+
+                    if (pessoa.dataEmissao === null) {
+                        const botaoExcluir = document.createElement("button");
+                        botaoExcluir.textContent = "Excluir";
+                        botaoExcluir.className = 'btn table-btn';
+                        botaoExcluir.onclick = function (event) {
+                            event.preventDefault();
+                            if (confirm("Tem certeza de que deseja excluir esta pessoa?")) {
+                                const linha = event.target.closest('tr');
+                                linha.remove();
+                            }
+                        };
+                        tdAcoes.appendChild(botaoExcluir);
+
+                        const botaoAtualizar = document.createElement("button");
+                        botaoAtualizar.textContent = "Atualizar";
+                        botaoAtualizar.className = 'btn table-btn';
+                        botaoAtualizar.onclick = function (event) {
+                            event.preventDefault();
+
+                            document.getElementById('inputNomeAtualizar').value = pessoa.nome;
+                            document.getElementById('inputCPFAtualizar').value = pessoa.cpf;
+                            document.getElementById('inputEmail1Atualizar').value = pessoa.email;
+                            document.getElementById('inputTextoAtualizar').value = pessoa.texto;
+
+                            linhaEditavelAtualizar = row;
+                            document.getElementById('botaoConfirmarAtualizacao2').setAttribute('data-pessoa-id', pessoa.id);
+                            document.getElementById('botaoConfirmarAtualizacao2').style.display = 'inline-block';
+                        };
+                        tdAcoes.appendChild(botaoAtualizar);
+                    } else {
+                        tdAcoes.textContent = 'Não pode ser editado ou excluído';
+                    }
+
+                    row.appendChild(tdAcoes);
+                    tbody.appendChild(row);
+                });
+            } else {
+                const row = document.createElement('tr');
+                const tdAcoes = document.createElement('td');
+                tdAcoes.colSpan = 5;
+                tdAcoes.textContent = 'Nenhum participante encontrado.';
+                row.appendChild(tdAcoes);
+                tbody.appendChild(row);
+            }
+        }
+
+        var linhaEditavelAtualizar = null;
+
+
+        document.getElementById('sair-link').addEventListener('click', function (e) {
+            e.preventDefault(); // Evita a ação padrão do link
+
+            // Envia uma solicitação POST para a ação Logout
+            fetch('/Home_Participante/Logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': getRequestVerificationToken() // Se você estiver usando CSRF token
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        // Redireciona para a página de login após o logout
+                        window.location.href = '/Organizador/Login'; // Ajuste o caminho conforme necessário
+                    } else {
+                        console.error('Falha ao realizar logout');
+                    }
+                })
+                .catch(error => console.error('Erro ao fazer logout:', error));
+        });
+
+        // Função para obter o token CSRF se necessário
+        function getRequestVerificationToken() {
+            const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+            return tokenElement ? tokenElement.value : '';
+        }
+
+
+
+
+
+        function preencherTabelaComExcel(data) {
+            const tbody = document.getElementById('eventos-tbody-atualizar');
+            // Remova esta linha se quiser manter as pessoas existentes
+            // tbody.innerHTML = ''; // Limpa a tabela
+
+            for (let i = 1; i < data.length; i++) {
+                const row = data[i];
+                if (row.length >= 4) {
+                    const tr = document.createElement('tr');
+
+                    const tdNome = document.createElement('td');
+                    tdNome.textContent = row[0];
+                    tr.appendChild(tdNome);
+
+                    const tdCPF = document.createElement('td');
+                    tdCPF.textContent = row[1];
+                    tr.appendChild(tdCPF);
+
+                    const tdEmail = document.createElement('td');
+                    tdEmail.textContent = row[2];
+                    tr.appendChild(tdEmail);
+
+                    const tdTexto = document.createElement('td');
+                    tdTexto.textContent = row[3];
+                    tr.appendChild(tdTexto);
+
+                    const tdAcoes = document.createElement('td');
+                    tdAcoes.innerHTML = `
+                                <button class="btn table-btn" onclick="excluirLinha(this)">Excluir</button>
+                                <button class="btn table-btn" onclick="editarLinha(this)">Atualizar</button>
+                            `;
+                    tr.appendChild(tdAcoes);
+
+                    tbody.appendChild(tr);
+                }
+            }
+        }
+
+        function excluirLinha(btn) {
+            const row = btn.closest('tr');
+            row.remove();
+        }
+
+        function editarLinha(btn) {
+            const row = btn.closest('tr');
+            const nome = row.cells[0].textContent;
+            const cpf = row.cells[1].textContent;
+            const email = row.cells[2].textContent;
+            const texto = row.cells[3].textContent;
+
+            document.getElementById('inputNomeAtualizar').value = nome;
+            document.getElementById('inputCPFAtualizar').value = cpf;
+            document.getElementById('inputEmail1Atualizar').value = email;
+            document.getElementById('inputTextoAtualizar').value = texto;
+
+            linhaEditavelAtualizar = row;
+            document.getElementById('botaoConfirmarAtualizacao2').style.display = 'inline-block';
+        }
+
+
+
+
+
+        // Função para importar o arquivo Excel e preencher a tabela
+        function importarExcelAtualizar() {
+            const fileInput = document.getElementById('excelFileAtualizar');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert("Por favor, selecione um arquivo Excel.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const binary = event.target.result;
+                const workbook = XLSX.read(binary, { type: 'binary' });
+                const sheetName = workbook.SheetNames[0];
+                const sheet = workbook.Sheets[sheetName];
+                const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+                preencherTabelaComExcel(data);
+            };
+            reader.readAsBinaryString(file);
+        }
+
+        // Função para preencher a tabela com os dados extraídos da planilha Excel
+        function preencherTabelaComExcel(data) {
+            const tbody = document.getElementById('eventos-tbody-atualizar');
+
+            for (let i = 1; i < data.length; i++) { // Começa da linha 1 para pular o cabeçalho
+                const row = data[i];
+                if (row.length >= 4) {
+                    const tr = document.createElement('tr');
+
+                    const tdNome = document.createElement('td');
+                    tdNome.textContent = row[0]; // Nome
+                    tr.appendChild(tdNome);
+
+                    const tdCPF = document.createElement('td');
+                    tdCPF.textContent = row[1]; // CPF
+                    tr.appendChild(tdCPF);
+
+                    const tdEmail = document.createElement('td');
+                    tdEmail.textContent = row[2]; // Email
+                    tr.appendChild(tdEmail);
+
+                    const tdTexto = document.createElement('td');
+                    tdTexto.textContent = row[3]; // Texto
+                    tr.appendChild(tdTexto);
+
+                    const tdAcoes = document.createElement('td');
+                    tdAcoes.innerHTML = `
+                            <button class="btn table-btn" type="button" onclick="excluirLinha(this)">Excluir</button>
+                            <button class="btn table-btn" type="button" onclick="editarLinha(this)">Atualizar</button>
+                            `;
+                    tr.appendChild(tdAcoes);
+
+                    tbody.appendChild(tr);
+                }
+            }
+        }
+
+
+
+        function excluirLinha(btn) {
+            if (confirm("Tem certeza de que deseja excluir esta pessoa?")) {
+                const row = btn.closest('tr');
+                row.remove();
+            }
+        }
+
+        // Função para editar uma linha da tabela
+        function editarLinha(btn) {
+            event.preventDefault(); // Prevenir a atualização da página
+
+            const row = btn.closest('tr');
+            const nome = row.cells[0].textContent;
+            const cpf = row.cells[1].textContent;
+            const email = row.cells[2].textContent;
+            const texto = row.cells[3].textContent;
+
+            document.getElementById('inputNomeAtualizar').value = nome;
+            document.getElementById('inputCPFAtualizar').value = cpf;
+            document.getElementById('inputEmail1Atualizar').value = email;
+            document.getElementById('inputTextoAtualizar').value = texto;
+
+            linhaEditavelAtualizar = row;
+            document.getElementById('botaoConfirmarAtualizacao2').style.display = 'inline-block';
+        }
+
+
+
+
+
+        document.getElementById('emitirCertificado').addEventListener('click', function () {
+            const eventoId = document.getElementById('eventoId').value;
+            const checkboxes = document.querySelectorAll('#certificados-tbody input[type="checkbox"]:checked');
+            const idPessoas = Array.from(checkboxes).map(checkbox => checkbox.dataset.id);
+
+            if (idPessoas.length === 0) {
+                alert('Por favor, selecione pelo menos uma pessoa.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('id', eventoId);
+            idPessoas.forEach(id => formData.append('idPessoas', id));
+
+            // Mostra o loading
+            document.getElementById('loading-overlay').style.display = 'flex';
+
+            fetch('/Home_Organizador/EmitirCertificado', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(error => { throw new Error(error.message || 'Erro desconhecido'); });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Esconde o loading
+                    document.getElementById('loading-overlay').style.display = 'none';
+
+                    if (data.success) {
+                        alert('Ação efetuada com sucesso!');
+                        location.reload(); // Recarrega a página
+                    } else {
+                        alert('Falha ao emitir certificados: ' + (data.message || 'Erro desconhecido'));
+                    }
+                })
+                .catch(error => {
+                    // Esconde o loading em caso de erro
+                    document.getElementById('loading-overlay').style.display = 'none';
+                    alert('Erro: ' + error.message);
+                });
+        });
+
+
+
+        async function carregarEventos() {
+            try {
+                const response = await fetch('/Home_Organizador/Index');
+                if (!response.ok) {
+                    throw new Error('Erro ao buscar eventos');
+                }
+                const eventos = await response.json();
+                console.log(eventos); // Aqui você pode atualizar a interface do usuário com os eventos
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        // Chame a função quando a página for carregada
+        document.addEventListener('DOMContentLoaded', carregarEventos);
 
     </script>
 </body>

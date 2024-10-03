@@ -1,10 +1,12 @@
 ﻿using System.Data;
+using System.Threading.Tasks; // Certifique-se de que este namespace está incluído.
 
 namespace EMISSOR_DE_CERTIFICADOS.Interfaces
 {
     public interface IOrganizadorRepository
     {
-        Task<DataTable> BuscarTodosEventosAsync(int userId);
+        // Remover a versão sem username
+        Task<DataTable> BuscarTodosEventosAsync(int userId, string username);
         Task<DataTable> BuscarEventoPorIdAsync(int id);
         Task<int?> InserirEventoAsync(string nome, byte[] imagemCertificado, int idUsuario);
         Task InserirEventoPessoaAsync(int idEvento, int idPessoa, string texto);

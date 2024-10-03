@@ -236,7 +236,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
 
             try
             {
-                texto = $"Código do Certificado: {codigo} - Verifique autenticidade em: definirUrl.com.br";
+                texto = $"Código do Certificado: {codigo} - Verifique autenticidade em: https://certificados.emescam.br/Autenticador";
                 return texto;
             }
             catch (Exception ex)

@@ -12,11 +12,42 @@
             <img src="logoemescam.png" alt="LogoEmescam">
         </div>
         <h1>Autenticar um certificado</h1>
-        <form>
+        <form id="verificationForm">Erro ao verificar o certificado. Tente novamente.
+
             <input type="text" id="code" name="code" placeholder="Digite o código">
             <button type="submit">Verificar Autenticidade</button>
         </form>
         <p class="info">O código pode ser encontrado no rodapé do certificado. Digite-o no campo acima.</p>
+        <div id="result"></div>
+        <img id="certImage" style="display:none;" alt="Imagem do Certificado" />
     </div>
+
+    <script>
+        document.getElementById('verificationForm').addEventListener('submit', async function (event) {
+            event.preventDefault(); // Previne o envio padrão do formulário
+            const code = document.getElementById('code').value;
+            const resultDiv = document.getElementById('result');
+            const certImage = document.getElementById('certImage');
+
+            try {
+                // Faz a requisição ao servidor para verificar o certificado
+                const response = await fetch(`/Autenticador/ValidarCertificado?codigo=${code}`);
+                const result = await response.json();
+
+                // Exibe a mensagem de validação
+                resultDiv.innerHTML = result.validacao;
+
+                // Se a imagem do certificado for retornada, exibe a imagem
+                if (result.imagemCertificado) {
+                    certImage.src = result.imagemCertificado; // Define a URL Base64 da imagem
+                    certImage.style.display = 'block'; // Exibe a imagem
+                } else {
+                    certImage.style.display = 'none'; // Oculta a imagem se não houver URL
+                }
+            } catch (error) {
+                resultDiv.innerHTML = 'Erro ao verificar o certificado. Tente novamente.';
+            }
+        });
+    </script>
 </body>
 </html>

@@ -17,26 +17,25 @@ namespace Autenticador.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ValidarCertificado(string codigo) 
+        public async Task<IActionResult> ValidarCertificado(string codigo)
         {
             try
             {
-                if( !string.IsNullOrEmpty(codigo))
+                if (!string.IsNullOrEmpty(codigo))
                 {
                     if (await _validarCertificadoService.Validar(codigo))
                     {
-                        ViewBag.Validacao = "Certificado Autêntico!";
                         var imagemCertificado = await _validarCertificadoService.ObterImagemCertificadoPorCodigo(codigo);
-                        return View(imagemCertificado);
+                        string imagemUrl = Url.Action("RenderCertificadoImage", new { codigo });
+                        return Json(new { validacao = "Certificado Autêntico!", imagemCertificado = imagemUrl });
                     }
-                    else 
+                    else
                     {
-                        ViewBag.Validacao = "Certificado não encontrado para o código fornecido";
-                        return View();
+                        return Json(new { validacao = "Certificado não encontrado para o código fornecido", imagemCertificado = (string)null });
                     }
                 }
-                
-                return StatusCode(500, $"Não foi possivel identificar o código. Verifique.");                
+
+                return StatusCode(500, "Não foi possível identificar o código. Verifique.");
 
             }
             catch (Exception ex)
@@ -44,6 +43,7 @@ namespace Autenticador.Controllers
                 return StatusCode(500, $"Ocorreu um erro em [AutenticadorController.ValidarCertificado] Erro: {ex.Message}");
             }
         }
+
 
 
         public async Task<IActionResult> RenderCertificadoImage(string codigo)
