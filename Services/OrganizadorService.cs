@@ -49,7 +49,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                     {
                         Id = Convert.ToInt32(row["ID"]),
                         Nome = Convert.ToString(row["NOME"]),
-                        ImagemCertificado = Util.ConvertToFormFile(imagemBytes)
+                        ImagemCertificado = Util.ConvertToFormFile(imagemBytes),
+                        UsuarioCriador = Convert.ToString(row["USUARIO_CRIADOR"])
                     });
                 }
 

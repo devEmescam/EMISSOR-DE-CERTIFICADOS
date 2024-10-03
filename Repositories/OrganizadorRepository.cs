@@ -29,7 +29,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                     E.NOME, 
                     E.IMAGEM_CERTIFICADO, 
                     E.ID_USUARIO_ADMINISTRATIVO, 
-                    U.USUARIO AS NOME_ADMINISTRADOR 
+                    U.USUARIO AS USUARIO_CRIADOR 
                 FROM 
                     EVENTO E
                 LEFT JOIN 
@@ -44,7 +44,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                     E.NOME, 
                     E.IMAGEM_CERTIFICADO, 
                     E.ID_USUARIO_ADMINISTRATIVO, 
-                    U.USUARIO AS NOME_ADMINISTRADOR 
+                    U.USUARIO AS USUARIO_CRIADOR 
                 FROM 
                     EVENTO E
                 LEFT JOIN 
