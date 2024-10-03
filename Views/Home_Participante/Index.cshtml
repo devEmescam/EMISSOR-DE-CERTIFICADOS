@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using System.Text.Json
+
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -7,18 +9,16 @@
     <link rel="stylesheet" href="~/css/Home_Participante.css" asp-append-version="true" />
 </head>
 <body>
-
     <header>
         <img id="logo" src="/logoemescam.png" alt="Logo Emescam">
         <nav>
             <a href="#" onclick="mostrarCard('meus-eventos')">Meus Eventos</a>
         </nav>
 
-
         <div id="dropdown-container">
             <div id="bem-vindo">Bem-Vindo, @ViewBag.Login!</div>
             <div id="dropdown-content">
-                <a id="sair-link" href="#">Sair</a>
+                <a id="sair-link" href="#" onclick="logout()">Sair</a>
             </div>
         </div>
     </header>
@@ -46,36 +46,67 @@
     </div>
 
     <script>
-        const eventos = [
-            { nome: 'Evento 1', data: '2024-08-01', certificadoUrl: '#certificado1' },
-            { nome: 'Evento 2', data: '2024-09-10', certificadoUrl: '#certificado2' },
-            { nome: 'Evento 3', data: '2024-10-20', certificadoUrl: '#certificado3' },
-            // Adicione mais eventos conforme necessário
-        ];
+        document.addEventListener('DOMContentLoaded', function () {
+            // Recebe eventos do backend
+            const eventos = @Html.Raw(JsonSerializer.Serialize(Model)); // Serializa o modelo para JSON
 
-        function atualizarTabela(eventosFiltrados) {
-            const tabelaCorpo = document.querySelector('#tabela-eventos tbody');
-            tabelaCorpo.innerHTML = '';
+            function preencherTabela(eventos) {
+                const tbody = document.querySelector('#tabela-eventos tbody');
+                tbody.innerHTML = ''; // Limpa a tabela existente
 
-            eventosFiltrados.forEach(evento => {
-                const linha = document.createElement('tr');
-                linha.innerHTML = `
-                            <td>${evento.nome}</td>
-                            <td>${evento.data}</td>
-                            <td><a href="${evento.certificadoUrl}" target="_blank">Visualizar</a></td>
-                        `;
-                tabelaCorpo.appendChild(linha);
-            });
+                eventos.forEach(evento => {
+                    const tr = document.createElement('tr');
+
+                    const tdNome = document.createElement('td');
+                    tdNome.textContent = evento.Nome || 'N/A';
+                    tr.appendChild(tdNome);
+
+                    const tdData = document.createElement('td');
+                    tdData.textContent = evento.Data || 'N/A';
+                    tr.appendChild(tdData);
+
+                    const tdVisualizar = document.createElement('td');
+                    const botaoVisualizar = document.createElement('button');
+                    botaoVisualizar.textContent = 'Visualizar Certificado';
+                    botaoVisualizar.onclick = () => visualizarCertificado(evento.IdEventoPessoa); // Passa o ID do evento
+                    tdVisualizar.appendChild(botaoVisualizar);
+                    tr.appendChild(tdVisualizar);
+
+                    tbody.appendChild(tr);
+                });
+            }
+
+            function visualizarCertificado(idEventoPessoa) {
+                fetch(`/Home_Participante/ObterImagemCertificado?idEventoPessoa=${idEventoPessoa}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.sucesso) {
+                            const imagemBase64 = data.imagemBase64;
+                            const imagemURL = `data:image/png;base64,${imagemBase64}`;
+                            const imgWindow = window.open("", "_blank");
+                            imgWindow.document.write(`<img src="${imagemURL}" alt="Certificado" style="width:100%;height:auto;">`);
+                        } else {
+                            alert(data.mensagem || "Erro ao carregar o certificado.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Erro ao obter a imagem do certificado:", error);
+                        alert("Erro ao carregar o certificado.");
+                    });
+            }
+
+            preencherTabela(eventos);
+        });
+
+        function logout() {
+            fetch('/Home_Participante/Logout', { method: 'POST' })
+                .then(() => window.location.href = 'https://certificados.emescam.br/Participante/Login')
+                .catch(error => {
+                    console.error('Erro ao encerrar a sessão:', error);
+                    alert('Erro ao encerrar a sessão.');
+                });
         }
 
-        function filtrarEventos() {
-            const filtro = document.querySelector('#pesquisa-evento').value.toLowerCase();
-            const eventosFiltrados = eventos.filter(evento => evento.nome.toLowerCase().includes(filtro));
-            atualizarTabela(eventosFiltrados);
-        }
-
-        // Inicialmente, exibir todos os eventos
-        atualizarTabela(eventos);
     </script>
 </body>
 </html>

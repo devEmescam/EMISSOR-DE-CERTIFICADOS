@@ -9,6 +9,8 @@
         public string Porta { get; set; }
         public string SSL { get; set; }
         public IFormFile ImagemAssinatura { get; set; }
-        public byte[] ImagemAssinaturaEmail { get; set; }    
+        public byte[] ImagemAssinaturaEmail { get; set; }
+        public string NOME_ADMINISTRADOR { get; set; } // Adicione esta linha
+
     }
 }

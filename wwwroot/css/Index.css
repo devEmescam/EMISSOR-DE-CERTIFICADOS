@@ -1,6 +1,7 @@
 ﻿/* Estilos gerais */
 #logoEmescam img {
-    width: 400px;
+    width: 40vw; /* Usa uma porcentagem da largura da viewport para ajustar o tamanho da imagem */
+    max-width: 400px; /* Define um tamanho máximo para a imagem */
     position: fixed;
     top: 0;
     left: 50%;
@@ -26,13 +27,18 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
     display: flex;
+    flex-direction: row; /* Mantém a disposição horizontal por padrão */
     justify-content: space-around;
     align-items: center;
-    max-width: 800px; /* Largura máxima */
-    width: 90%; /* Ajuste para largura responsiva */
-    height: 400px; /* Altura fixa */
+    width: 80vw; /* Usa uma porcentagem da largura da viewport para ajustar o tamanho */
+    max-width: 600px; /* Define um tamanho máximo para a seção */
+    height: 40vh; /* Usa uma porcentagem da altura da viewport para ajustar a altura */
+    max-height: 300px; /* Define um tamanho máximo para a altura */
+    border-radius: 10px; /* Opcional: adiciona bordas arredondadas */
+    padding: 20px; /* Opcional: adiciona um padding interno */
 }
 
+/* Ajustes para itens individuais */
 .participantes,
 .organizador {
     background-color: transparent;
@@ -83,8 +89,9 @@ body {
 /* Media queries para ajustes responsivos */
 @media (max-width: 768px) {
     .acessos {
-        flex-direction: column;
+        flex-direction: column; /* Muda para coluna em telas menores */
         height: auto; /* Altura automática */
+        padding: 10px; /* Reduz o padding interno */
     }
 
     .participantes,
@@ -112,6 +119,8 @@ body {
     .participantes,
     .organizador {
         width: 100%; /* Largura total */
+        height: auto; /* Altura automática */
+        margin-bottom: 15px;
     }
 
     #imgParticipantes {
@@ -128,3 +137,21 @@ body {
         height: 30px; /* Ajuste para botões menores */
     }
 }
+
+
+/* Estilo para botões menores */
+.btn-pequeno {
+    font-size: 12px;
+    padding: 5px 10px;
+    margin: 0 5px;
+    background-color: black; /* Cor de fundo */
+    color: white; /* Cor do texto */
+    border: none; /* Remove a borda */
+    border-radius: 3px; /* Borda arredondada */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+    .btn-pequeno:hover {
+        background-color: #45a049; /* Cor de fundo ao passar o mouse */
+    }

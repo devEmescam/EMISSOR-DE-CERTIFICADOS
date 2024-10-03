@@ -125,7 +125,7 @@ body {
     align-items: flex-start;
     justify-content: space-between;
     width: 100%;
-    margin-left:-5.2%;
+    margin-left:0%;
 }
 
     .dados-form input, .dados-form textarea {
@@ -137,6 +137,19 @@ body {
         width: calc(70% - 10px);
     }
 
+
+
+#divDados {
+    display: flex;
+    flex-direction: column;
+    width: 30%; /* Ajuste a largura conforme necessário */
+    margin-right: 10px; /* Adiciona um espaço entre os inputs e o textarea */
+}
+
+    #divDados input {
+        width: 90%; /* Faz com que os inputs ocupem toda a largura do contêiner */
+        margin-bottom: 10px;
+    }
 #textareaTexto {
     width: 100%;
     height: 150px;
@@ -171,7 +184,7 @@ body {
         }
 
 .tabela-container {
-    max-height: 340px;
+    max-height: 325px;
     overflow-y: auto;
 }
 
@@ -181,7 +194,7 @@ body {
     }
 
 .tabela-container2 {
-    max-height: 320px;
+    max-height: 420px;
     overflow-y: auto;
     position: relative;
 }
@@ -932,7 +945,7 @@ nav {
 
 #btnLimparTabela {
     margin-left:10px;
-    margin-top:70px;
+    margin-top:0px;
     margin-bottom: 4px;
     height: 25px;
     width: 100px;
@@ -949,3 +962,193 @@ nav {
 }
 
 
+
+/*atualizar evento*/
+
+#dados-form2 {
+    display: flex;
+    width: 100%;
+}
+
+#divDadosAtualizar {
+    display: flex;
+    flex-direction: column;
+    width: 30%; /* Ajuste a largura conforme necessário */
+    margin-right: 10px; /* Adiciona um espaço entre os inputs e o textarea */
+}
+
+    #divDadosAtualizar input {
+        width: 100%; /* Faz com que os inputs ocupem toda a largura do contêiner */
+        margin-bottom: 10px;
+    }
+
+#inputTextoAtualizar {
+    width: 60%; /* Ajuste a largura conforme necessário */
+    height: 150px;
+    max-height: 96px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+#botaoAcaoAtualizar {
+    background-color: #007bff; /* Cor de fundo (azul) */
+    color: #fff; /* Cor do texto (branco) */
+    border: none; /* Remove a borda padrão */
+    border-radius: 2px; /* Cantos arredondados */
+    padding: 5px 10px; /* Ajusta o preenchimento interno do botão */
+    font-size: 14px; /* Tamanho da fonte */
+    cursor: pointer; /* Muda o cursor para um ponteiro ao passar sobre o botão */
+    transition: background-color 0.3s ease; /* Efeito de transição para mudança de cor */
+}
+
+    #botaoAcaoAtualizar:hover {
+        background-color: #0056b3; /* Cor de fundo ao passar o mouse (azul mais escuro) */
+    }
+
+#AtualizarEvento {
+    background-color: #4CAF50; /* Cor de fundo (verde) */
+    color: #fff; /* Cor do texto (branco) */
+    border: none; /* Remove a borda padrão */
+    border-radius: 2px; /* Cantos arredondados */
+    padding: 6px 12px; /* Ajusta o preenchimento interno do botão */
+    font-size: 14px; /* Tamanho da fonte */
+    cursor: pointer; /* Muda o cursor para um ponteiro ao passar sobre o botão */
+    transition: background-color 0.3s ease; /* Efeito de transição para mudança de cor */
+}
+
+    #AtualizarEvento:hover {
+        background-color: #0c5606; /* Cor de fundo ao passar o mouse (verde mais escuro) */
+    }
+
+
+
+    .custom-file-upload2:hover {
+        background-color: #0056b3; /* Cor de fundo ao passar o mouse */
+    }
+
+
+
+.upload-container2 {
+    position: relative;
+    width: 100%;
+}
+
+/* Estilos do input */
+#excelFileAtualizar {
+    background-color: #007bff; /* Cor de fundo */
+    color: #fff; /* Cor do texto */
+    border: none; /* Remove a borda padrão */
+    border-radius: 2px; /* Cantos arredondados */
+    padding: 2px 5px; /* Ajusta o preenchimento interno do botão */
+    font-size: 14px; /* Tamanho da fonte */
+    cursor: pointer; /* Muda o cursor para um ponteiro */
+    transition: background-color 0.3s ease; /* Transição na mudança de cor */
+}
+
+    /* Efeito hover no input */
+    #excelFileAtualizar:hover {
+        background-color: #0056b3; /* Cor de fundo ao passar o mouse */
+    }
+
+/* Estilos do botão personalizado */
+.custom-file-upload2 {
+    background-color: #007bff; /* Cor de fundo */
+    color: #fff; /* Cor do texto */
+    border: none; /* Remove a borda */
+    border-radius: 2px; /* Cantos arredondados */
+    padding: 3px 6px; /* Espaçamento interno */
+    font-size: 14px; /* Tamanho da fonte */
+    cursor: pointer; /* Cursor em forma de mão */
+    position: absolute; /* Posição absoluta dentro do contêiner */
+    left: 0; /* Alinha o botão à esquerda dentro do contêiner */
+    top: 0; /* Mantém a altura original */
+}
+
+    /* Efeito hover no botão personalizado */
+    .custom-file-upload2:hover {
+        background-color: #0056b3; /* Cor de fundo ao passar o mouse */
+    }
+
+
+
+
+
+#loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 9999; /* Certifique-se de que ele esteja acima de outros elementos */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Estilo para a animação de carregamento */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8); /* Fundo semi-transparente */
+    display: none; /* Inicialmente escondido */
+    align-items: center;
+    justify-content: center;
+    z-index: 9999; /* Garante que fique sobre outros elementos */
+    flex-direction: column;
+}
+
+.loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+    .loader img {
+        width: 150px; /* Tamanho da imagem */
+        height: 150px;
+        margin-bottom: 20px;
+    }
+
+.loader-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
+}
+
+.loader-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: black;
+    margin: 0 10px;
+    animation: loader-dot 1.5s infinite ease-in-out;
+}
+
+    .loader-dot:nth-child(2) {
+        animation-delay: 0.25s;
+    }
+
+    .loader-dot:nth-child(3) {
+        animation-delay: 0.5s;
+    }
+
+@keyframes loader-dot {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.5);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
