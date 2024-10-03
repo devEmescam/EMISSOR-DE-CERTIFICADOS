@@ -5,5 +5,6 @@
         public int Id {get; set;}
         public string Nome {get; set;}                 
         public IFormFile ImagemCertificado {get; set;}
+        public string UsuarioCriador { get; set; }
     }
 }

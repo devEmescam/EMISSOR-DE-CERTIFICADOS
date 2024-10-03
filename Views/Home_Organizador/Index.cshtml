@@ -108,8 +108,9 @@
                     <thead>
                         <tr>
                             <th style="width:5%; text-align: center;">Código</th>
-                            <th style="width:55%; text-align: center;">Nome do Evento</th>
-                            <th style="width:15%; text-align: center;">Imagem do Certificado</th>
+                            <th style="width:45%; text-align: center;">Nome do Evento</th>
+                            <th style="width:15%; text-align: center;">Usuário Criador</th>
+                            <th style="width:10%; text-align: center;">Imagem do Certificado</th>
                             <th style="width:25%; text-align: center;">Ações</th>
                         </tr>
                     </thead>
@@ -119,6 +120,7 @@
                             <tr>
                                 <td style="text-align: center;">@evento.Id</td>
                                 <td class="evento-nome" style="text-align: center;">@evento.Nome</td>
+                                <td style="text-align: center;">@evento.UsuarioCriador</td>
                                 <td style="text-align: center;">
                                     <img src="@Url.Action("VisualizarImagem", "Home_Organizador", new { Id = evento.Id })"
                                          alt="imagem do certificado"
@@ -2195,3 +2197,4 @@
     </script>
 </body>
 </html>
+
