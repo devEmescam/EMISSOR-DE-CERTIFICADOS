@@ -60,9 +60,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                     sSQL += "AND (DATA_EMISSAO IS NULL OR DATA_EMISSAO = '' OR DATA_EMISSAO = '1900-01-01')";                    
                 }
 
-
-
                 var oDT = await _dbHelper.ExecuteQueryAsync(sSQL);
+
                 var pessoasEventoList = new List<PessoaEvento>();
 
                 foreach (DataRow row in oDT.Rows)
