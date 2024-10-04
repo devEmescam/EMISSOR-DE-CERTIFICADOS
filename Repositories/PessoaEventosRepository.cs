@@ -61,11 +61,11 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
             try
             {
                 // Inicializar a string SQL básica
-                var sSQL = @"SELECT E.ID, E.NOME, EP.IMAGEM_CERTIFICADO 
-             FROM EVENTO E
-             JOIN EVENTO_PESSOA EP ON (E.ID = EP.ID_EVENTO)
-             WHERE EP.CERTIFICADO_EMITIDO = 1
-             AND EP.ID_PESSOA = @idPessoa";
+                var sSQL = @"SELECT EP.ID ID_EVENTO_PESSOA, E.ID ID_EVENTO, E.NOME, EP.IMAGEM_CERTIFICADO 
+                            FROM EVENTO E
+                            JOIN EVENTO_PESSOA EP ON (E.ID = EP.ID_EVENTO)
+                            WHERE EP.CERTIFICADO_EMITIDO = 1
+                            AND EP.ID_PESSOA = @idPessoa";
 
                 // Se for organizador, adicionar filtro na consulta
                 if (visaoOrganizador)
@@ -75,9 +75,9 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
 
                 // Definir os parâmetros
                 var parameters = new Dictionary<string, object>
-{
-    { "@idPessoa", idPessoa }
-};
+                {
+                    { "@idPessoa", idPessoa }
+                };
 
                 // Se for organizador, adicionar o parâmetro idUsuario
                 if (visaoOrganizador)
@@ -104,7 +104,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
 
                     eventos.Add(new EventoPessoa
                     {
-                        IdEventoPessoa = Convert.ToInt32(row["ID"]),
+                        IdEventoPessoa = Convert.ToInt32(row["ID_EVENTO_PESSOA"]),
+                        IdEvento = Convert.ToInt32(row["ID_EVENTO"]),
                         Nome = Convert.ToString(row["NOME"]),
                         ImagemCertificadoBase64 = imagemCertificadoBase64 // Armazena a string base64
                     });
@@ -134,6 +135,7 @@ public class Pessoa
 public class EventoPessoa
 {
     public int IdEventoPessoa { get; set; }
+    public int IdEvento { get; set; }
     public string Nome { get; set; }
     public string ImagemCertificadoBase64 { get; set; } // Adiciona a propriedade base64
 

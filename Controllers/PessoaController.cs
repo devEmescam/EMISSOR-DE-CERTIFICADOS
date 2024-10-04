@@ -57,6 +57,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Ocorreu um erro em [PessoaController.BuscarEventosPessoa] Erro: {ex.Message}");
             }           
         }
+        
         [HttpPost]
         public async Task<IActionResult> ReenviarInstrucoes(int idEventoPessoa) 
         {
