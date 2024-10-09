@@ -118,10 +118,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                 throw new Exception($"Erro em [PessoaEventosRepository.CarregarEventosPessoaAsync]: {ex.Message}");
             }
         }
-
-
-
-
     }
 }
 public class Pessoa

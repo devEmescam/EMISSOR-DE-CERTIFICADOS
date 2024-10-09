@@ -127,7 +127,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                     PessoaModel pessoa = new PessoaModel
                     {
                         Nome = registro.Nome.Trim(),
-                        CPF = registro.CPF.Trim(),
+                        CPF = registro.CPF.Replace(".", "").Replace("-", "").Replace("/", "").Replace("\\", "").Trim(),
                         Email = registro.Email.Trim()
                     };
 
@@ -157,7 +157,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                     PessoaModel pessoa = new PessoaModel
                     {
                         Nome = registro.Nome.Trim(),
-                        CPF = registro.CPF.Trim(),
+                        CPF = registro.CPF.Replace(".", "").Replace("-", "").Replace("/", "").Replace("\\", "").Trim(),
                         Email = registro.Email.Trim()
                     };
 
