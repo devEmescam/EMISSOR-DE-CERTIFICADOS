@@ -118,7 +118,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                     {
                         if (Util.ValidaEstruturaEmail(pessoa.Email))
                         {
-                            
+                            pessoa.CPF = pessoa.CPF.Replace(".", "").Replace("-", "").Replace("/", "").Replace("\\", "");
                             await _pessoaRepository.InserirPessoaAsync(pessoa, idUsuario);
                             pessoa.Id = await _pessoaRepository.ObterIdPessoaPorCPFAsync(pessoa.CPF);
                             return "Inserido com Sucesso.";
