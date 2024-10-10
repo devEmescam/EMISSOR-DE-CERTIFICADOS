@@ -8,5 +8,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Interfaces
         Task<bool> UsuarioExisteAsync(string usuario);
         Task<int> RetornarIdAsync(string usuario);
         Task<UsuarioSenha> ObterUsuarioESenhaAsync(int idEventoPessoa);
+
+        Task<int> CriarNovoUsuarioAsync(string login); // Novo método
     }
 }

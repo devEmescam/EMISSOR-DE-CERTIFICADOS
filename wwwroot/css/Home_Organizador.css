@@ -1152,3 +1152,78 @@ nav {
         transform: scale(1);
     }
 }
+
+
+
+
+
+
+
+
+
+/* Estilos para o formulário de cadastro */
+#novoUsuarioForm {
+    max-width: 100%; /* Faz com que o formulário ocupe toda a largura da página */
+    margin: 20px auto; /* Centraliza o formulário na página */
+    padding: 20px; /* Adiciona um preenchimento interno ao formulário */
+    background-color: white; /* Fundo branco para contraste */
+    display: flex; /* Usar flexbox para o layout do formulário */
+    flex-direction: column; /* Coloca os itens em coluna */
+    align-items: center; /* Centraliza os itens horizontalmente */
+}
+
+/* Estilo para alinhar os campos de Login, Senha e Repetir Senha em linha */
+.form-row {
+    display: flex; /* Garante que os itens dentro sejam exibidos em linha */
+    justify-content: space-between; /* Distribui o espaço entre os itens */
+    align-items: center; /* Alinha verticalmente os itens */
+    margin-bottom: 15px; /* Espaçamento entre a linha e o botão */
+    flex-wrap: wrap; /* Permite que os campos se movam para a linha seguinte em telas menores */
+    width: 100%; /* Faz a linha ocupar toda a largura do formulário */
+}
+
+/* Ajustes nos grupos de formulário */
+.form-group {
+    flex: 1; /* Permite que os campos ocupem espaço igual */
+    margin-right: 10px; /* Espaço à direita entre os campos */
+    min-width: 150px; /* Define uma largura mínima para os campos */
+}
+
+    .form-group:last-child {
+        margin-right: 0; /* Remove o espaço à direita do último campo */
+    }
+
+/* Estilo dos campos de entrada */
+.form-control {
+    width: 100%; /* Garante que os campos de entrada ocupem toda a largura disponível */
+    padding: 8px; /* Adiciona um pouco de preenchimento interno */
+    box-sizing: border-box; /* Garante que padding e border sejam incluídos na largura total */
+}
+
+/* Estilo do botão de cadastro */
+.btn-cadastrar {
+    margin-top: 20px; /* Espaço acima do botão */
+    padding: 5px 8px!important; /* Ajusta o tamanho do botão (altura e largura) */
+    width: auto; /* Faz o botão ter largura automática */
+    max-width: 150px; /* Limita a largura máxima do botão */
+    display: block; /* Permite que o botão seja tratado como um bloco para centralização */
+    margin: 20px auto; /* Centraliza o botão horizontalmente e adiciona espaço acima e abaixo */
+    font-size: 12px !important; /* Diminui o tamanho da fonte do texto */
+    text-transform:none!important;
+    border-radius:4px!important;
+}
+
+/* Media Queries para Responsividade */
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column; /* Muda para coluna em telas menores */
+    }
+
+    .form-group {
+        margin-right: 0; /* Remove o espaço à direita em telas menores */
+        margin-bottom: 15px; /* Adiciona espaço abaixo dos campos */
+    }
+}
+
+
+

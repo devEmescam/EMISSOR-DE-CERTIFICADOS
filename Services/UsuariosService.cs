@@ -145,5 +145,29 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 throw new Exception($"Erro em [UsuariosService.ObterUsuarioESenhaAsync]: {ex.Message}");
             }
         }
-    }    
+
+
+        public async Task<bool> CriarNovoUsuarioAsync(string login)
+        {
+            try
+            {
+                // Verificar se o usuário já existe
+                if (await _usuarioRepository.UsuarioExisteAsync(login))
+                {
+                    throw new Exception("Usuário já existe.");
+                }
+
+                // Chamar o repositório para salvar o usuário no banco de dados e verificar se foi criado com sucesso
+                int resultado = await _usuarioRepository.CriarNovoUsuarioAsync(login);
+
+                // Se o ID do novo usuário for maior que zero, retorna true, indicando que o usuário foi criado com sucesso
+                return resultado > 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [UsuariosService.CriarNovoUsuarioAsync]: {ex.Message}");
+            }
+        }
+
+    }
 }

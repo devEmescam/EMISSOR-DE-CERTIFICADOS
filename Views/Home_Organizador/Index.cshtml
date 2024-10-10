@@ -16,7 +16,7 @@
         <nav>
             <a href="#" onclick="mostrarCard('meus-eventos')">Meus Eventos</a>
             <a href="#" onclick="mostrarCard('buscar-pessoas')">Buscar Pessoas</a>
-            <a href="#" onclick="mostrarCard('configuracoes')">Configurações</a>
+            <a href="#" onclick="mostrarCard('configuracoes')">Configurações</a> 
         </nav>
 
 
@@ -83,7 +83,7 @@
                     <span id="fileName" style="margin-left: 10px;"></span>
                     <br>
                     <!-- Botão de importar Certificado -->
-                    <input type="file" id="arteCertificadoFile" name="arteCertificadoFile" accept=".jpeg, .jpg" style="display:none">
+                    <input type="file" id="arteCertificadoFile" name="arteCertificadoFile" accept=".jpeg, .jpg, .png" style="display:none">
                     <label for="arteCertificadoFile" class="custom-file-upload">
                         Selecionar Certificado
                     </label>
@@ -266,7 +266,7 @@
         <div id="configuracoes" class="card">
             <h4>Configurações</h4>
             <hr>
-            <h6>Remetente</h6>
+             <h6>Remetente</h6>
             <div class="configuracoes-info">
                 <div class="configuracao-item">
                     <label for="configuracoesEmail">Email</label>
@@ -300,6 +300,27 @@
                 <input type="file" id="assinaturaDigitalInput" accept="image/*">
                 <img id="assinaturaDigitalPreview" src="#" alt="Preview da Assinatura Digital">
             </div>
+
+            <hr>
+            <h6>Cadastrar novo usuário</h6>
+
+            <!-- Formulário de cadastro de usuário -->
+            <form id="novoUsuarioForm" onsubmit="return cadastrarNovoUsuario();">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="loginUsuario">Login:</label>
+                        <input type="text" id="loginUsuario" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmarLoginUsuario">Confirmar Login:</label>
+                        <input type="text" id="confirmarLoginUsuario" class="form-control" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-cadastrar btn btn-primary">Cadastrar Usuário</button>
+            </form>
+
+
+
         </div>
 
 
@@ -1042,7 +1063,7 @@
             $(button).next(".acoes-dropdown-content").toggle();
         }
 
-        // Função para exibir o nome do evento abaixo do nome da pessoa
+        // Função para buscar eventos da pessoa e armazenar o idEventoPessoa
         function exibirCertificado(button, pessoaId) {
             var item = $(button).closest('.result-item');
             var certificadoDiv = item.next(".certificado");
@@ -1052,66 +1073,38 @@
                 return;
             }
 
-            // Se o conteúdo ainda não foi carregado, faça a requisição para carregá-lo
             if (certificadoDiv.is(':empty')) {
                 $.ajax({
-                    url: `/Pessoa/BuscarEventosPessoa/${pessoaId}`, // URL da API para buscar eventos
+                    url: `/Pessoa/BuscarEventosPessoa/${pessoaId}`,
                     type: 'GET',
-                    dataType: 'json', // Espera-se que a resposta seja JSON
+                    dataType: 'json',
                     success: function (data) {
                         if (data && data.length > 0) {
-                            // Acessa o nome do primeiro evento no array
-                            var nomeEvento = data[0].nome; // A chave correta é 'nome'
-                            var idEventoPessoa = data[0].id; // Supondo que exista um ID do evento
+                            var nomeEvento = data[0].nome;
+                            var idEventoPessoa = data[0].idEventoPessoa;
+
+                            // Exibe no console para verificar
+                            console.log("idEventoPessoa:", idEventoPessoa);
 
                             // Cria o link clicável para o nome do evento
                             var nomeEventoLink = $("<a href='#' class='nome-evento'></a>")
-                                .text(nomeEvento)
-                                .on('click', function (e) {
-                                    e.preventDefault();
-                                    console.log("Nome do evento clicado:", nomeEvento);
-                                    // Insira sua ação futura aqui
-                                });
+                                .text(nomeEvento);
 
-                            // Botão para "Reenviar instruções"
+                            // Botão para reenviar instruções, armazena o idEventoPessoa como data
                             var reenviarBtn = $('<button class="btn-reenviar"></button>')
                                 .text('Reenviar instruções')
+                                .data('idEventoPessoa', idEventoPessoa)  // Armazenando o idEventoPessoa
                                 .on('click', function () {
-                                    // Chamada AJAX para ReenviarInstrucoesAsync
-                                    $.ajax({
-                                        url: `/Pessoa/ReenviarInstrucoes/${idEventoPessoa}`, // URL da action no servidor
-                                        type: 'POST',
-                                        success: function (response) {
-                                            if (response) {
-                                                alert("Instruções reenviadas com sucesso.");
-                                            } else {
-                                                alert("Falha ao reenviar as instruções.");
-                                            }
-                                        },
-                                        error: function (xhr, status, error) {
-                                            console.error("Erro ao reenviar instruções:", error);
-                                            alert("Erro ao tentar reenviar as instruções.");
-                                        }
-                                    });
+                                    var eventoId = $(this).data('idEventoPessoa');  // Recuperando o idEventoPessoa
+                                    console.log("ID do Evento Pessoa:", eventoId); // Log para verificar se o ID está correto
+                                    reenviarInstrucoes(eventoId);  // Chama a função para reenviar
                                 });
 
-                            // Botão para "Visualizar certificado"
-                            var visualizarBtn = $('<button class="btn-visualizar"></button>')
-                                .text('Visualizar certificado')
-                                .on('click', function () {
-                                    // Ação para visualizar o certificado
-                                    console.log("Visualizar certificado para:", pessoaId);
-                                    // Insira a lógica para visualizar o certificado aqui
-                                });
-
-                            // Atualiza o conteúdo da div certificado com o nome do evento e os botões
                             certificadoDiv
-                                .empty() // Limpa qualquer conteúdo anterior
-                                .append(nomeEventoLink) // Adiciona o nome do evento
-                                .append(" ") // Espaço entre o nome do evento e os botões
-                                .append(reenviarBtn) // Adiciona o botão de reenviar instruções
-                                .append(" ") // Espaço entre os botões
-                                .append(visualizarBtn) // Adiciona o botão de visualizar certificado
+                                .empty()
+                                .append(nomeEventoLink)
+                                .append(" ")
+                                .append(reenviarBtn)
                                 .slideDown("slow");
                         } else {
                             certificadoDiv.text("Nenhum evento encontrado").slideDown("slow");
@@ -1126,6 +1119,25 @@
                 certificadoDiv.slideDown("slow");
             }
         }
+
+        // Função para reenviar as instruções
+        function reenviarInstrucoes(idEventoPessoa) {
+            console.log("Enviando ID do evento:", idEventoPessoa); // Log para verificar o valor antes de enviar
+            $.ajax({
+                url: `/Pessoa/ReenviarInstrucoes`, // Certifique-se de que essa URL está correta
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(idEventoPessoa), // Enviando o idEventoPessoa como um número no corpo
+                success: function (response) {
+                    alert("Instruções reenviadas com sucesso.");
+                },
+                error: function (xhr, status, error) {
+                    console.error("Erro ao reenviar instruções:", error);
+                    alert("Erro ao tentar reenviar as instruções.");
+                }
+            });
+        }
+
 
 
 
@@ -2193,6 +2205,58 @@
 
         // Chame a função quando a página for carregada
         document.addEventListener('DOMContentLoaded', carregarEventos);
+
+
+
+
+
+
+
+        function cadastrarNovoUsuario() {
+            var login = document.getElementById('loginUsuario').value;
+            var confirmarLogin = document.getElementById('confirmarLoginUsuario').value;
+
+            // Verifica se o login e a confirmação são iguais
+            if (login !== confirmarLogin) {
+                alert('O login e a confirmação não coincidem. Tente novamente.');
+                return false;
+            }
+
+            // Prepara os dados para envio ao backend
+            var formData = new FormData();
+            formData.append('login', login);
+            formData.append('confirmacaoLogin', confirmarLogin); // Embora seja o mesmo valor, está aqui para clareza
+
+            // Faz a requisição AJAX para o backend
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/Home_Organizador/CadastrarUsuario');
+            xhr.setRequestHeader('RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]').value);
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    alert('Usuário cadastrado com sucesso!');
+                    document.getElementById('novoUsuarioForm').reset(); // Limpa o formulário
+                } else {
+                    alert('Erro ao cadastrar o usuário. Tente novamente.');
+                }
+            };
+            xhr.send(formData);
+
+            return false;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     </script>
 </body>
