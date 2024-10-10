@@ -57,20 +57,21 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Ocorreu um erro em [PessoaController.BuscarEventosPessoa] Erro: {ex.Message}");
             }           
         }
-        
+
         [HttpPost]
-        public async Task<IActionResult> ReenviarInstrucoes(int idEventoPessoa) 
+        public async Task<IActionResult> ReenviarInstrucoes([FromBody] int idEventoPessoa)
         {
             try
-            {                
+            {
                 bool retorno = await _pessoaService.ReenviarInstrucoesAsync(idEventoPessoa);
-                return View();
+                return Ok(); // Retorna um status de sucesso
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Ocorreu um erro em [PessoaController.ReenviarInstrucoes] Erro: {ex.Message}");
             }
         }
+
         [HttpGet]
         public async Task<IActionResult> ObterIdPessoaPorCPF(string cpf)
         {
