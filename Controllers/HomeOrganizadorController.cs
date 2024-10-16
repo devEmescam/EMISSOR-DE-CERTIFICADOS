@@ -113,15 +113,18 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 }
 
                 var tabelaDataList = JsonConvert.DeserializeObject<List<TabelaData>>(tableData);
-                // Adiciona novas pessoas no evento de id informado
                 await _organizadorService.AtualizarPessoasEventoAsync(id, tabelaDataList);
-                return RedirectToAction(nameof(Index));
+
+                // Certifique-se de que o retorno é um JSON válido
+                return Json(new { redirectUrl = Url.Action(nameof(Index)) });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.AdicionarPessoas]. Erro: {ex.Message}");
+                // Mesmo em caso de erro, retorne uma resposta JSON
+                return Json(new { success = false, message = ex.Message });
             }
         }
+
 
         public async Task<IActionResult> VisualizarImagem(int id)
         {

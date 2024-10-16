@@ -1771,16 +1771,13 @@
         }
 
 
-        // Evento de clique para o botão de atualização do evento
         document.getElementById('AtualizarEvento').addEventListener('click', async function (event) {
-            event.preventDefault(); // Prevenir o comportamento padrão do botão
+            event.preventDefault();
 
-            // Obter a tabela e os dados dela
             const tabela = document.querySelector('.tabela-container2 tbody');
             const linhas = tabela.querySelectorAll('tr');
             const dadosTabela = [];
 
-            // Extrair os dados das linhas da tabela
             linhas.forEach(linha => {
                 const colunas = linha.querySelectorAll('td');
                 const pessoa = {
@@ -1792,10 +1789,8 @@
                 dadosTabela.push(pessoa);
             });
 
-            // Obter o ID do evento
             const idEvento = document.getElementById('idEventoAtualizar').value;
 
-            // Validação simples
             if (!idEvento || idEvento <= 0) {
                 alert('ID do evento inválido.');
                 return;
@@ -1807,16 +1802,16 @@
             }
 
             try {
-                // Fazer a requisição para a action no controller correto
                 const response = await fetch('/Home_Organizador/AtualizarPessoasEvento', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json', // Solicita a resposta em JSON
                         'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
                     },
                     body: new URLSearchParams({
                         id: idEvento,
-                        tableData: JSON.stringify(dadosTabela) // Converter os dados da tabela para string JSON
+                        tableData: JSON.stringify(dadosTabela)
                     })
                 });
 
@@ -1825,16 +1820,18 @@
                 }
 
                 const result = await response.json();
-                if (result.success) {
-                    alert('Dados enviados com sucesso.');
+
+                if (result.redirectUrl) {
+                    window.location.href = result.redirectUrl;
                 } else {
-                    alert('Erro ao enviar os dados: ' + result.message);
+                    alert('Erro ao atualizar os dados.');
                 }
             } catch (error) {
                 console.error('Erro ao enviar os dados:', error);
                 alert('Erro ao enviar os dados: ' + error.message);
             }
         });
+
 
         var linhaEditavelAtualizar = null;
 
@@ -2141,52 +2138,45 @@
 
 
         document.getElementById('emitirCertificado').addEventListener('click', function () {
-            const eventoId = document.getElementById('eventoId').value;
-            const checkboxes = document.querySelectorAll('#certificados-tbody input[type="checkbox"]:checked');
-            const idPessoas = Array.from(checkboxes).map(checkbox => checkbox.dataset.id);
+    const eventoId = document.getElementById('eventoId').value;
+    const checkboxes = document.querySelectorAll('#certificados-tbody input[type="checkbox"]:checked');
+    const idPessoas = Array.from(checkboxes).map(checkbox => checkbox.dataset.id);
 
-            if (idPessoas.length === 0) {
-                alert('Por favor, selecione pelo menos uma pessoa.');
-                return;
-            }
+    if (idPessoas.length === 0) {
+        alert('Por favor, selecione pelo menos uma pessoa.');
+        return;
+    }
 
-            const formData = new FormData();
-            formData.append('id', eventoId);
-            idPessoas.forEach(id => formData.append('idPessoas', id));
+    const formData = new FormData();
+    formData.append('id', eventoId);
+    idPessoas.forEach(id => formData.append('idPessoas', id));
 
-            // Mostra o loading
-            document.getElementById('loading-overlay').style.display = 'flex';
+    // Exibir o loading
+    document.getElementById('loading').style.display = 'block';
 
-            fetch('/Home_Organizador/EmitirCertificado', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                }
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(error => { throw new Error(error.message || 'Erro desconhecido'); });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // Esconde o loading
-                    document.getElementById('loading-overlay').style.display = 'none';
+    // Realizar a requisição
+    fetch('/Home_Organizador/EmitirCertificado', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(result => {
+        // Ocultar o loading após a resposta do backend
+        document.getElementById('loading').style.display = 'none';
 
-                    if (data.success) {
-                        alert('Ação efetuada com sucesso!');
-                        location.reload(); // Recarrega a página
-                    } else {
-                        alert('Falha ao emitir certificados: ' + (data.message || 'Erro desconhecido'));
-                    }
-                })
-                .catch(error => {
-                    // Esconde o loading em caso de erro
-                    document.getElementById('loading-overlay').style.display = 'none';
-                    alert('Erro: ' + error.message);
-                });
-        });
+        if (result.success) {
+            alert('Certificados emitidos com sucesso!');
+        } else {
+            alert(result.message);
+        }
+    })
+    .catch(error => {
+        document.getElementById('loading').style.display = 'none';
+        alert('Ocorreu um erro ao emitir os certificados: ' + error);
+    });
+});
+
+
 
 
 
