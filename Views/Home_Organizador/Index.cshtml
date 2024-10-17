@@ -326,11 +326,10 @@
 
     </div>
 
-    <!-- loading... -->
-
-    <div id="loading-overlay" class="loading-overlay">
+    <!-- Loading... -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
         <div class="loader">
-            <img src="~/loading.png">
+            <img src="~/loading.png" alt="Loading...">
             <div class="loader-dots">
                 <div class="loader-dot"></div>
                 <div class="loader-dot"></div>
@@ -338,6 +337,7 @@
             </div>
         </div>
     </div>
+
 
 
     <script>
@@ -2138,43 +2138,41 @@
 
 
         document.getElementById('emitirCertificado').addEventListener('click', function () {
-    const eventoId = document.getElementById('eventoId').value;
-    const checkboxes = document.querySelectorAll('#certificados-tbody input[type="checkbox"]:checked');
-    const idPessoas = Array.from(checkboxes).map(checkbox => checkbox.dataset.id);
+            const eventoId = document.getElementById('eventoId').value;
+            const checkboxes = document.querySelectorAll('#certificados-tbody input[type="checkbox"]:checked');
+            const idPessoas = Array.from(checkboxes).map(checkbox => checkbox.dataset.id);
 
-    if (idPessoas.length === 0) {
-        alert('Por favor, selecione pelo menos uma pessoa.');
-        return;
-    }
+            if (idPessoas.length === 0) {
+                alert('Por favor, selecione pelo menos uma pessoa.');
+                return;
+            }
 
-    const formData = new FormData();
-    formData.append('id', eventoId);
-    idPessoas.forEach(id => formData.append('idPessoas', id));
+            // Exibir o loading overlay
+            const loadingOverlay = document.getElementById('loading-overlay');
+            loadingOverlay.style.display = 'flex'; // Use 'flex' para aplicar a centralização definida no CSS
 
-    // Exibir o loading
-    document.getElementById('loading').style.display = 'block';
+            const formData = new FormData();
+            formData.append('id', eventoId);
+            idPessoas.forEach(id => formData.append('idPessoas', id));
 
-    // Realizar a requisição
-    fetch('/Home_Organizador/EmitirCertificado', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(result => {
-        // Ocultar o loading após a resposta do backend
-        document.getElementById('loading').style.display = 'none';
+            fetch('/Home_Organizador/EmitirCertificado', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Ocultar o loading overlay quando o retorno for sucesso
+                        loadingOverlay.style.display = 'none';
+                        // Certificados emitidos com sucesso, realizar outras ações se necessário
+                    }
+                })
+                .catch(() => {
+                    // Não ocultar o loading em caso de erro
+                    console.error('Ocorreu um erro, mas o loading continuará exibido.');
+                });
+        });
 
-        if (result.success) {
-            alert('Certificados emitidos com sucesso!');
-        } else {
-            alert(result.message);
-        }
-    })
-    .catch(error => {
-        document.getElementById('loading').style.display = 'none';
-        alert('Ocorreu um erro ao emitir os certificados: ' + error);
-    });
-});
 
 
 
