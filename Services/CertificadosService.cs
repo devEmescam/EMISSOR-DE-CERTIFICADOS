@@ -57,7 +57,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                     await imagem.CopyToAsync(memoryStream);
                     using (Bitmap certificado = new Bitmap(memoryStream))
                     {
-                        using (Font fontTextCertLocaleData = new Font("Arial", 36, FontStyle.Regular, GraphicsUnit.Pixel)) // tamanho original: 30
+                        using (Font fontTextCertLocaleData = new Font("Arial", 48, FontStyle.Regular, GraphicsUnit.Pixel)) // tamanho original: 30
                         using (Font fonteTextoFixo = new Font("Arial", 48, FontStyle.Regular, GraphicsUnit.Pixel)) // tamanho original: 42
                         using (Graphics graphics = Graphics.FromImage(certificado))
                         {
@@ -74,67 +74,83 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                             StringFormat alinhamentoTexto = new StringFormat { Alignment = StringAlignment.Center };
 
                             //===================================================================================== INICIO
-                            //TEXTO CERTIFICADO
-                            float posicaoVertical = certificado.Height / 2.1f;
+                            // TEXTO CERTIFICADO
+                            float posicaoVertical = certificado.Height / 2.0f;
                             float altRetTextCertificado = 200;
 
-                            if (!string.IsNullOrEmpty(textoCertificado)) 
-                            {                                                                
+                            if (!string.IsNullOrEmpty(textoCertificado))
+                            {
                                 RectangleF retTextCertificado = new RectangleF(margemLateral, posicaoVertical, certificado.Width - 2 * margemLateral, altRetTextCertificado);
+
                                 // Ajustar tamanho da fonte do texto do certificado
-                                float tamanhoFonteTextoCertificado = 48; //tamanho original 42
+                                float tamanhoFonteTextoCertificado = 48; // tamanho original 42
                                 Font fonteTextoCertificado = new Font("Arial", tamanhoFonteTextoCertificado, FontStyle.Regular, GraphicsUnit.Pixel);
                                 SizeF tamanhoTextoCertificado = graphics.MeasureString(textoCertificado, fonteTextoCertificado, (int)retTextCertificado.Width);
-                                //Ajusta o texto dentro do retangulo diminuindo o tamanho da fonte se necessário
+
+                                // Ajusta o texto dentro do retângulo diminuindo o tamanho da fonte se necessário
                                 while ((tamanhoTextoCertificado.Width > retTextCertificado.Width || tamanhoTextoCertificado.Height > retTextCertificado.Height) && tamanhoFonteTextoCertificado > 10)
                                 {
                                     tamanhoFonteTextoCertificado -= 1;
                                     fonteTextoCertificado = new Font("Arial", tamanhoFonteTextoCertificado, FontStyle.Regular, GraphicsUnit.Pixel);
                                     tamanhoTextoCertificado = graphics.MeasureString(textoCertificado, fonteTextoCertificado, (int)retTextCertificado.Width);
                                 }
-                                // USADO APENAS PARA NECESSIDADE DE AJUSTES: Desenha o retângulo com borda
-                                //graphics.DrawRectangle(penBorda, retTextCertificado.X, retTextCertificado.Y, retTextCertificado.Width, retTextCertificado.Height);
+
                                 // Desenha o texto dentro do retângulo
                                 graphics.DrawString(textoCertificado, fonteTextoCertificado, pincelTextoCertificado, retTextCertificado, alinhamentoTexto);
                             }
                             //===================================================================================== FIM
 
                             //===================================================================================== INICIO
-                            //NOME PARTICIPANTE
+                            // ESPAÇAMENTO ENTRE O TEXTO DO CERTIFICADO E O NOME DO PARTICIPANTE
+                            float espacamentoEntreTextoENome = -5;  // Espaçamento reduzido para 0,2 unidades
+                            float posicaoVerticalNome = posicaoVertical - altRetTextCertificado - espacamentoEntreTextoENome; // Subir o nome ajustando a posição
+
+                            // NOME PARTICIPANTE
                             float altRetNomeParticipante = 85;
-                            RectangleF retNomeParticipante = new RectangleF(margemLateral, posicaoVertical - altRetNomeParticipante, certificado.Width - 2 * margemLateral, altRetNomeParticipante);
-                            if (!string.IsNullOrEmpty(nomeParticipante)) 
-                            {   
+                            RectangleF retNomeParticipante = new RectangleF(margemLateral, posicaoVerticalNome, certificado.Width - 2 * margemLateral, altRetNomeParticipante);
+
+                            if (!string.IsNullOrEmpty(nomeParticipante))
+                            {
                                 // Ajustar tamanho da fonte do nome do participante
-                                float tamanhoFonteNomeParticipante = 66; // tamanho original 60
+                                float tamanhoFonteNomeParticipante = 80; // tamanho original 60
                                 Font fonteNomeParticipante = new Font("Arial", tamanhoFonteNomeParticipante, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Pixel);
                                 SizeF tamanhoTextoNome = graphics.MeasureString(nomeParticipante, fonteNomeParticipante);
-                                //Ajusta o texto dentro do retangulo diminuindo o tamanho da fonte se necessário
+
+                                // Ajusta o texto dentro do retângulo diminuindo o tamanho da fonte se necessário
                                 while (tamanhoTextoNome.Width > retNomeParticipante.Width && tamanhoFonteNomeParticipante > 10)
                                 {
                                     tamanhoFonteNomeParticipante -= 1;
                                     fonteNomeParticipante = new Font("Arial", tamanhoFonteNomeParticipante, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Pixel);
                                     tamanhoTextoNome = graphics.MeasureString(nomeParticipante, fonteNomeParticipante);
                                 }
-                                // USADO APENAS PARA NECESSIDADE DE AJUSTES: Desenha o retângulo com borda
-                                //graphics.DrawRectangle(penBorda, retNomeParticipante.X, retNomeParticipante.Y, retNomeParticipante.Width, retNomeParticipante.Height);
+
                                 // Desenha o texto dentro do retângulo
                                 graphics.DrawString(nomeParticipante, fonteNomeParticipante, pincelTextoCertificado, retNomeParticipante, alinhamentoTexto);
-                            }                            
+                            }
                             //===================================================================================== FIM
+
+
 
                             //===================================================================================== INICIO
                             // TEXTO ANTES DO NOME
-                            if (!string.IsNullOrEmpty(textoAntesNomePessoa)) 
+                            if (!string.IsNullOrEmpty(textoAntesNomePessoa))
                             {
                                 float altRetTextFixo = graphics.MeasureString(textoAntesNomePessoa, fonteTextoFixo).Height;
                                 float posVertTextFixo = retNomeParticipante.Y;
+
+                                // Ajustando para mover o texto um pouco mais para cima
+                                float deslocamentoParaCima = 40; // Ajuste o valor conforme necessário
+                                posVertTextFixo -= deslocamentoParaCima;
+
                                 RectangleF retTextoFixo = new RectangleF(margemLateral, posVertTextFixo - altRetTextFixo, certificado.Width - 2 * margemLateral, altRetTextFixo);
+
                                 // USADO APENAS PARA NECESSIDADE DE AJUSTES: Desenha o retângulo com borda
-                                //graphics.DrawRectangle(penBorda, retTextoFixo.X, retTextoFixo.Y, retTextoFixo.Width, retTextoFixo.Height);
+                                // graphics.DrawRectangle(penBorda, retTextoFixo.X, retTextoFixo.Y, retTextoFixo.Width, retTextoFixo.Height);
+
                                 // Desenha o texto dentro do retângulo
                                 graphics.DrawString(textoAntesNomePessoa, fonteTextoFixo, pincelTextoCertificado, retTextoFixo, alinhamentoTexto);
                             }
+
                             //===================================================================================== FIM
 
                             //===================================================================================== INICIO
@@ -186,8 +202,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             {
                 throw new Exception($"Erro em [CertificadosService.GerarCertificadoAsync]: {ex.Message}");
             }
-        }        
-        private async Task<(string, string, string, string)> ProcessarTextoCertificadoAsync(int idPessoa, string texto)
+        }
+        private async Task<(string, string, string, string, string)> ProcessarTextoCertificadoAsync(int idPessoa, string texto)
         {
             string textoAntesPessoa = string.Empty;
             string textoLocalData = string.Empty;
@@ -199,24 +215,23 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             {
                 if (!string.IsNullOrEmpty(texto))
                 {
-                    //Se o texto não tiver as tags esperadas, o texto que chegou é atribuido a textoCertificado integralmente: cenario identificado com Karen (NAPED)
+                    // Se o texto não contiver as tags esperadas, atribuir o texto diretamente à variável textoCertificado
                     if (!texto.Contains("NOME_PESSOA") && !texto.Contains("CPF_PESSOA") && !texto.Contains("<br>"))
                     {
+                        // Ajuste para garantir que o texto original sem tags seja retornado corretamente
                         textoCertificado = texto;
                     }
-                    else 
+                    else
                     {
                         int posNomePessoa = -1;
                         int posBR = -1;
 
-                        if (texto.Contains("NOME_PESSOA")) 
+                        if (texto.Contains("NOME_PESSOA"))
                         {
                             nomePessoa = await _pessoaService.ObterNomePorIdPessoaAsync(idPessoa);
                             posNomePessoa = texto.IndexOf("NOME_PESSOA");
                         }
 
-                        nomePessoa = await _pessoaService.ObterNomePorIdPessoaAsync(idPessoa);
-                        posNomePessoa = texto.IndexOf("NOME_PESSOA");
                         posBR = texto.IndexOf("<br>", StringComparison.OrdinalIgnoreCase);
 
                         if (posNomePessoa != -1)
@@ -229,11 +244,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                             textoLocalData = texto.Substring(posBR + "<br>".Length);
                         }
 
-                        //Valida se foi encontrado um indice para "NOME_PESSOA" e "<br>"
-                        // e (&&) garante que a posição de "<br>" e posterior a "NOME_PESSOA"
                         if (posNomePessoa != -1 && posBR != -1 && posBR > posNomePessoa)
                         {
-                            //Atribui a variavel o que estiver entre "NOME_PESSOA" e "<br>" usando como referencia o indices das posições e comprimento das chaves "NOME_PESSOA" e "<br>"
                             textoCertificado = texto.Substring(posNomePessoa + "NOME_PESSOA".Length, posBR - (posNomePessoa + "NOME_PESSOA".Length));
 
                             if (textoCertificado.Contains("CPF_PESSOA"))
@@ -242,16 +254,48 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                                 textoCertificado = textoCertificado.Replace("CPF_PESSOA", cpf);
                             }
                         }
-                    }                    
+                    }
                 }
 
-                return (textoAntesPessoa, nomePessoa, textoCertificado, textoLocalData);
+                // Aplicar o estilo de negrito para as tags <negrito>
+                textoCertificado = textoCertificado.Replace("<negrito>", "<strong>")
+                                                   .Replace("</negrito>", "</strong>");
+
+                // Gerar o HTML do certificado
+                string htmlCertificado = $@"
+                     <html>
+                         <head>
+                             <style>
+                                 .certificado {{
+                                     font-family: Arial, sans-serif;
+                                     font-size: 20px;
+                                 }}
+                                 .certificado strong {{
+                                     font-weight: bold;
+                                     color: #333; /* Cor mais escura */
+                                 }}
+                             </style>
+                         </head>
+                         <body>
+                             <div class='certificado'>
+                                 {textoAntesPessoa}
+                                 <h2>{nomePessoa}</h2>
+                                 <p>{textoCertificado}</p>
+                                 <p>{textoLocalData}</p>
+                             </div>
+                         </body>
+                     </html>";
+
+                return (textoAntesPessoa, nomePessoa, textoCertificado, textoLocalData, htmlCertificado); // Retorna o HTML completo
             }
             catch (Exception ex)
             {
                 throw new Exception($"Erro em [CertificadoEditor.ProcessarTextoCertificadoAsync]", ex);
             }
-        }        
+        }
+
+
+
         private string RetornarTextoAutenticidade(string codigo)
         {
             string texto = string.Empty;

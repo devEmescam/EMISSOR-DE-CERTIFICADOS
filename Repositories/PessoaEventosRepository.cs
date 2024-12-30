@@ -60,46 +60,37 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
         {
             try
             {
-                // Inicializar a string SQL básica
                 var sSQL = @"SELECT EP.ID ID_EVENTO_PESSOA, E.ID ID_EVENTO, E.NOME, EP.IMAGEM_CERTIFICADO 
-                            FROM EVENTO E
-                            JOIN EVENTO_PESSOA EP ON (E.ID = EP.ID_EVENTO)
-                            WHERE EP.CERTIFICADO_EMITIDO = 1
-                            AND EP.ID_PESSOA = @idPessoa";
+                    FROM EVENTO E
+                    JOIN EVENTO_PESSOA EP ON (E.ID = EP.ID_EVENTO)
+                    WHERE EP.CERTIFICADO_EMITIDO = 1
+                    AND EP.ID_PESSOA = @idPessoa";
 
-                // Se for organizador, adicionar filtro na consulta
                 if (visaoOrganizador)
                 {
                     sSQL += " AND E.ID_USUARIO_ADMINISTRATIVO = @idUsuario";
                 }
 
-                // Definir os parâmetros
                 var parameters = new Dictionary<string, object>
-                {
-                    { "@idPessoa", idPessoa }
-                };
+        {
+            { "@idPessoa", idPessoa }
+        };
 
-                // Se for organizador, adicionar o parâmetro idUsuario
                 if (visaoOrganizador)
                 {
                     parameters.Add("@idUsuario", idUsuario);
                 }
 
-                // Executar a consulta
                 var oDT = await _dbHelper.ExecuteQueryAsync(sSQL, parameters);
                 if (oDT.Rows.Count == 0)
                 {
                     return null;
                 }
 
-                // Processar os resultados
                 var eventos = new List<EventoPessoa>();
                 foreach (DataRow row in oDT.Rows)
                 {
-                    // Recupera os bytes da imagem do certificado diretamente do banco de dados
                     byte[] imagemBytes = row["IMAGEM_CERTIFICADO"] as byte[];
-
-                    // Converte os bytes para uma string base64, se houver imagem
                     string imagemCertificadoBase64 = imagemBytes != null ? Convert.ToBase64String(imagemBytes) : null;
 
                     eventos.Add(new EventoPessoa
@@ -107,7 +98,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                         IdEventoPessoa = Convert.ToInt32(row["ID_EVENTO_PESSOA"]),
                         IdEvento = Convert.ToInt32(row["ID_EVENTO"]),
                         Nome = Convert.ToString(row["NOME"]),
-                        ImagemCertificadoBase64 = imagemCertificadoBase64 // Armazena a string base64
+                        ImagemCertificadoBase64 = imagemCertificadoBase64
                     });
                 }
 
@@ -118,6 +109,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                 throw new Exception($"Erro em [PessoaEventosRepository.CarregarEventosPessoaAsync]: {ex.Message}");
             }
         }
+
     }
 }
 public class Pessoa

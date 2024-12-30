@@ -120,21 +120,26 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
         {
             try
             {
-                var query = $"SELECT COUNT(*) FROM Pessoa WHERE CPF = @CPF and ID_USUARIO_ADMINISTRATIVO = @ID_USUARIO_ADMINISTRATIVO";
-                var parameters = new Dictionary<string, object>
-                {
-                    { "@CPF", cpf },
-                    { "@ID_USUARIO_ADMINISTRATIVO", userId}
-                };
+                // Ajuste na consulta para verificar o CPF relacionado ao ID do usuário administrativo
+                var query = "SELECT COUNT(*) FROM PESSOA WHERE CPF = @CPF AND ID_USUARIO_ADMINISTRATIVO = @ID_USUARIO_ADMINISTRATIVO";
 
+                // Utilização de parâmetros para evitar SQL Injection
+                var parameters = new Dictionary<string, object>
+        {
+            { "@CPF", cpf },
+            { "@ID_USUARIO_ADMINISTRATIVO", userId }
+        };
+
+                // Executa a consulta e retorna o resultado
                 var result = await _dbHelper.ExecuteScalarAsync<int>(query, parameters);
-                return result > 0;
+                return result > 0; // Retorna verdadeiro se já existir uma pessoa com esse CPF para o usuário
             }
             catch (Exception ex)
             {
                 throw new Exception($"Erro em [PessoaRepository.ExistePessoaComCPFAsync]: {ex.Message}");
             }
         }
+
         public async Task<int> ObterIdPessoaPorCPFAsync(string cpf)
         {
             try
