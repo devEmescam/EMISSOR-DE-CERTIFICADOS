@@ -134,5 +134,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
         public string Texto { get; set; }
         public string Cpf { get; set; }
         public string Email { get; set; }
+        // Novo campo para armazenar a URL da imagem do certificado
+        public string ImagemCertificadoUrl { get; set; }
     }
 }

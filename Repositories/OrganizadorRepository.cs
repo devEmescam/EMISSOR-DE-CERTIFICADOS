@@ -20,7 +20,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
 
                 // Verifica se o usuário é "autorizado"
                 if (username.Equals("ray.oliveira", StringComparison.OrdinalIgnoreCase) ||
-                username.Equals("lucas.guimaraes", StringComparison.OrdinalIgnoreCase))
+                username.Equals("lucas.guimaraes", StringComparison.OrdinalIgnoreCase) ||
+                username.Equals("Lucimar.Mazega", StringComparison.OrdinalIgnoreCase) )
                 {
                     // Se for, busca todos os eventos com nome do administrador
                     query = @"

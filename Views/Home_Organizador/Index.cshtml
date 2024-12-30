@@ -128,12 +128,19 @@
                                          onclick="window.open('@Url.Action("VisualizarImagem", "Home_Organizador", new { Id = evento.Id })')">
                                 </td>
                                 <td style="text-align: center;">
-                                    @if (ViewBag.Login == "lucas.guimaraes" || ViewBag.Login == "ray.oliveira")
-                                    {
-                                        <button class="btn btn-emitir" onclick="abrirCardEmitirCertificado('@evento.Id')">Emitir Certificado</button>
-                                    }
+                                    <button class="btn btn-emitir" onclick="abrirCardEmitirCertificado('@evento.Id')">
+                                        @if (ViewBag.Login == "lucas.guimaraes" || ViewBag.Login == "ray.oliveira" || ViewBag.Login == "Lucimar.Mazega")
+                                        {
+                                            <text>Emitir Certificado</text>
+                                        }
+                                        else
+                                        {
+                                            <text>Participantes</text>
+                                        }
+                                    </button>
                                     <button class="btn btn-atualizar" onclick="atualizarEvento('@evento.Id', '@evento.Nome')">Atualizar</button>
                                 </td>
+
                             </tr>
                         }
                     </tbody>
@@ -176,7 +183,13 @@
                     </tbody>
                 </table>
             </div>
-            <button id="emitirCertificado">Emitir Certificado</button>
+
+
+
+            @if (ViewBag.Login == "lucas.guimaraes" || ViewBag.Login == "ray.oliveira" || ViewBag.Login == "Lucimar.Mazega")
+            {
+                <button id="emitirCertificado">Emitir Certificado</button>
+            }
         </div>
 
 
@@ -266,7 +279,22 @@
         <div id="configuracoes" class="card">
             <h4>Configurações</h4>
             <hr>
-             <h6>Remetente</h6>
+            <!-- Material de apoio -->
+            <form id="materialDeApoio">
+                <div>
+                    <div>
+                        <h6>Material de apoio</h6>
+                        <!-- Link de download corrigido -->
+                        <a href="/Downloads/PLANILHA_MODELO_CERTIFICADOS.xlsx" download="PLANILHA_MODELO_CERTIFICADOS.xlsx">
+                            Baixar Planilha
+                        </a>
+                    </div>
+                </div>
+            </form>
+
+@*             <hr>
+ *@
+            @*  <h6>Remetente</h6>
             <div class="configuracoes-info">
                 <div class="configuracao-item">
                     <label for="configuracoesEmail">Email</label>
@@ -293,13 +321,13 @@
                 <button id="editarRemetente">Editar Remetente</button>
                 <button id="salvarRemetente">Salvar Remetente</button>
             </div>
-
-            <hr>
+ *@
+           @*  <hr>
             <h6>Assinatura Digital</h6>
             <div class="assinatura-digital">
                 <input type="file" id="assinaturaDigitalInput" accept="image/*">
                 <img id="assinaturaDigitalPreview" src="#" alt="Preview da Assinatura Digital">
-            </div>
+            </div> *@
 
             <hr>
             <h6>Cadastrar novo usuário</h6>
@@ -318,19 +346,18 @@
                 </div>
                 <button type="submit" class="btn-cadastrar btn btn-primary">Cadastrar Usuário</button>
             </form>
-
-
+            <hr>
+           
 
         </div>
 
 
     </div>
 
-    <!-- loading... -->
-
-    <div id="loading-overlay" class="loading-overlay">
+    <!-- Loading... -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
         <div class="loader">
-            <img src="~/loading.png">
+            <img src="~/loading.png" alt="Loading...">
             <div class="loader-dots">
                 <div class="loader-dot"></div>
                 <div class="loader-dot"></div>
@@ -338,6 +365,7 @@
             </div>
         </div>
     </div>
+
 
 
     <script>
@@ -639,7 +667,6 @@
         }
 
 
-
         function importarExcel() {
             var input = document.getElementById('excelFile');
             if (!input.files || input.files.length === 0) {
@@ -655,14 +682,22 @@
                 var sheetName = workbook.SheetNames[0];
                 var worksheet = workbook.Sheets[sheetName];
 
+                // Colunas esperadas
                 var expectedColumns = ['NOME_PESSOA', 'CPF_PESSOA', 'EMAIL_PESSOA', 'TIPO_PESSOA', 'TEXTO'];
                 var headerRow = XLSX.utils.sheet_to_json(worksheet, { header: 1, range: 'A1:E1' })[0];
-                var isValidModel = expectedColumns.every(function (col, index) {
-                    return headerRow[index] === col;
+
+                // Mapear colunas esperadas para índices
+                var columnIndexMap = {};
+                expectedColumns.forEach((colName) => {
+                    var colIndex = headerRow.indexOf(colName);
+                    if (colIndex !== -1) {
+                        columnIndexMap[colName] = colIndex;
+                    }
                 });
 
-                if (!isValidModel) {
-                    alert('O modelo da planilha selecionada está incorreto.');
+                // Verificar se há pelo menos as colunas mínimas necessárias
+                if (Object.keys(columnIndexMap).length < 3) {
+                    alert('A planilha deve conter pelo menos as colunas NOME_PESSOA, CPF_PESSOA, EMAIL_PESSOA e TEXTO.');
                     return;
                 }
 
@@ -670,29 +705,54 @@
                 var rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, range: 1 });
 
                 rows.forEach(function (row) {
-                    if (row.every(cellContent => cellContent !== "")) {
-                        var newRow = table.insertRow(-1);
-                        var cellIndex = 0;
+                    // Ignorar linhas completamente vazias
+                    if (row.every(cellContent => cellContent === "")) return;
 
-                        for (const key in row) {
-                            if (row.hasOwnProperty(key)) {
-                                var cell = newRow.insertCell(cellIndex++);
-                                cell.textContent = row[key];
-                            }
+                    var newRow = table.insertRow(-1);
+                    var textoOriginal = row[columnIndexMap.TEXTO] || "";
+
+                    // Substituir as tags no texto
+                    var textoFinal = textoOriginal
+                       
+
+                    // Inserir as colunas na tabela mantendo a ordem
+                    expectedColumns.forEach((colName, index) => {
+                        if (columnIndexMap[colName] !== undefined) {
+                            var cell = newRow.insertCell(index);
+                            // Coloca o texto substituído ou o valor das outras colunas
+                            cell.textContent = colName === 'TEXTO' ? textoFinal : (row[columnIndexMap[colName]] || '');
                         }
+                    });
 
-                        var celulaAcoes = newRow.insertCell(cellIndex); // Adicionar célula para ações
-                        adicionarBotoesLinha(celulaAcoes, newRow); // Chamar a função para adicionar botões
-                    }
+                    var celulaAcoes = newRow.insertCell(expectedColumns.length); // Adicionar célula para ações
+                    adicionarBotoesLinha(celulaAcoes, newRow); // Chamar a função para adicionar botões
                 });
 
                 destacarCPFsInvalidos(); // Verifica CPFs inválidos após adicionar novas linhas
+                removerLinhasEmBranco(); // Remover linhas em branco após importar os dados do Excel
 
-                // Remover linhas em branco após importar os dados do Excel
-                removerLinhasEmBranco();
             };
             reader.readAsArrayBuffer(file);
         }
+
+        // Função para enviar os dados para a controladora (backend)
+        function enviarDadosParaBackend(rows) {
+            fetch('/suaControladora/acao', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(rows),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Dados enviados com sucesso:', data);
+                })
+                .catch(error => {
+                    console.error('Erro ao enviar dados:', error);
+                });
+        }
+
 
         function removerLinhasEmBranco() {
             var tabela = document.getElementById("tabela").getElementsByTagName("tbody")[0];
@@ -1239,7 +1299,7 @@
 
 
         function preencherTabelaCertificados(evento) {
-            console.log('Dados do evento recebidos:', evento);
+            console.log('Dados do evento recebidos:', evento); // Imprime o evento completo
 
             const tbody = document.getElementById('certificados-tbody');
             tbody.innerHTML = ''; // Limpar a tabela antes de preencher
@@ -1251,13 +1311,54 @@
                     // Código
                     const tdCodigo = document.createElement('td');
                     tdCodigo.style.textAlign = 'center';
-                    tdCodigo.textContent = pessoa.id; // Supondo que cada pessoa tenha um ID
+                    tdCodigo.textContent = pessoa.id; // ID da pessoa
                     tr.appendChild(tdCodigo);
 
                     // Nome
                     const tdNome = document.createElement('td');
                     tdNome.style.textAlign = 'center';
-                    tdNome.textContent = pessoa.nome;
+
+                    // Nome da pessoa
+                    const nomeSpan = document.createElement('span');
+                    nomeSpan.textContent = pessoa.nome;
+                    tdNome.appendChild(nomeSpan);
+
+                    // Adiciona o botão de certificado se o certificado já foi emitido
+                    if (pessoa.certificadoEmitido) {
+                        const certButton = document.createElement('button');
+                        certButton.innerHTML = '&#128179;'; // Ícone de certificado (📜)
+                        certButton.style.backgroundColor = 'transparent';
+                        certButton.style.border = 'none';
+                        certButton.style.cursor = 'pointer';
+                        certButton.style.marginLeft = '10px'; // Espaço entre nome e ícone
+
+                        // Passando o id do evento para a função de clique
+                        const eventoId = evento.id; // Pegando o ID do evento diretamente de evento.id
+                        console.log('ID do evento enviado:', eventoId); // Verifique se o eventoId está sendo extraído corretamente
+
+                        // Adiciona o evento de clique no botão
+                        certButton.addEventListener('click', async function () {
+                            console.log('ID do evento enviado:', eventoId);
+
+                            if (eventoId) {
+                                try {
+                                    const response = await fetch(`/Home_Organizador/ObterPessoasEvento/${eventoId}`);
+                                    const eventoDetalhes = await response.json();
+
+                                    // Processar os dados retornados...
+                                    console.log('Detalhes do evento recebidos:', eventoDetalhes);
+
+                                } catch (error) {
+                                    console.error('Erro ao buscar os detalhes do evento:', error);
+                                }
+                            } else {
+                                console.error('ID do evento não encontrado.');
+                            }
+                        });
+
+                        tdNome.appendChild(certButton); // Adiciona o botão à célula de nome
+                    }
+
                     tr.appendChild(tdNome);
 
                     // Certificado Emitido
@@ -1278,7 +1379,6 @@
                     const tdCheckbox = document.createElement('td');
                     tdCheckbox.style.textAlign = 'center';
 
-                    // Verifica se o certificado já foi emitido
                     if (!pessoa.certificadoEmitido) {
                         const checkbox = document.createElement('input');
                         checkbox.type = 'checkbox';
@@ -1293,6 +1393,11 @@
                 console.error('Dados do evento ou pessoas não estão definidos corretamente.');
             }
         }
+
+
+
+
+
 
 
 
@@ -1557,7 +1662,10 @@
             };
             tdAcoes.appendChild(botaoExcluir);
 
-            // Botão Atualizar
+
+
+            // Botão Atualizar ------------------------------------------------------>
+
             const botaoAtualizar = document.createElement("button");
             botaoAtualizar.textContent = "Atualizar";
             botaoAtualizar.className = 'btn table-btn';
@@ -1685,7 +1793,8 @@
         //     location.reload(); // Atualiza a página
         // });
 
-        //ATUALIZAR EVENTO ------------------------------------------------------------------------------------------
+
+        //ATUALIZAR EVENTO ------------------------------------------------------------------------------------------>
 
 
         function preencherTabela(eventoPessoas) {
@@ -2138,43 +2247,41 @@
 
 
         document.getElementById('emitirCertificado').addEventListener('click', function () {
-    const eventoId = document.getElementById('eventoId').value;
-    const checkboxes = document.querySelectorAll('#certificados-tbody input[type="checkbox"]:checked');
-    const idPessoas = Array.from(checkboxes).map(checkbox => checkbox.dataset.id);
+            const eventoId = document.getElementById('eventoId').value;
+            const checkboxes = document.querySelectorAll('#certificados-tbody input[type="checkbox"]:checked');
+            const idPessoas = Array.from(checkboxes).map(checkbox => checkbox.dataset.id);
 
-    if (idPessoas.length === 0) {
-        alert('Por favor, selecione pelo menos uma pessoa.');
-        return;
-    }
+            if (idPessoas.length === 0) {
+                alert('Por favor, selecione pelo menos uma pessoa.');
+                return;
+            }
 
-    const formData = new FormData();
-    formData.append('id', eventoId);
-    idPessoas.forEach(id => formData.append('idPessoas', id));
+            // Exibir o loading overlay
+            const loadingOverlay = document.getElementById('loading-overlay');
+            loadingOverlay.style.display = 'flex'; // Use 'flex' para aplicar a centralização definida no CSS
 
-    // Exibir o loading
-    document.getElementById('loading').style.display = 'block';
+            const formData = new FormData();
+            formData.append('id', eventoId);
+            idPessoas.forEach(id => formData.append('idPessoas', id));
 
-    // Realizar a requisição
-    fetch('/Home_Organizador/EmitirCertificado', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(result => {
-        // Ocultar o loading após a resposta do backend
-        document.getElementById('loading').style.display = 'none';
+            fetch('/Home_Organizador/EmitirCertificado', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Ocultar o loading overlay quando o retorno for sucesso
+                        loadingOverlay.style.display = 'none';
+                        // Certificados emitidos com sucesso, realizar outras ações se necessário
+                    }
+                })
+                .catch(() => {
+                    // Não ocultar o loading em caso de erro
+                    console.error('Ocorreu um erro, mas o loading continuará exibido.');
+                });
+        });
 
-        if (result.success) {
-            alert('Certificados emitidos com sucesso!');
-        } else {
-            alert(result.message);
-        }
-    })
-    .catch(error => {
-        document.getElementById('loading').style.display = 'none';
-        alert('Ocorreu um erro ao emitir os certificados: ' + error);
-    });
-});
 
 
 
@@ -2233,6 +2340,8 @@
 
             return false;
         }
+
+
 
 
 
