@@ -13,5 +13,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Models
         public string Senha { get; set; }
 
         public bool Administrativo { get; set; }
+
+        public string? Setor { get; set; }
     }
 }

@@ -23,14 +23,12 @@
         <div id="dropdown-container">
             <div id="bem-vindo">Bem-Vindo, @ViewBag.Login!</div>
             <div id="dropdown-content">
-                <a id="sair-link" href="#">Sair</a>
+                <a id="logout" href="#">Sair</a>
             </div>
         </div>
     </header>
 
-
     <div class="cartao-menu">
-
 
         <!--CADASTRAR EVENTO-->
         <!-- Formulário para cadastro de evento -->
@@ -96,7 +94,6 @@
             </form>
         </div>
 
-
         <!-- MEUS EVENTOS -->
         <div id="card-meus-eventos" class="card">
             <h4>Meus Eventos</h4>
@@ -116,7 +113,10 @@
                     </thead>
                     <tbody>
                         @foreach (var evento in Model)
-                        {
+                        {    
+                            // Define o texto do botão com base na lógica do setor
+                            var textoBotao = (ViewBag.Setor == "TI" || ViewBag.Setor == "SECRETARIA") ? "Emitir Certificado" : "Participantes";
+                             
                             <tr>
                                 <td style="text-align: center;">@evento.Id</td>
                                 <td class="evento-nome" style="text-align: center;">@evento.Nome</td>
@@ -129,14 +129,7 @@
                                 </td>
                                 <td style="text-align: center;">
                                     <button class="btn btn-emitir" onclick="abrirCardEmitirCertificado('@evento.Id')">
-                                        @if (ViewBag.Login == "lucas.guimaraes" || ViewBag.Login == "ray.oliveira" || ViewBag.Login == "Lucimar.Mazega")
-                                        {
-                                            <text>Emitir Certificado</text>
-                                        }
-                                        else
-                                        {
-                                            <text>Participantes</text>
-                                        }
+                                        @textoBotao
                                     </button>
                                     <button class="btn btn-atualizar" onclick="atualizarEvento('@evento.Id', '@evento.Nome')">Atualizar</button>
                                 </td>
@@ -158,7 +151,16 @@
 
         <!-- EMITIR CERTIFICADO -->
         <div id="card-emitir-certificado" class="card" style="display: none;">
-            <h4>Emitir Certificado</h4>
+
+            @{
+                // Define o texto do botão com base na lógica do setor
+                var textoH4 = (ViewBag.Setor == "TI" || ViewBag.Setor == "SECRETARIA")
+                ? "Emitir Certificado"
+                : "Participantes";
+            }
+
+            <h4>@textoH4</h4>
+
             <div class="certificado-info">
                 <div class="certificado-detalhes">
                     <input type="text" id="nomeDoEvento" name="nomeDoEvento" readonly>
@@ -172,9 +174,11 @@
                     <thead>
                         <tr>
                             <th style="width:5%; text-align: center;">Código</th>
-                            <th style="width:50%; text-align: center;">Nome</th>
+                            <th style="width:8%; text-align: center;">CPF</th>
+                            <th style="width:40%; text-align: center;">Nome</th>                            
+                            <th style="width:5%; text-align: center;">Certificado</th>
                             <th style="width:5%; text-align: center;">Certificado Emitido</th>
-                            <th style="width:5%; text-align: center;">Retorno Email</th>
+                            <th style="width:20%; text-align: center;">Retorno Email</th>
                             <th style="width:5%; text-align: center; cursor: pointer;" onclick="toggleSelectAll()">Selecionar</th>
                         </tr>
                     </thead>
@@ -184,15 +188,12 @@
                 </table>
             </div>
 
+            @if (ViewBag.Setor == "TI" || ViewBag.Setor == "SECRETARIA")
+            {                
 
-
-            @if (ViewBag.Login == "lucas.guimaraes" || ViewBag.Login == "ray.oliveira" || ViewBag.Login == "Lucimar.Mazega")
-            {
                 <button id="emitirCertificado">Emitir Certificado</button>
             }
         </div>
-
-
 
         <!-- ATUALIZAR EVENTO -->
         <div id="card-atualizar-evento" class="card" style="display: none;">
@@ -252,10 +253,9 @@
                 </div>
 
                 <input type="hidden" id="tableDataAtualizar" name="tableDataAtualizar">
-                <button type="button" id="AtualizarEvento">Atualizar Evento</button>
+                <button type="button" id="AtualizarEventoPessoa">Atualizar Evento</button>
             </form>
         </div>
-
 
         <!-- BUSCAR PESSOAS -->
         <div id="card-buscar-pessoas" class="card">
@@ -351,7 +351,6 @@
 
         </div>
 
-
     </div>
 
     <!-- Loading... -->
@@ -365,8 +364,6 @@
             </div>
         </div>
     </div>
-
-
 
     <script>
         window.onload = function () {
@@ -512,8 +509,6 @@
             nomeEventoInput.readOnly = true;
         }
 
-
-
         var modoAdicionar = true;
         var linhaEditavel;
 
@@ -586,8 +581,6 @@
             celulaAcoes.style.textAlign = "center"; // Centralizar os botões na célula
             destacarCPFsInvalidos(); // Verificar CPFs da nova linha
         }
-
-
 
         function atualizarDados() {
             if (modoAdicionar) {
@@ -665,7 +658,6 @@
             document.getElementById("tipoPessoa").value = "";
             document.getElementById("textareaTexto").value = "";
         }
-
 
         function importarExcel() {
             var input = document.getElementById('excelFile');
@@ -753,7 +745,6 @@
                 });
         }
 
-
         function removerLinhasEmBranco() {
             var tabela = document.getElementById("tabela").getElementsByTagName("tbody")[0];
             var linhas = tabela.getElementsByTagName("tr");
@@ -777,10 +768,6 @@
                 }
             }
         }
-
-
-
-
 
         function importarCertificado() {
             var input = document.getElementById('arteCertificadoFile');
@@ -949,7 +936,6 @@
             });
         }
 
-
         function confirmarAtualizacao() {
             if (!linhaEditavel) return;
 
@@ -978,6 +964,7 @@
             limparCampos();
             destacarCPFsInvalidos();
         }
+
         function destacarCPFsInvalidos() {
             var tabela = document.getElementById("tabela");
             var linhas = tabela.getElementsByTagName("tr");
@@ -996,8 +983,6 @@
             }
             return !temCPFInvalido; // Retorna falso se houver CPFs inválidos
         }
-
-
 
         function validarCPF(cpf) {
             cpf = cpf.replace(/[^\d]+/g, '');
@@ -1022,7 +1007,6 @@
             if ((resto === 10) || (resto === 11)) resto = 0;
             return resto === parseInt(cpf.substring(10, 11));
         }
-
 
         document.getElementById('arteCertificadoFile').addEventListener('change', function () {
             var fileInput = document.getElementById('arteCertificadoFile');
@@ -1066,7 +1050,6 @@
             }
         });
 
-
         //FUNCIONANDO PERFEITAMENTE!!!
         // Função para buscar pessoas e adicionar botões de ação
         function buscarPessoas() {
@@ -1081,7 +1064,8 @@
                         resultList.find(".result-item, .certificado").remove(); // Limpar resultados anteriores
 
                         if (data.length === 0) {
-                            resultList.append("<div class='result-item'>Nenhum resultado encontrado.</div>");
+                            // resultList.append("<div class='result-item'>Nenhum resultado encontrado.</div>");
+                            alert("Nenhum resultado encontrado.");
                             return;
                         }
 
@@ -1121,9 +1105,8 @@
         // Função para alternar a visibilidade do dropdown
         function toggleDropdown(button) {
             $(button).next(".acoes-dropdown-content").toggle();
-        }
+        }      
 
-        // Função para buscar eventos da pessoa e armazenar o idEventoPessoa
         function exibirCertificado(button, pessoaId) {
             var item = $(button).closest('.result-item');
             var certificadoDiv = item.next(".certificado");
@@ -1142,13 +1125,25 @@
                         if (data && data.length > 0) {
                             var nomeEvento = data[0].nome;
                             var idEventoPessoa = data[0].idEventoPessoa;
+                            var imagemCertificadoBase64 = data[0].imagemCertificadoBase64; // Base64 do certificado
 
                             // Exibe no console para verificar
                             console.log("idEventoPessoa:", idEventoPessoa);
 
                             // Cria o link clicável para o nome do evento
                             var nomeEventoLink = $("<a href='#' class='nome-evento'></a>")
-                                .text(nomeEvento);
+                                .text(nomeEvento)
+                                .on('click', function (e) {
+                                    e.preventDefault(); // Previne o comportamento padrão
+                                    if (imagemCertificadoBase64) {
+                                        // Abre a imagem em uma nova guia
+                                        var novaJanela = window.open();
+                                        novaJanela.document.write('<img src="' + imagemCertificadoBase64 + '" alt="Certificado" width="1200" height="848" />');
+                                        novaJanela.document.close();
+                                    } else {
+                                        alert("Certificado não disponível.");
+                                    }
+                                });
 
                             // Botão para reenviar instruções, armazena o idEventoPessoa como data
                             var reenviarBtn = $('<button class="btn-reenviar"></button>')
@@ -1197,9 +1192,6 @@
                 }
             });
         }
-
-
-
 
         function acao2() {
             alert("Ação 2 executada");
@@ -1251,9 +1243,6 @@
             return true; // Permitir a submissão do formulário
         }
 
-
-
-
         function abrirCardEmitirCertificado(eventoId) {
             // Configurar o formulário oculto com o evento ID
             document.getElementById('eventoId').value = eventoId;
@@ -1296,9 +1285,7 @@
                 });
         }
 
-
-
-        function preencherTabelaCertificados(evento) {
+        function preencherTabelaCertificados_ORIGINAL(evento) {
             console.log('Dados do evento recebidos:', evento); // Imprime o evento completo
 
             const tbody = document.getElementById('certificados-tbody');
@@ -1314,6 +1301,12 @@
                     tdCodigo.textContent = pessoa.id; // ID da pessoa
                     tr.appendChild(tdCodigo);
 
+                    // CPF
+                    const tdCPF = document.createElement('td');
+                    tdCPF.style.textAlign = 'center';
+                    tdCPF.textContent = pessoa.cpf; // CPF da pessoa
+                    tr.appendChild(tdCPF);
+
                     // Nome
                     const tdNome = document.createElement('td');
                     tdNome.style.textAlign = 'center';
@@ -1324,6 +1317,7 @@
                     tdNome.appendChild(nomeSpan);
 
                     // Adiciona o botão de certificado se o certificado já foi emitido
+                    // Analisar se o trecho dentro do IF se trata de um recurso solicitado que não foi finalizado
                     if (pessoa.certificadoEmitido) {
                         const certButton = document.createElement('button');
                         certButton.innerHTML = '&#128179;'; // Ícone de certificado (📜)
@@ -1394,63 +1388,93 @@
             }
         }
 
+        function preencherTabelaCertificados(evento) {
+            console.log('Dados do evento recebidos:', evento); // Imprime o evento completo
 
+            const tbody = document.getElementById('certificados-tbody');
+            tbody.innerHTML = ''; // Limpar a tabela antes de preencher
 
+            if (evento && evento.pessoasEventos) {
+                evento.pessoasEventos.forEach(pessoa => {
+                    const tr = document.createElement('tr');                  
 
+                    // Código
+                    const tdCodigo = document.createElement('td');
+                    tdCodigo.style.textAlign = 'center';
+                    tdCodigo.textContent = pessoa.idPessoa; // ID da pessoa
+                    tr.appendChild(tdCodigo);
 
+                    // CPF
+                    const tdCPF = document.createElement('td');
+                    tdCPF.style.textAlign = 'center';
+                    tdCPF.textContent = pessoa.cpf; // CPF da pessoa
+                    tr.appendChild(tdCPF);
 
+                    // Nome
+                    const tdNome = document.createElement('td');
+                    tdNome.style.textAlign = 'center';
+                    tdNome.textContent = pessoa.nome; // Nome da pessoa
+                    tr.appendChild(tdNome);
 
+                    // Certificado
+                    const tdCertificado = document.createElement('td');
+                    tdCertificado.style.textAlign = 'center';
 
+                    if (pessoa.certificadoEmitido) {
+                        const imgCertificado = document.createElement('img');
+                        imgCertificado.src = `/Home_Organizador/VisualizarCertificadoParticipante/${pessoa.idEventoPessoa}`; // Miniatura do certificado
+                        imgCertificado.alt = "Imagem do Certificado";
+                        imgCertificado.style.width = '60px';
+                        imgCertificado.style.height = 'auto';
+                        imgCertificado.style.cursor = 'pointer';
 
+                        // Abre a imagem em uma nova aba ao clicar
+                        imgCertificado.addEventListener('click', function () {
+                            window.open(`/Home_Organizador/VisualizarCertificadoParticipante/${pessoa.idEventoPessoa}`);
+                        });
 
+                        tdCertificado.appendChild(imgCertificado);
+                    } else {
+                        tdCertificado.textContent = "N/A"; // Exibe "N/A" se o certificado não foi emitido
+                    }
 
+                    tr.appendChild(tdCertificado);
 
-        //APONTA NO CONSOLE O RETORNO DO JSON DA CONTROLLER
+                    // Certificado Emitido
+                    const tdCertificadoEmitido = document.createElement('td');
+                    tdCertificadoEmitido.style.textAlign = 'center';
+                    if (pessoa.certificadoEmitido) {
+                           const checkMark = document.createElement('span');
+                           checkMark.innerHTML = '&#10004;'; // Marca de seleção (✔)
+                           checkMark.style.color = 'green'; // Define a cor verde
+                           tdCertificadoEmitido.appendChild(checkMark);
+                    }
+                    tr.appendChild(tdCertificadoEmitido);
 
-        // function preencherTabelaCertificados(evento) {
-        //     console.log('Dados do evento recebidos:', evento);
+                    // Retorno Email
+                    const tdEmail = document.createElement('td');
+                    tdEmail.style.textAlign = 'center';
+                    tdEmail.textContent = pessoa.mensagemRetornoEmail;
+                    tr.appendChild(tdEmail);
 
-        //     const tbody = document.getElementById('certificados-tbody');
-        //     tbody.innerHTML = ''; // Limpar a tabela antes de preencher
+                    // Checkbox "Selecionar"
+                    const tdCheckbox = document.createElement('td');
+                    tdCheckbox.style.textAlign = 'center';
 
-        //     if (evento && evento.pessoas) {
-        //         evento.pessoas.forEach(pessoa => {
-        //             const tr = document.createElement('tr');
+                    if (!pessoa.certificadoEmitido) {
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.dataset.id = pessoa.idPessoa; // Adiciona o ID da pessoa ao checkbox
+                        tdCheckbox.appendChild(checkbox);
+                    }
 
-        //             // Código
-        //             const tdCodigo = document.createElement('td');
-        //             tdCodigo.style.textAlign = 'center';
-        //             tdCodigo.textContent = pessoa.id; // Supondo que cada pessoa tenha um ID
-        //             tr.appendChild(tdCodigo);
-
-        //             // Nome
-        //             const tdNome = document.createElement('td');
-        //             tdNome.style.textAlign = 'center';
-        //             tdNome.textContent = pessoa.nome;
-        //             tr.appendChild(tdNome);
-
-        //             // Email
-        //             const tdEmail = document.createElement('td');
-        //             tdEmail.style.textAlign = 'center';
-        //             tdEmail.textContent = pessoa.email;
-        //             tr.appendChild(tdEmail);
-
-        //             // Checkbox "Todos"
-        //             const tdCheckbox = document.createElement('td');
-        //             tdCheckbox.style.textAlign = 'center';
-        //             const checkbox = document.createElement('input');
-        //             checkbox.type = 'checkbox';
-        //             tdCheckbox.appendChild(checkbox);
-        //             tr.appendChild(tdCheckbox);
-
-        //             tbody.appendChild(tr);
-        //         });
-        //     } else {
-        //         console.error('Dados do evento ou pessoas não estão definidos corretamente.');
-        //     }
-        // }
-
-
+                    tr.appendChild(tdCheckbox);
+                    tbody.appendChild(tr);
+                });
+            } else {
+                console.error('Dados do evento ou pessoas não estão definidos corretamente.');
+            }
+        }
 
         let allSelected = false;
 
@@ -1463,12 +1487,9 @@
             });
         }
 
-
-
         function permitirApenasNumeros(input) {
             input.value = input.value.replace(/\D/g, '');
         }
-
 
         document.getElementById('emitirCertificado').addEventListener('click', function () {
             const eventoId = document.getElementById('eventoId').value;
@@ -1509,13 +1530,6 @@
                     alert('Erro: ' + error.message);
                 });
         });
-
-
-
-
-
-
-
 
         document.addEventListener('DOMContentLoaded', function () {
             // Função para carregar dados salvos no local storage
@@ -1572,6 +1586,75 @@
 
                 document.getElementById('editarRemetente').style.display = 'inline-block';
                 document.getElementById('salvarRemetente').style.display = 'none';
+            }            
+
+            const botaoAtualizar = document.getElementById('AtualizarEventoPessoa');
+
+            if (botaoAtualizar) {
+                botaoAtualizar.addEventListener('click', async function (event) {
+                    event.preventDefault();
+                    console.log("Botão Atualizar Evento foi clicado");
+
+                    // Captura os dados da tabela
+                    const tabela = document.querySelector('.tabela-container2 tbody');
+                    const linhas = tabela.querySelectorAll('tr');
+                    const dadosTabela = [];
+
+                    linhas.forEach(linha => {
+                        const colunas = linha.querySelectorAll('td');
+                        const pessoa = {
+                            nome: colunas[0].textContent.trim(),
+                            cpf: colunas[1].textContent.trim(),
+                            email: colunas[2].textContent.trim(),
+                            texto: colunas[3].textContent.trim()
+                        };
+                        dadosTabela.push(pessoa);
+                    });
+
+                    const idEvento = document.getElementById('idEventoAtualizar').value;
+
+                    if (!idEvento || idEvento <= 0) {
+                        alert('ID do evento inválido.');
+                        return;
+                    }
+
+                    if (dadosTabela.length === 0) {
+                        alert('Nenhum dado na tabela para enviar.');
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch('/Home_Organizador/AtualizarPessoasEvento', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'Accept': 'application/json',
+                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                            },
+                            body: new URLSearchParams({
+                                id: idEvento,
+                                tableData: JSON.stringify(dadosTabela)
+                            })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+
+                        const result = await response.json();
+
+                        if (result.redirectUrl) {
+                            window.location.href = result.redirectUrl;
+                        } else {
+                            alert('Erro ao atualizar os dados.');
+                        }
+                    } catch (error) {
+                        console.error('Erro ao enviar os dados:', error);
+                        alert('Erro ao enviar os dados: ' + error.message);
+                    }
+                });
+            } else {
+                console.log("Botão não encontrado!");
             }
 
             // Event listeners
@@ -1581,11 +1664,6 @@
             // Chamar a função para carregar as configurações quando a página carregar
             carregarConfiguracoes();
         });
-
-
-
-
-
 
         document.getElementById('assinaturaDigitalInput').addEventListener('change', function (event) {
             var input = event.target;
@@ -1599,8 +1677,6 @@
                 reader.readAsDataURL(input.files[0]);
             }
         });
-
-
 
         //ADICIONAR PESSOAS------------------------------------------
 
@@ -1661,8 +1737,6 @@
                 }
             };
             tdAcoes.appendChild(botaoExcluir);
-
-
 
             // Botão Atualizar ------------------------------------------------------>
 
@@ -1731,13 +1805,21 @@
                 tdAcoes.appendChild(botaoConfirmar);
             };
 
-
             tdAcoes.appendChild(botaoAtualizar);
             row.appendChild(tdAcoes);
             tbody.appendChild(row);
 
             // Limpar os campos de edição
             limparCamposAtualizacao();
+
+            // Verificar e remover a linha "Nenhum participante encontrado."
+            const linhas = tbody.querySelectorAll('tr');
+            linhas.forEach(linha => {
+                const tdAcoes = linha.querySelector('td:last-child');
+                if (tdAcoes && tdAcoes.textContent.trim() === "Nenhum participante encontrado.") {
+                    linha.remove();
+                }
+            });
         }
 
         // Função para limpar os campos de atualização
@@ -1781,209 +1863,8 @@
             } catch (error) {
                 console.error('Erro ao obter detalhes do evento e pessoas:', error);
             }
-        }
-
-
-
-
-
-
-
-        // document.getElementById("emitirCertificado").addEventListener("click", function () {
-        //     location.reload(); // Atualiza a página
-        // });
-
-
-        //ATUALIZAR EVENTO ------------------------------------------------------------------------------------------>
-
-
-        function preencherTabela(eventoPessoas) {
-            const tbody = document.getElementById('eventos-tbody-atualizar');
-            // Comentado para evitar a exclusão das pessoas já presentes na tabela:
-            // tbody.innerHTML = '';
-
-            if (eventoPessoas && eventoPessoas.pessoasEventos && eventoPessoas.pessoasEventos.length > 0) {
-                eventoPessoas.pessoasEventos.forEach(pessoa => {
-                    const row = document.createElement('tr');
-
-                    // Nome
-                    const tdNome = document.createElement('td');
-                    tdNome.textContent = pessoa.nome;
-                    row.appendChild(tdNome);
-
-                    // CPF
-                    const tdCPF = document.createElement('td');
-                    tdCPF.textContent = pessoa.cpf;
-                    row.appendChild(tdCPF);
-
-                    // Email
-                    const tdEmail = document.createElement('td');
-                    tdEmail.textContent = pessoa.email;
-                    row.appendChild(tdEmail);
-
-                    // Texto
-                    const tdTexto = document.createElement('td');
-                    tdTexto.textContent = pessoa.texto;
-                    row.appendChild(tdTexto);
-
-                    // Ações
-                    const tdAcoes = document.createElement('td');
-
-                    if (pessoa.dataEmissao === null) {
-                        // Botão Excluir
-                        const botaoExcluir = document.createElement("button");
-                        botaoExcluir.textContent = "Excluir";
-                        botaoExcluir.className = 'btn table-btn';
-                        botaoExcluir.onclick = function (event) {
-                            event.preventDefault(); // Prevenir a ação padrão
-
-                            if (confirm("Tem certeza de que deseja excluir esta pessoa?")) {
-                                const linha = event.target.closest('tr');
-                                linha.remove();
-                            }
-                        };
-                        tdAcoes.appendChild(botaoExcluir);
-
-                        // Botão Atualizar
-                        const botaoAtualizar = document.createElement("button");
-                        botaoAtualizar.textContent = "Atualizar";
-                        botaoAtualizar.className = 'btn table-btn';
-                        botaoAtualizar.onclick = function (event) {
-                            event.preventDefault(); // Prevenir a ação padrão
-
-                            document.getElementById('inputNomeAtualizar').value = pessoa.nome;
-                            document.getElementById('inputCPFAtualizar').value = pessoa.cpf;
-                            document.getElementById('inputEmail1Atualizar').value = pessoa.email;
-                            document.getElementById('inputTextoAtualizar').value = pessoa.texto;
-
-                            linhaEditavelAtualizar = row;
-
-                            document.getElementById('botaoConfirmarAtualizacao2').setAttribute('data-pessoa-id', pessoa.id);
-                            document.getElementById('botaoConfirmarAtualizacao2').style.display = 'inline-block';
-                        };
-                        tdAcoes.appendChild(botaoAtualizar);
-                    } else {
-                        tdAcoes.textContent = 'Não pode ser editado ou excluído';
-                    }
-
-                    row.appendChild(tdAcoes);
-                    tbody.appendChild(row);
-                });
-            } else {
-                const row = document.createElement('tr');
-                const tdAcoes = document.createElement('td');
-                tdAcoes.colSpan = 5;
-                tdAcoes.textContent = 'Nenhum participante encontrado.';
-                row.appendChild(tdAcoes);
-                tbody.appendChild(row);
-            }
-        }
-
-
-        document.getElementById('AtualizarEvento').addEventListener('click', async function (event) {
-            event.preventDefault();
-
-            const tabela = document.querySelector('.tabela-container2 tbody');
-            const linhas = tabela.querySelectorAll('tr');
-            const dadosTabela = [];
-
-            linhas.forEach(linha => {
-                const colunas = linha.querySelectorAll('td');
-                const pessoa = {
-                    nome: colunas[0].textContent.trim(),
-                    cpf: colunas[1].textContent.trim(),
-                    email: colunas[2].textContent.trim(),
-                    texto: colunas[3].textContent.trim()
-                };
-                dadosTabela.push(pessoa);
-            });
-
-            const idEvento = document.getElementById('idEventoAtualizar').value;
-
-            if (!idEvento || idEvento <= 0) {
-                alert('ID do evento inválido.');
-                return;
-            }
-
-            if (dadosTabela.length === 0) {
-                alert('Nenhum dado na tabela para enviar.');
-                return;
-            }
-
-            try {
-                const response = await fetch('/Home_Organizador/AtualizarPessoasEvento', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'Accept': 'application/json', // Solicita a resposta em JSON
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                    },
-                    body: new URLSearchParams({
-                        id: idEvento,
-                        tableData: JSON.stringify(dadosTabela)
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
-                const result = await response.json();
-
-                if (result.redirectUrl) {
-                    window.location.href = result.redirectUrl;
-                } else {
-                    alert('Erro ao atualizar os dados.');
-                }
-            } catch (error) {
-                console.error('Erro ao enviar os dados:', error);
-                alert('Erro ao enviar os dados: ' + error.message);
-            }
-        });
-
-
-        var linhaEditavelAtualizar = null;
-
-        // Função para confirmar a atualização de uma linha
-        function confirmarAtualizacaoEvento() {
-            if (!linhaEditavelAtualizar) return;
-
-            const nome = document.getElementById("inputNomeAtualizar").value.trim();
-            const cpf = document.getElementById("inputCPFAtualizar").value.trim();
-            const email = document.getElementById("inputEmail1Atualizar").value.trim();
-            const texto = document.getElementById("inputTextoAtualizar").value.trim();
-
-            if (nome === "" || cpf === "" || email === "" || texto === "") {
-                alert("Por favor, preencha todos os campos.");
-                return;
-            }
-
-            // Atualizar a linha editada
-            linhaEditavelAtualizar.cells[0].textContent = nome;
-            linhaEditavelAtualizar.cells[1].textContent = cpf;
-            linhaEditavelAtualizar.cells[2].textContent = email;
-            linhaEditavelAtualizar.cells[3].textContent = texto;
-
-            limparCamposAtualizar();
-            document.getElementById('botaoConfirmarAtualizacao2').style.display = 'none';
-            linhaEditavelAtualizar = null;
-        }
-
-
-
-        // Função para limpar os campos de edição
-        function limparCamposAtualizar() {
-            document.getElementById("inputNomeAtualizar").value = "";
-            document.getElementById("inputCPFAtualizar").value = "";
-            document.getElementById("inputEmail1Atualizar").value = "";
-            document.getElementById("inputTextoAtualizar").value = "";
-        }
-
-
-        // Adicionar evento de clique para o botão de confirmação de atualização
-        document.getElementById('botaoConfirmarAtualizacao2').addEventListener('click', confirmarAtualizacaoEvento);
-
-
+        }       
+        
         // Função para preencher a tabela com um objeto JSON
         function preencherTabela(eventoPessoas) {
             const tbody = document.getElementById('eventos-tbody-atualizar');
@@ -2054,42 +1935,108 @@
                 row.appendChild(tdAcoes);
                 tbody.appendChild(row);
             }
-        }
+        }       
 
         var linhaEditavelAtualizar = null;
 
+        // Função para confirmar a atualização de uma linha
+        function confirmarAtualizacaoEvento() {
+            if (!linhaEditavelAtualizar) return;
 
-        document.getElementById('sair-link').addEventListener('click', function (e) {
-            e.preventDefault(); // Evita a ação padrão do link
+            const nome = document.getElementById("inputNomeAtualizar").value.trim();
+            const cpf = document.getElementById("inputCPFAtualizar").value.trim();
+            const email = document.getElementById("inputEmail1Atualizar").value.trim();
+            const texto = document.getElementById("inputTextoAtualizar").value.trim();
 
-            // Envia uma solicitação POST para a ação Logout
-            fetch('/Home_Participante/Logout', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'RequestVerificationToken': getRequestVerificationToken() // Se você estiver usando CSRF token
-                }
-            })
-                .then(response => {
-                    if (response.ok) {
-                        // Redireciona para a página de login após o logout
-                        window.location.href = '/Organizador/Login'; // Ajuste o caminho conforme necessário
-                    } else {
-                        console.error('Falha ao realizar logout');
-                    }
-                })
-                .catch(error => console.error('Erro ao fazer logout:', error));
+            if (nome === "" || cpf === "" || email === "" || texto === "") {
+                alert("Por favor, preencha todos os campos.");
+                return;
+            }
+
+            // Atualizar a linha editada
+            linhaEditavelAtualizar.cells[0].textContent = nome;
+            linhaEditavelAtualizar.cells[1].textContent = cpf;
+            linhaEditavelAtualizar.cells[2].textContent = email;
+            linhaEditavelAtualizar.cells[3].textContent = texto;
+
+            limparCamposAtualizar();
+            document.getElementById('botaoConfirmarAtualizacao2').style.display = 'none';
+            linhaEditavelAtualizar = null;
+        }
+
+        // Função para limpar os campos de edição
+        function limparCamposAtualizar() {
+            document.getElementById("inputNomeAtualizar").value = "";
+            document.getElementById("inputCPFAtualizar").value = "";
+            document.getElementById("inputEmail1Atualizar").value = "";
+            document.getElementById("inputTextoAtualizar").value = "";
+        }
+
+        // Adicionar evento de clique para o botão de confirmação de atualização
+        document.getElementById('botaoConfirmarAtualizacao2').addEventListener('click', confirmarAtualizacaoEvento);        
+
+        var linhaEditavelAtualizar = null;
+
+        // document.getElementById('logout').addEventListener('click', function (e) {
+            
+        //     //alert('logout');
+
+        //     e.preventDefault(); // Evita a ação padrão do link
+
+        //     // Envia uma solicitação POST para a ação Logout
+        //     fetch('/Home_Organizador/Logout', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //             'RequestVerificationToken': getRequestVerificationToken() // Se você estiver usando CSRF token
+        //         }
+        //     })
+        //         .then(response => {
+        //             if (response.ok) {
+        //                 // Redireciona para a página de login após o logout
+        //                 window.location.href = '/Organizador/Login'; // Ajuste o caminho conforme necessário
+        //             } else {
+        //                 console.error('Falha ao realizar logout');
+        //             }
+        //         })
+        //         .catch(error => console.error('Erro ao fazer logout:', error));
+        // });
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const logoutButton = document.getElementById('logout');
+
+            if (logoutButton) {
+                logoutButton.addEventListener('click', function (e) {
+                    e.preventDefault(); // Evita a ação padrão do link
+
+                    fetch('/Home_Organizador/Logout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'                            
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            // Redireciona para a página de login após o logout
+                            window.location.href = '/Organizador/Login';
+                        } else {
+                            console.error('Falha ao realizar logout');
+                        }
+                    })
+                    .catch(error => console.error('Erro ao fazer logout:', error));
+                });
+            } else {
+                console.error("Botão de logout não encontrado!");
+            }
         });
+
 
         // Função para obter o token CSRF se necessário
         function getRequestVerificationToken() {
             const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
             return tokenElement ? tokenElement.value : '';
         }
-
-
-
-
 
         function preencherTabelaComExcel(data) {
             const tbody = document.getElementById('eventos-tbody-atualizar');
@@ -2149,10 +2096,6 @@
             linhaEditavelAtualizar = row;
             document.getElementById('botaoConfirmarAtualizacao2').style.display = 'inline-block';
         }
-
-
-
-
 
         // Função para importar o arquivo Excel e preencher a tabela
         function importarExcelAtualizar() {
@@ -2214,8 +2157,6 @@
             }
         }
 
-
-
         function excluirLinha(btn) {
             if (confirm("Tem certeza de que deseja excluir esta pessoa?")) {
                 const row = btn.closest('tr');
@@ -2241,10 +2182,6 @@
             linhaEditavelAtualizar = row;
             document.getElementById('botaoConfirmarAtualizacao2').style.display = 'inline-block';
         }
-
-
-
-
 
         document.getElementById('emitirCertificado').addEventListener('click', function () {
             const eventoId = document.getElementById('eventoId').value;
@@ -2282,11 +2219,6 @@
                 });
         });
 
-
-
-
-
-
         async function carregarEventos() {
             try {
                 const response = await fetch('/Home_Organizador/Index');
@@ -2302,12 +2234,6 @@
 
         // Chame a função quando a página for carregada
         document.addEventListener('DOMContentLoaded', carregarEventos);
-
-
-
-
-
-
 
         function cadastrarNovoUsuario() {
             var login = document.getElementById('loginUsuario').value;
@@ -2340,22 +2266,6 @@
 
             return false;
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     </script>
 </body>

@@ -125,10 +125,10 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
 
                 // Utilização de parâmetros para evitar SQL Injection
                 var parameters = new Dictionary<string, object>
-        {
-            { "@CPF", cpf },
-            { "@ID_USUARIO_ADMINISTRATIVO", userId }
-        };
+                {
+                    { "@CPF", cpf },
+                    { "@ID_USUARIO_ADMINISTRATIVO", userId }
+                };
 
                 // Executa a consulta e retorna o resultado
                 var result = await _dbHelper.ExecuteScalarAsync<int>(query, parameters);

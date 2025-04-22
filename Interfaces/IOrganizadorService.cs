@@ -1,4 +1,5 @@
-﻿using EMISSOR_DE_CERTIFICADOS.Models;
+﻿using DocumentFormat.OpenXml.Math;
+using EMISSOR_DE_CERTIFICADOS.Models;
 using EMISSOR_DE_CERTIFICADOS.Repositories;
 
 namespace EMISSOR_DE_CERTIFICADOS.Interfaces
@@ -9,7 +10,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Interfaces
         Task<EventoModel> BuscarEventoPorIdAsync(int id);
         Task InserirEventoAsync(EventoModel evento, List<TabelaData>? dadosTabela);
         Task AtualizarPessoasEventoAsync(int id, List<TabelaData>? dadosTabela);
-        Task<byte[]> BuscarBytesDaImagemNoBDAsync(int id);
+        Task<byte[]> BuscarArteCertificadoEmBytesNoBDAsync(int id);
+        Task<byte[]> BuscarCertificadoParticipanteEmBytesNoBDAsync(int idEventoPessoa);
         Task<Evento> ObterEventoPessoas(int idEvento, bool emitirCertificado);
         Task EmitirCertificadoAsync(EventoModel evento, List<int> listaIdPessoas);
         Task<EmailConfigModel> ObterEmailConfigAsync();

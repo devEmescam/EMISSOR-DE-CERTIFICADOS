@@ -33,6 +33,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
 
                 // Passa o login para a view através do modelo
                 ViewBag.Login = HttpContext.Session.GetString("Login");
+                ViewBag.Setor = HttpContext.Session.GetString("Setor");
 
                 return View(eventos);
             }
@@ -125,12 +126,11 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             }
         }
 
-
         public async Task<IActionResult> VisualizarImagem(int id)
         {
             try
             {
-                byte[] imagemBytes = await _organizadorService.BuscarBytesDaImagemNoBDAsync(id);
+                byte[] imagemBytes = await _organizadorService.BuscarArteCertificadoEmBytesNoBDAsync(id);
 
                 // Retorna a imagem como um arquivo para o navegador
                 return File(imagemBytes, "image/jpeg");
@@ -141,6 +141,24 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Erro em [Home_OrganizadorController.VisualizarImagem]. Erro: {ex.Message}");
             }
         }
+
+        [HttpGet("/Home_Organizador/VisualizarCertificadoParticipante/{idEventoPessoa}")]
+        public async Task<IActionResult> VisualizarCertificadoParticipante(int idEventoPessoa)
+        {
+            try
+            {                
+                byte[] imagemBytes = await _organizadorService.BuscarCertificadoParticipanteEmBytesNoBDAsync(idEventoPessoa);
+
+                // Retorna a imagem como um arquivo para o navegador
+                return File(imagemBytes, "image/jpeg");
+            }
+            catch (Exception ex)
+            {
+                // Se ocorrer algum erro, retorna um status 500 (Internal Server Error)                
+                return StatusCode(500, $"Erro em [Home_OrganizadorController.VisualizarCertificadoParticipante]. Erro: {ex.Message}");
+            }
+        }
+
 
         // Chamado pela ação de tela referente a emissão dos certificados das pessoas do evento        
         public async Task<IActionResult> DetalhesEventoPessoas(int idEvento)

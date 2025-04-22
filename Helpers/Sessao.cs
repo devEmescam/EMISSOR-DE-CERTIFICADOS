@@ -1,4 +1,5 @@
-﻿using EMISSOR_DE_CERTIFICADOS.Models;
+﻿using EMISSOR_DE_CERTIFICADOS.Interfaces;
+using EMISSOR_DE_CERTIFICADOS.Models;
 using Newtonsoft.Json;
 
 namespace EMISSOR_DE_CERTIFICADOS.Helpers
@@ -6,9 +7,11 @@ namespace EMISSOR_DE_CERTIFICADOS.Helpers
     public class Sessao : ISessao
     {
         private readonly IHttpContextAccessor _httpContext;
+        //private readonly IUsuarioService _usuarioService;
         public Sessao(IHttpContextAccessor httpContext)
         {
             _httpContext = httpContext;
+            
         }
         public LoginModel BuscarSessaodoUsuario()
         {
@@ -26,7 +29,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Helpers
             }
 
         }
-        public void CriarSessaoDoUsuario(LoginModel login)
+        public async void CriarSessaoDoUsuario(LoginModel login)
         {
             try
             {
@@ -36,6 +39,8 @@ namespace EMISSOR_DE_CERTIFICADOS.Helpers
                 _httpContext.HttpContext.Session.SetInt32("UserId", login.Id);
                 _httpContext.HttpContext.Session.SetString("Login", login.Login.ToLower());
                 _httpContext.HttpContext.Session.SetString("Senha", login.Senha);
+                _httpContext.HttpContext.Session.SetString("Setor", login.Setor);
+                
                 if (login.Administrativo)
                 {
                     _httpContext.HttpContext.Session.SetString("Tipo", "organizador");
@@ -93,6 +98,17 @@ namespace EMISSOR_DE_CERTIFICADOS.Helpers
                 throw new Exception($"Ocorreu um erro em [Sessao.ObterUsuarioPassword]. Erro: {ex.Message}");
             }
 
+        }
+        public string ObterUsuarioSetor()
+        {
+            try
+            {
+                return _httpContext.HttpContext.Session.GetString("Setor") ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ocorreu um erro em Sessao.ObterUsuarioId. Erro: {ex.Message}");
+            }
         }
     }
 }

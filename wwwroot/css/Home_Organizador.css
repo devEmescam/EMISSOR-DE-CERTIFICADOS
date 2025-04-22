@@ -28,23 +28,21 @@ body {
     transform: translate(-50%, -50%);
 }
 
-    .cartao-menu a {
-        display: block;
-        text-decoration: none;
-        color: #000;
-        margin: 10px 0;
-        padding: 10px;
-        border: 1px solid transparent;
-        transition: color 0.3s, border-color 0.3s;
-        border-color: #14086D;
-    }
+.cartao-menu a {
+    display: block;
+    text-decoration: none;
+    color: #000;
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid transparent;
+    transition: color 0.3s, border-color 0.3s;
+    border-color: #14086D;
+}
 
-        .cartao-menu a:hover {
-            color: #ff0000;
-            border-color: #ff0000;
-        }
-
-
+.cartao-menu a:hover {
+    color: #ff0000;
+    border-color: #ff0000;
+}
 
 .nav-link {
     display: block;
@@ -58,14 +56,10 @@ body {
     font-size: calc(8px + 0.5vw);
 }
 
-    .nav-link:hover {
-        color: #ff0000;
-        border-color: #ff0000;
-    }
-
-
-
-
+.nav-link:hover {
+    color: #ff0000;
+    border-color: #ff0000;
+}
 
 .card {
     background-color: white; /* Transparência ajustada */
@@ -128,16 +122,14 @@ body {
     margin-left:0%;
 }
 
-    .dados-form input, .dados-form textarea {
-        margin-bottom: 10px;
+.dados-form input, .dados-form textarea {
+    margin-bottom: 10px;
         
-    }
+}
 
-    .dados-form input {
-        width: calc(70% - 10px);
-    }
-
-
+.dados-form input {
+    width: calc(70% - 10px);
+}
 
 #divDados {
     display: flex;
@@ -146,10 +138,11 @@ body {
     margin-right: 10px; /* Adiciona um espaço entre os inputs e o textarea */
 }
 
-    #divDados input {
-        width: 90%; /* Faz com que os inputs ocupem toda a largura do contêiner */
-        margin-bottom: 10px;
-    }
+#divDados input {
+    width: 90%; /* Faz com que os inputs ocupem toda a largura do contêiner */
+    margin-bottom: 10px;
+}
+
 #textareaTexto {
     width: 100%;
     height: 150px;
@@ -167,28 +160,28 @@ body {
     max-height: 300px;
 }
 
-    #tabela th {
-        background-color: #f2f2f2;
-    }
+#tabela th {
+    background-color: #f2f2f2;
+}
 
-    #tabela tbody tr {
-        border-bottom: 1px solid black;
-    }
+#tabela tbody tr {
+    border-bottom: 1px solid black;
+}
 
-        #tabela tbody tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
+#tabela tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
 
-        #tabela tbody tr:nth-child(odd) {
-            background-color: white;
-        }
+#tabela tbody tr:nth-child(odd) {
+    background-color: white;
+}
 
 .tabela-container {
     max-height: 325px;
     overflow-y: auto;
 }
 
-    .tabela-container table td {
+.tabela-container table td {
         vertical-align: middle; /* Centraliza verticalmente o conteúdo das células */
         text-align: center; /* Centraliza horizontalmente o conteúdo das células */
     }
@@ -199,30 +192,29 @@ body {
     position: relative;
 }
 
-    .tabela-container2 table {
+.tabela-container2 table {
         width: 100%;
         border-collapse: collapse;
     }
 
-        .tabela-container2 table thead {
+.tabela-container2 table thead {
             position: sticky;
             top: 0;
             background-color: #fff; /* Cor de fundo do cabeçalho */
             z-index: 1; /* Garante que o cabeçalho esteja acima das linhas da tabela */
         }
 
-        .tabela-container2 table th, .tabela-container2 table td {
+.tabela-container2 table th, .tabela-container2 table td {
             vertical-align: middle; /* Centraliza verticalmente o conteúdo das células */
             text-align: center; /* Centraliza horizontalmente o conteúdo das células */
             border: 1px solid #ddd; /* Adiciona bordas às células */
             padding: 8px; /* Adiciona um pouco de espaço dentro das células */
         }
 
-        .tabela-container2 table th {
+.tabela-container2 table th {
             background-color: #f2f2f2; /* Cor de fundo do cabeçalho */
             font-weight: bold; /* Negrito para o texto do cabeçalho */
         }
-
 
 button.btn {
     padding: 10px 20px;
@@ -253,7 +245,7 @@ button.btn {
     animation: pulse 2s infinite;
 }
 
-    .botao-adicionar::after {
+.botao-adicionar::after {
         content: "+";
         position: absolute;
         top: 50%;
@@ -261,11 +253,11 @@ button.btn {
         transform: translate(-50%, -50%);
     }
 
-    .botao-adicionar:hover {
+.botao-adicionar:hover {
         background-color: green;
     }
 
-        .botao-adicionar:hover::after {
+.botao-adicionar:hover::after {
             color: black;
         }
 
@@ -289,7 +281,7 @@ button.btn-emitir {
     font-size: 12px; /* Reduz a fonte se necessário */
 }
 
-    button.btn-emitir:hover {
+ button.btn-emitir:hover {
         background-color: #45a049;
     }
 
@@ -299,9 +291,9 @@ button.btn-atualizar {
     font-size: 12px; /* Reduz a fonte se necessário */
 }
 
-    button.btn-atualizar:hover {
-        background-color: #007B9E;
-    }
+button.btn-atualizar:hover {
+    background-color: #007B9E;
+}
 
 #CadastrarEvento {
     background-color: #4CAF50; /* Verde */
@@ -315,9 +307,9 @@ button.btn-atualizar {
     border-radius: 2px;
 }
 
-    #CadastrarEvento:hover {
-        background-color: #0c5606; 
-    }
+#CadastrarEvento:hover {
+    background-color: #0c5606; 
+}
 
 .upload-container {
     position: relative;
@@ -381,10 +373,10 @@ hr {
     width: 70px; /* Largura fixa para todos os botões */
 }
 
-    .btn.table-btn:hover {
-        background-color: black; /* Cor de fundo ao passar o mouse */
-        color: white; /* Cor do texto ao passar o mouse */
-    }
+.btn.table-btn:hover {
+    background-color: black; /* Cor de fundo ao passar o mouse */
+    color: white; /* Cor do texto ao passar o mouse */
+}
 
 #botaoAcao {
     background-color: #007bff; /* Cor de fundo do botão */
@@ -405,9 +397,9 @@ hr {
     border: 1px solid #ddd;
 }
 
-    #resultadosBusca div:hover {
-        background-color: #e9e9e9;
-    }
+#resultadosBusca div:hover {
+    background-color: #e9e9e9;
+}
 
 #detalhesPessoa p {
     font-size: 14px;
@@ -433,8 +425,6 @@ hr {
     margin-right: 0px; /* Remove a margem à direita */
 }
 
-
-
 /*Estilo do card*/
 #searchInput {
     width: 80%;
@@ -453,10 +443,10 @@ button {
     cursor: pointer;
 }
 
-    button:hover {
-        background-color: #0056b3;
+button:hover {
+    background-color: #0056b3;
 
-    }
+}
 
 #resultList {
     margin-top: 20px;
@@ -466,9 +456,6 @@ button {
     border: 1px solid #ccc; /* Opcional: Adiciona uma borda para visualização */
     padding: 10px; /* Opcional: Adiciona um padding interno */
 }
-
-
-
 
 /* Estilos para o cabeçalho */
 header {
@@ -497,13 +484,13 @@ nav {
     margin-right: auto; /* Empurra o menu de navegação para a esquerda */
 }
 
-    /* Links de navegação */
-    nav a {
-        margin: 0 10px;
-        text-decoration: none;
-        color: #333;
-        font-size: 16px;
-    }
+/* Links de navegação */
+nav a {
+    margin: 0 10px;
+    text-decoration: none;
+    color: #333;
+    font-size: 16px;
+}
 
 /* Container do dropdown */
 #dropdown-container {
@@ -535,24 +522,16 @@ nav {
     text-decoration: none;
 }
 
-    /* Estilo ao passar o mouse sobre os links do dropdown */
-    #dropdown-content a:hover {
-        background-color: #f0f0f0; /* Destaca o link ao passar o mouse */
-    }
+/* Estilo ao passar o mouse sobre os links do dropdown */
+#dropdown-content a:hover {
+    background-color: #f0f0f0; /* Destaca o link ao passar o mouse */
+}
 
 /* Estilo do "Bem-Vindo" */
 #bem-vindo {
     font-size: 18px;
     margin-left: auto; /* Empurra o "Bem-Vindo" para o lado direito */
 }
-
-
-
-
-
-
-
-
 
 .result-item {
     display: flex;
@@ -561,9 +540,9 @@ nav {
     border-bottom: 1px solid #ccc;
 }
 
-    .result-item:hover {
-        background-color: #f0f0f0;
-    }
+.result-item:hover {
+    background-color: #f0f0f0;
+}
 
 .detalhes-inline {
     font-size: 0.8em; /* Define a fonte menor */
@@ -602,22 +581,22 @@ nav {
     left: -60px; /* Ajusta a posição para a esquerda */
 }
 
-    .acoes-dropdown-content button {
-        color: black;
-        padding: 8px 12px; /* Diminui o padding */
-        font-size: 12px; /* Diminui o tamanho da fonte */
-        text-decoration: none;
-        display: block;
-        width: 100%;
-        text-align: left;
-        background-color: white;
-        border: none;
-        cursor: pointer;
-    }
+.acoes-dropdown-content button {
+    color: black;
+    padding: 8px 12px; /* Diminui o padding */
+    font-size: 12px; /* Diminui o tamanho da fonte */
+    text-decoration: none;
+    display: block;
+    width: 100%;
+    text-align: left;
+    background-color: white;
+    border: none;
+    cursor: pointer;
+}
 
-        .acoes-dropdown-content button:hover {
-            background-color: #f1f1f1;
-        }
+.acoes-dropdown-content button:hover {
+    background-color: #f1f1f1;
+}
 
 .acoes-btn {
     background-color: #28a745;
@@ -628,9 +607,9 @@ nav {
     padding: 5px 10px;
 }
 
-    .acoes-btn:hover {
-        background-color: #218838;
-    }
+.acoes-btn:hover {
+    background-color: #218838;
+}
 
 .certificado-link {
     color: green;
@@ -639,9 +618,9 @@ nav {
     display: inline; /* Garante que o link esteja na mesma linha */
 }
 
-    .certificado-link:hover {
-        text-decoration: underline;
-    }
+.certificado-link:hover {
+    text-decoration: underline;
+}
 
 .certificado {
     display: none;
@@ -650,13 +629,6 @@ nav {
     margin-top: 5px;
     border-bottom: 2px solid green; /* Adiciona uma linha rosa abaixo */
 }
-
-
-
-
-
-
-
 
 /* Estilo do card "Meus Eventos" */
 #card-meus-eventos {
@@ -668,47 +640,45 @@ nav {
     background-color: white;
 }
 
-    #card-meus-eventos h4 {
-        text-align: center;
-        margin-bottom: 20px;
-    }
+#card-meus-eventos h4 {
+    text-align: center;
+    margin-bottom: 20px;
+}
 
-    #card-meus-eventos .tabela-eventos {
-        margin-top: 20px;
-        text-align: left;
-    }
+#card-meus-eventos .tabela-eventos {
+    margin-top: 20px;
+    text-align: left;
+}
 
-    #card-meus-eventos table {
-        width: 100%;
-        border-collapse: collapse;
-        text-align: center;
-    }
+#card-meus-eventos table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+}
 
-    #card-meus-eventos th, #card-meus-eventos td {
-        padding: 10px;
-        border: 1px solid #ccc;
-        text-align: center;
-    }
+#card-meus-eventos th, #card-meus-eventos td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: center;
+}
 
-    #card-meus-eventos th {
-        background-color: #f0f0f0;
-        text-align: center;
-    }
+#card-meus-eventos th {
+    background-color: #f0f0f0;
+    text-align: center;
+}
 
-    #card-meus-eventos tr:hover {
-        background-color: #f0f0f0;
-    }
-
+#card-meus-eventos tr:hover {
+    background-color: #f0f0f0;
+}
   
-    #card-meus-eventos input#campo-pesquisa {
-        width: 80%;
-        padding: 10px;
-        margin-bottom: 10px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
-        text-align: center;
+#card-meus-eventos input#campo-pesquisa {
+    width: 80%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    text-align: center;
     }
-
 
 .tabela-eventos {
     max-height: 550px; /* Altura fixa para o contêiner */
@@ -716,26 +686,23 @@ nav {
     border-collapse: collapse;
 }
 
-    .tabela-eventos table {
-        width: 100%; /* Garantir que a tabela ocupe 100% do contêiner */
-        border-collapse: collapse;
-    }
+.tabela-eventos table {
+    width: 100%; /* Garantir que a tabela ocupe 100% do contêiner */
+    border-collapse: collapse;
+}
 
-    .tabela-eventos th, .tabela-eventos td {
-        text-align: center; /* Centralizar o texto */
-        padding: 8px;
-        border: 1px solid #ddd; /* Adiciona borda às células */
-    }
+.tabela-eventos th, .tabela-eventos td {
+    text-align: center; /* Centralizar o texto */
+    padding: 8px;
+    border: 1px solid #ddd; /* Adiciona borda às células */
+}
 
-    .tabela-eventos thead th {
-        position: sticky;
-        top: 0;
-        background: #f9f9f9; /* Cor de fundo para o cabeçalho */
-        z-index: 1; /* Garante que o cabeçalho fique acima das células */
-    }
-
-
-
+.tabela-eventos thead th {
+    position: sticky;
+    top: 0;
+    background: #f9f9f9; /* Cor de fundo para o cabeçalho */
+    z-index: 1; /* Garante que o cabeçalho fique acima das células */
+}
 
 /* Estilo do card "EMITIR CERTIFICADO" */
 
@@ -763,19 +730,19 @@ nav {
     flex-direction: column;
 }
 
-    .certificado-detalhes label {
-        display: block;
-        margin-bottom: 5px;
-    }
+.certificado-detalhes label {
+    display: block;
+    margin-bottom: 5px;
+}
 
-    .certificado-detalhes input {
-        width: 100%;
-        padding: 8px;
-        margin-bottom: 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        display: block;
-    }
+.certificado-detalhes input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    display: block;
+}
 
 .certificado-imagem img {
     max-width: 200px; /* Ajusta a largura máxima para 300px */
@@ -793,23 +760,23 @@ nav {
     margin-top:130px;
 }
 
-    .tabela-certificados table {
-        width: 100%;
-        border-collapse: collapse;
-    }
+.tabela-certificados table {
+    width: 100%;
+    border-collapse: collapse;
+}
 
-    .tabela-certificados th, .tabela-certificados td {
-        text-align: center;
-        padding: 8px;
-        border: 1px solid #ddd;
-    }
+.tabela-certificados th, .tabela-certificados td {
+    text-align: center;
+    padding: 8px;
+    border: 1px solid #ddd;
+}
 
-    .tabela-certificados thead th {
-        position: sticky;
-        top: 0;
-        background: #f4f4f4; /* Cor de fundo para o cabeçalho */
-        z-index: 1; /* Garante que o cabeçalho fique acima das células */
-    }
+.tabela-certificados thead th {
+    position: sticky;
+    top: 0;
+    background: #f4f4f4; /* Cor de fundo para o cabeçalho */
+    z-index: 1; /* Garante que o cabeçalho fique acima das células */
+}
 
 #nomeDoEvento {
     font-size: 20px; /* Ajuste o tamanho da fonte conforme necessário */
@@ -836,18 +803,13 @@ nav {
     text-decoration: none;
 }
 
-    .btn-emitir:hover {
-        background-color: #0056b3;
-    }
+.btn-emitir:hover {
+    background-color: #0056b3;
+}
 
 #card-emitir-certificado {
     display: none;
 }
-
-
-
-
-
 
 /* Estilo do card "CONFIGURAÇÕES" */
 #configuracoes {
@@ -859,10 +821,10 @@ nav {
     background-color: white;
 }
 
-    #configuracoes h4 {
-        text-align: center;
-        margin-bottom: 20px;
-    }
+#configuracoes h4 {
+    text-align: center;
+    margin-bottom: 20px;
+}
 
 .configuracoes-info {
     display: flex;
@@ -901,18 +863,18 @@ nav {
     margin-top: 10px;
 }
 
-    .button-container button {
-        padding: 5px 8px; /* Ajuste menor de padding */
-        background-color: #007bff;
-        color: white;
-        text-align: center;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 12px; /* Tamanho da fonte menor */
-        max-width: 130px; /* Largura máxima dos botões */
-        margin: 0 5px; /* Espaço entre os botões */
-    }
+.button-container button {
+    padding: 5px 8px; /* Ajuste menor de padding */
+    background-color: #007bff;
+    color: white;
+    text-align: center;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px; /* Tamanho da fonte menor */
+    max-width: 130px; /* Largura máxima dos botões */
+    margin: 0 5px; /* Espaço entre os botões */
+}
 
 #salvarRemetente {
     display: none;
@@ -926,10 +888,10 @@ nav {
     margin-top: 20px;
 }
 
-    .assinatura-digital input[type="file"] {
-        display: block;
-        margin-top: 10px;
-    }
+.assinatura-digital input[type="file"] {
+    display: block;
+    margin-top: 10px;
+}
 
 #assinaturaDigitalPreview {
     max-width: 300px; /* Aumenta a largura máxima da imagem */
@@ -977,10 +939,10 @@ nav {
     margin-right: 10px; /* Adiciona um espaço entre os inputs e o textarea */
 }
 
-    #divDadosAtualizar input {
-        width: 100%; /* Faz com que os inputs ocupem toda a largura do contêiner */
-        margin-bottom: 10px;
-    }
+#divDadosAtualizar input {
+    width: 100%; /* Faz com que os inputs ocupem toda a largura do contêiner */
+    margin-bottom: 10px;
+}
 
 #inputTextoAtualizar {
     width: 60%; /* Ajuste a largura conforme necessário */
@@ -1003,9 +965,9 @@ nav {
     transition: background-color 0.3s ease; /* Efeito de transição para mudança de cor */
 }
 
-    #botaoAcaoAtualizar:hover {
-        background-color: #0056b3; /* Cor de fundo ao passar o mouse (azul mais escuro) */
-    }
+#botaoAcaoAtualizar:hover {
+    background-color: #0056b3; /* Cor de fundo ao passar o mouse (azul mais escuro) */
+}
 
 #AtualizarEvento {
     background-color: #4CAF50; /* Cor de fundo (verde) */
@@ -1018,17 +980,13 @@ nav {
     transition: background-color 0.3s ease; /* Efeito de transição para mudança de cor */
 }
 
-    #AtualizarEvento:hover {
-        background-color: #0c5606; /* Cor de fundo ao passar o mouse (verde mais escuro) */
-    }
+#AtualizarEvento:hover {
+    background-color: #0c5606; /* Cor de fundo ao passar o mouse (verde mais escuro) */
+}
 
-
-
-    .custom-file-upload2:hover {
-        background-color: #0056b3; /* Cor de fundo ao passar o mouse */
-    }
-
-
+.custom-file-upload2:hover {
+    background-color: #0056b3; /* Cor de fundo ao passar o mouse */
+}
 
 .upload-container2 {
     position: relative;
@@ -1047,10 +1005,10 @@ nav {
     transition: background-color 0.3s ease; /* Transição na mudança de cor */
 }
 
-    /* Efeito hover no input */
-    #excelFileAtualizar:hover {
-        background-color: #0056b3; /* Cor de fundo ao passar o mouse */
-    }
+/* Efeito hover no input */
+#excelFileAtualizar:hover {
+    background-color: #0056b3; /* Cor de fundo ao passar o mouse */
+}
 
 /* Estilos do botão personalizado */
 .custom-file-upload2 {
@@ -1066,14 +1024,10 @@ nav {
     top: 0; /* Mantém a altura original */
 }
 
-    /* Efeito hover no botão personalizado */
-    .custom-file-upload2:hover {
-        background-color: #0056b3; /* Cor de fundo ao passar o mouse */
-    }
-
-
-
-
+/* Efeito hover no botão personalizado */
+.custom-file-upload2:hover {
+    background-color: #0056b3; /* Cor de fundo ao passar o mouse */
+}
 
 #loading {
     position: fixed;
@@ -1109,11 +1063,11 @@ nav {
     align-items: center;
 }
 
-    .loader img {
-        width: 150px; /* Tamanho da imagem */
-        height: 150px;
-        margin-bottom: 20px;
-    }
+.loader img {
+    width: 150px; /* Tamanho da imagem */
+    height: 150px;
+    margin-bottom: 20px;
+}
 
 .loader-dots {
     display: flex;
@@ -1131,13 +1085,13 @@ nav {
     animation: loader-dot 1.5s infinite ease-in-out;
 }
 
-    .loader-dot:nth-child(2) {
-        animation-delay: 0.25s;
-    }
+.loader-dot:nth-child(2) {
+    animation-delay: 0.25s;
+}
 
-    .loader-dot:nth-child(3) {
-        animation-delay: 0.5s;
-    }
+.loader-dot:nth-child(3) {
+    animation-delay: 0.5s;
+}
 
 @keyframes loader-dot {
     0% {
@@ -1152,14 +1106,6 @@ nav {
         transform: scale(1);
     }
 }
-
-
-
-
-
-
-
-
 
 /* Estilos para o formulário de cadastro */
 #novoUsuarioForm {
@@ -1189,9 +1135,9 @@ nav {
     min-width: 150px; /* Define uma largura mínima para os campos */
 }
 
-    .form-group:last-child {
-        margin-right: 0; /* Remove o espaço à direita do último campo */
-    }
+.form-group:last-child {
+    margin-right: 0; /* Remove o espaço à direita do último campo */
+}
 
 /* Estilo dos campos de entrada */
 .form-control {
@@ -1224,7 +1170,3 @@ nav {
         margin-bottom: 15px; /* Adiciona espaço abaixo dos campos */
     }
 }
-
-
-
-

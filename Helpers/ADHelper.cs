@@ -15,8 +15,10 @@ namespace EMISSOR_DE_CERTIFICADOS.Helpers
         public ADHelper()
         {
             this.strDominio = "LDAP://ccsv.br/DC=ccsv,DC=br";
-            this.strLoginAdmin = "Moodle";
-            this.strSenhaAdmin = "2emesead1";
+            //this.strLoginAdmin = "Moodle";
+            //this.strSenhaAdmin = "2emesead1";
+            this.strLoginAdmin = "serv.intdev";
+            this.strSenhaAdmin = "S3rv@1nt1d3v#01";
             this.strDomainName = "ccsv.br";
             this.ADContext = new DirectoryEntry();
 

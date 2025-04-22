@@ -1,301 +1,529 @@
-﻿using EMISSOR_DE_CERTIFICADOS.DBConnections;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Text;
-using RectangleF = System.Drawing.RectangleF;
-using Rectangle = System.Drawing.Rectangle;
-using EMISSOR_DE_CERTIFICADOS.Helpers;
+﻿
 using EMISSOR_DE_CERTIFICADOS.Interfaces;
+using iText.Kernel.Pdf;
+using iText.Layout;
+using iText.Layout.Element;
+using iText.IO.Image;
+using iText.Kernel.Geom;
+using iText.Kernel.Font;
+using iText.Kernel.Pdf.Canvas;
+using iText.Layout.Properties;
+using System.Text;
+using iText.Kernel.Font;
+using iText.IO.Font.Constants;
+using iText.Kernel.Colors;
+using System.Text.RegularExpressions;
 
 namespace EMISSOR_DE_CERTIFICADOS.Services
 {
     internal class CertificadosService : ICertificadosService
-    {
-        private readonly IDBHelpers _dbHelper;
-        private readonly ISessao _sessao;
-        private readonly IPessoaEventosRepository _pessoaEventosRepository;
+    {        
         private readonly IPessoaService _pessoaService;
         private readonly ICertificadosRepository _certiificadosRepository;
 
-        public CertificadosService(IDBHelpers dbHelper, ISessao sessao, IPessoaEventosRepository pessoaEventosRepository, IPessoaService pessoaService, ICertificadosRepository certificadosRepository)
-        {
-            _dbHelper = dbHelper ?? throw new ArgumentNullException(nameof(dbHelper), "O DBHelpers não pode ser nulo.");
-            _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");
-            _pessoaEventosRepository = pessoaEventosRepository ?? throw new ArgumentNullException(nameof(pessoaEventosRepository), "O PessoaEventosRepository não pode ser nulo.");
+        public CertificadosService(IPessoaService pessoaService, ICertificadosRepository certificadosRepository)
+        {            
             _pessoaService = pessoaService ?? throw new ArgumentNullException(nameof(pessoaService), "O IPessoaService não ser nulo.");
             _certiificadosRepository = certificadosRepository ?? throw new ArgumentNullException(nameof(certificadosRepository), "O ICertificadosRepository não ser nulo.");
-        }              
-        public async Task<bool> GerarCertificadoAsync(int idEvento_Pessoa, int idPessoa, string textoOriginal, IFormFile imagem)
+        }       
+        public async Task<bool> GerarCertificadoAsync_NEGRITO_TudoEmLinhaUnica(int idEvento_Pessoa, int idPessoa, string textoOriginal, IFormFile imagem)
         {
-            string textoCertificado = string.Empty;
             string textoAutenticidade = string.Empty;
             string codigoCertificado = string.Empty;
-            string cpfParticipante = string.Empty;
-            string nomeParticipante = string.Empty;
             string caminhoQRCode = string.Empty;
-            string textCertLocaleData = string.Empty;            
-            string textoAntesNomePessoa = string.Empty;
             bool retorno = false;
 
             try
-            {               
-                var resultado = await ProcessarTextoCertificadoAsync(idPessoa, textoOriginal);
-                textoAntesNomePessoa = resultado.Item1;
-                nomeParticipante = resultado.Item2;
-                textoCertificado = resultado.Item3;
-                textCertLocaleData = resultado.Item4;
-                //textoCertificado = "Esse ajuste deve alinhar a borda inferior de retTextoFixo com a borda superior de retanguloNomeParticipante, e alinhar a borda esquerda de retTextoFixo com a borda esquerda de retanguloTextoCertificado.Verifique se os tamanhos e posições dos retângulos atendem às suas necessidades. Caso precise ajustar, é possível alterar as variáveis relacionadas às dimensões e posições dos retângulos.";
-                //textCertLocaleData = "Vitória, 07 de maio de 2024";                
-                //nomeParticipante = "URSULA THAIS MENDES DA COSTA MORAES VARJÃO PARAGUASSÚ DE SÁ";
-                cpfParticipante = await RetornarCPFAsync(idPessoa);
-                codigoCertificado = GerarCodigo(cpfParticipante);
+            {
+                // Gerar código do certificado e texto de autenticidade
+                codigoCertificado = await GerarCodigo(idPessoa);
                 textoAutenticidade = RetornarTextoAutenticidade(codigoCertificado);
-                caminhoQRCode = Path.Combine("wwwroot", "QRCodeEmescam.png");
+                caminhoQRCode = System.IO.Path.Combine("wwwroot", "QRCodeEmescam.png");
 
-                using (var memoryStream = new MemoryStream())
+                // Criar stream separado para o PDF
+                using (var pdfStream = new MemoryStream())
                 {
-                    await imagem.CopyToAsync(memoryStream);
-                    using (Bitmap certificado = new Bitmap(memoryStream))
+                    // Inicializar o PDF em memória
+                    using (var imageStream = new MemoryStream())
                     {
-                        using (Font fontTextCertLocaleData = new Font("Arial", 48, FontStyle.Regular, GraphicsUnit.Pixel)) // tamanho original: 30
-                        using (Font fonteTextoFixo = new Font("Arial", 48, FontStyle.Regular, GraphicsUnit.Pixel)) // tamanho original: 42
-                        using (Graphics graphics = Graphics.FromImage(certificado))
+                        // Copiar a arte do certificado
+                        await imagem.CopyToAsync(imageStream);
+                        imageStream.Position = 0;
+
+                        // Criar o documento PDF
+                        using (var pdfWriter = new PdfWriter(pdfStream))
+                        using (var pdfDocument = new PdfDocument(pdfWriter))
                         {
-                            // GERAL: Definir algumas caracteristicas dos elementos
-                            //Cor do texto
-                            Color corTextoCertificado = Color.DarkSlateGray; 
-                            Brush pincelTextoCertificado = new SolidBrush(corTextoCertificado);
-                            //Bordas dos retangulos
-                            float larguraBorda = 2;
-                            Pen penBorda = new Pen(Color.Black, larguraBorda);
-                            //Margem lateral dos retangulos: usado para definir a largura dos retangulos
-                            float margemLateral = certificado.Width / 16;
-                            //Alinhamento do texto
-                            StringFormat alinhamentoTexto = new StringFormat { Alignment = StringAlignment.Center };
+                            // Definir tamanho da página como A4 e orientação Paisagem
+                            pdfDocument.SetDefaultPageSize(PageSize.A4.Rotate());                            
 
-                            //===================================================================================== INICIO
-                            // TEXTO CERTIFICADO
-                            float posicaoVertical = certificado.Height / 2.0f;
-                            float altRetTextCertificado = 200;
+                            // Criar um documento sem margens padrão
+                            var document = new Document(pdfDocument, PageSize.A4.Rotate(), false);
+                            document.SetMargins(0, 0, 0, 0); // Remove qualquer margem extra
 
-                            if (!string.IsNullOrEmpty(textoCertificado))
+                            // Criar imagem corretamente a partir do novo stream, ocupando toda a página
+                            var imageData = ImageDataFactory.Create(imageStream.ToArray());
+                            var image = new iText.Layout.Element.Image(imageData)
+                                .ScaleToFit(pdfDocument.GetDefaultPageSize().GetWidth(), pdfDocument.GetDefaultPageSize().GetHeight()) // Ajusta para ocupar todo o espaço
+                                .SetFixedPosition(0, 0); // Posiciona no canto inferior esquerdo (0,0)
+                            document.Add(image);                                                                                    
+
+                            // Processar e adicionar o texto principal
+                            var partesTexto = await ProcessarTextoEstilizadoAsync(textoOriginal, idPessoa);
+                            //Definir o tipo de fonte
+                            var font = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
+                            //Definir o tamanho da fonte
+                            var paragraph = new Paragraph().SetFontSize(14);
+                            // Alinhamento padrão do texto
+                            TextAlignment ultimoAlinhamento = TextAlignment.CENTER;
+
+                            // Adicionar o texto no PDF
+                            foreach (var (textoParte, estilo, alinhamento) in partesTexto)
                             {
-                                RectangleF retTextCertificado = new RectangleF(margemLateral, posicaoVertical, certificado.Width - 2 * margemLateral, altRetTextCertificado);
+                                // Criar um objeto 'Text' para cada textoParte
+                                var text = new Text(textoParte).SetFont(estilo).SetFontColor(new DeviceRgb(50, 50, 50)); 
 
-                                // Ajustar tamanho da fonte do texto do certificado
-                                float tamanhoFonteTextoCertificado = 48; // tamanho original 42
-                                Font fonteTextoCertificado = new Font("Arial", tamanhoFonteTextoCertificado, FontStyle.Regular, GraphicsUnit.Pixel);
-                                SizeF tamanhoTextoCertificado = graphics.MeasureString(textoCertificado, fonteTextoCertificado, (int)retTextCertificado.Width);
-
-                                // Ajusta o texto dentro do retângulo diminuindo o tamanho da fonte se necessário
-                                while ((tamanhoTextoCertificado.Width > retTextCertificado.Width || tamanhoTextoCertificado.Height > retTextCertificado.Height) && tamanhoFonteTextoCertificado > 10)
+                                //Validar se precisa aplicar o negrito
+                                if (estilo.ToString().Contains("Bold"))
                                 {
-                                    tamanhoFonteTextoCertificado -= 1;
-                                    fonteTextoCertificado = new Font("Arial", tamanhoFonteTextoCertificado, FontStyle.Regular, GraphicsUnit.Pixel);
-                                    tamanhoTextoCertificado = graphics.MeasureString(textoCertificado, fonteTextoCertificado, (int)retTextCertificado.Width);
+                                    text.SetBold(); 
                                 }
 
-                                // Desenha o texto dentro do retângulo
-                                graphics.DrawString(textoCertificado, fonteTextoCertificado, pincelTextoCertificado, retTextCertificado, alinhamentoTexto);
-                            }
-                            //===================================================================================== FIM
+                                // Adicionamos ao mesmo parágrafo
+                                paragraph.Add(text);
 
-                            //===================================================================================== INICIO
-                            // ESPAÇAMENTO ENTRE O TEXTO DO CERTIFICADO E O NOME DO PARTICIPANTE
-                            float espacamentoEntreTextoENome = -5;  // Espaçamento reduzido para 0,2 unidades
-                            float posicaoVerticalNome = posicaoVertical - altRetTextCertificado - espacamentoEntreTextoENome; // Subir o nome ajustando a posição
-
-                            // NOME PARTICIPANTE
-                            float altRetNomeParticipante = 85;
-                            RectangleF retNomeParticipante = new RectangleF(margemLateral, posicaoVerticalNome, certificado.Width - 2 * margemLateral, altRetNomeParticipante);
-
-                            if (!string.IsNullOrEmpty(nomeParticipante))
-                            {
-                                // Ajustar tamanho da fonte do nome do participante
-                                float tamanhoFonteNomeParticipante = 80; // tamanho original 60
-                                Font fonteNomeParticipante = new Font("Arial", tamanhoFonteNomeParticipante, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Pixel);
-                                SizeF tamanhoTextoNome = graphics.MeasureString(nomeParticipante, fonteNomeParticipante);
-
-                                // Ajusta o texto dentro do retângulo diminuindo o tamanho da fonte se necessário
-                                while (tamanhoTextoNome.Width > retNomeParticipante.Width && tamanhoFonteNomeParticipante > 10)
-                                {
-                                    tamanhoFonteNomeParticipante -= 1;
-                                    fonteNomeParticipante = new Font("Arial", tamanhoFonteNomeParticipante, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Pixel);
-                                    tamanhoTextoNome = graphics.MeasureString(nomeParticipante, fonteNomeParticipante);
-                                }
-
-                                // Desenha o texto dentro do retângulo
-                                graphics.DrawString(nomeParticipante, fonteNomeParticipante, pincelTextoCertificado, retNomeParticipante, alinhamentoTexto);
-                            }
-                            //===================================================================================== FIM
-
-
-
-                            //===================================================================================== INICIO
-                            // TEXTO ANTES DO NOME
-                            if (!string.IsNullOrEmpty(textoAntesNomePessoa))
-                            {
-                                float altRetTextFixo = graphics.MeasureString(textoAntesNomePessoa, fonteTextoFixo).Height;
-                                float posVertTextFixo = retNomeParticipante.Y;
-
-                                // Ajustando para mover o texto um pouco mais para cima
-                                float deslocamentoParaCima = 40; // Ajuste o valor conforme necessário
-                                posVertTextFixo -= deslocamentoParaCima;
-
-                                RectangleF retTextoFixo = new RectangleF(margemLateral, posVertTextFixo - altRetTextFixo, certificado.Width - 2 * margemLateral, altRetTextFixo);
-
-                                // USADO APENAS PARA NECESSIDADE DE AJUSTES: Desenha o retângulo com borda
-                                // graphics.DrawRectangle(penBorda, retTextoFixo.X, retTextoFixo.Y, retTextoFixo.Width, retTextoFixo.Height);
-
-                                // Desenha o texto dentro do retângulo
-                                graphics.DrawString(textoAntesNomePessoa, fonteTextoFixo, pincelTextoCertificado, retTextoFixo, alinhamentoTexto);
+                                // Atualiza a variável com o último alinhamento encontrado
+                                ultimoAlinhamento = alinhamento; 
                             }
 
-                            //===================================================================================== FIM
+                            // Após o loop, adicionamos o parágrafo ao documento
+                            float posicaoX = 100;  // Ajuste conforme necessário
+                            // Define a distancia entre margem superior e inicio do texto
+                            float posicaoY = 265;
+                            // Define a largura maxima da linha do texto
+                            float largura = 650;
 
-                            //===================================================================================== INICIO
-                            // TEXTO LOCAL E DATA
-                            if (!string.IsNullOrEmpty(textCertLocaleData)) 
-                            {
-                                float posVertTextCertLocaleData = posicaoVertical + altRetTextCertificado;
-                                float altRetTextCertLocaleData = 50;
-                                RectangleF retTextCertLocaleData = new RectangleF(margemLateral, posVertTextCertLocaleData, certificado.Width - 2 * margemLateral, altRetTextCertLocaleData);
-                                // USADO APENAS PARA NECESSIDADE DE AJUSTES: Desenha o retângulo com borda
-                                //graphics.DrawRectangle(penBorda, retTextCertLocaleData.X, retTextCertLocaleData.Y, retTextCertLocaleData.Width, retTextCertLocaleData.Height);
-                                // Desenha o texto dentro do retângulo
-                                graphics.DrawString(textCertLocaleData, fontTextCertLocaleData, pincelTextoCertificado, retTextCertLocaleData, alinhamentoTexto);
-                            }                            
-                            //===================================================================================== FIM
+                            //Seta os posicionamentos definidos no paragrafo
+                            paragraph.SetFixedPosition(posicaoX, posicaoY, largura);
+                            // Seta o alinhamento definido
+                            paragraph.SetTextAlignment(ultimoAlinhamento); 
+                            //Adiciona o paragrafo no documento
+                            document.Add(paragraph);
 
-                            //===================================================================================== INICIO
-                            // TEXTO DE AUTENTICIDADE e QRCode
-                            using (Font fonteTextoAutenticidade = new Font("Arial", 22, FontStyle.Regular, GraphicsUnit.Pixel)) //tamanho original22
-                            {                                
-                                float posHor = margemLateral - 30; // Use margemLateral para alinhar com retTextCertificado
-                                RectangleF retTextAutenticidade = new RectangleF(posHor, certificado.Height - 70, 1500, 50);
-                                // USADO APENAS PARA NECESSIDADE DE AJUSTES: Desenha o retângulo com borda
-                                //graphics.DrawRectangle(penBorda, retTextAutenticidade.X, retTextAutenticidade.Y, retTextAutenticidade.Width, retTextAutenticidade.Height);
-                                graphics.DrawString(textoAutenticidade, fonteTextoAutenticidade, pincelTextoCertificado, retTextAutenticidade);
+                            //Definir tamanho do QrCode
+                            float tamanhoQrCode = 65; 
+                            // Definir margens para posicionamento
+                            float margemDireita = 38;
+                            float margemInferior = 34;
 
-                                Bitmap qrCodeBitmap = new Bitmap(caminhoQRCode);
-                                Rectangle retanguloQRCode = new Rectangle(certificado.Width - 245, certificado.Height - 228, 153, 153);
-                                graphics.DrawImage(qrCodeBitmap, retanguloQRCode);
-                            }
-                            //===================================================================================== FIM
+                            // Adicionar o QR Code: POSICIONADO NA PARTE INFERIOR DIREITA 'DENTRO' DA ARTE PROXIMOS AS BORDAS
+                            var qrCodeImage = ImageDataFactory.Create(caminhoQRCode);
+                            var qrCode = new Image(qrCodeImage)
+                                .ScaleToFit(tamanhoQrCode, tamanhoQrCode) // Define o tamanho do QR Code
+                                .SetFixedPosition(
+                                    pdfDocument.GetDefaultPageSize().GetWidth() - tamanhoQrCode - margemDireita, // Alinha à direita
+                                    margemInferior // Posiciona no rodapé
+                                );
+
+                            document.Add(qrCode);
+
+                            // Adicionar texto de autenticidade: POSICIONADO NA PARTE INFERIOR ESQUERDA ABAIXO DA BORDA DA ARTE
+                            var autenticidadeParagraph = new Paragraph(textoAutenticidade)
+                                .SetFont(font)
+                                .SetFontSize(8)
+                                .SetFixedPosition(35, 15, 600); // Ajuste a posição conforme necessário
+                            document.Add(autenticidadeParagraph);
+
+                            // Fechar o documento PDF
+                            document.Close();
                         }
 
-                        byte[] certificadoBytes;
-                        using (MemoryStream ms = new MemoryStream())
-                        {
-                            certificado.Save(ms, ImageFormat.Png);
-                            certificadoBytes = ms.ToArray();
-                        }
-
+                        // Salvar o arquivo PDF gerado
+                        byte[] certificadoBytes = pdfStream.ToArray();
                         await InserirAsync(idEvento_Pessoa, certificadoBytes, codigoCertificado);
+
+                        // Salvar o arquivo localmente em C:\Temp
+                        string caminhoDiretorio = @"C:\Temp";
+                        if (!Directory.Exists(caminhoDiretorio))
+                        {
+                            Directory.CreateDirectory(caminhoDiretorio);
+                        }
+
+                        string caminhoArquivo = System.IO.Path.Combine(caminhoDiretorio, $"Certificado_{codigoCertificado}.pdf");
+                        await File.WriteAllBytesAsync(caminhoArquivo, certificadoBytes);
+
                         retorno = true;
                     }
-                }
-
-                return retorno;
+                }                
             }
             catch (Exception ex)
             {
                 throw new Exception($"Erro em [CertificadosService.GerarCertificadoAsync]: {ex.Message}");
             }
-        }
-        private async Task<(string, string, string, string, string)> ProcessarTextoCertificadoAsync(int idPessoa, string texto)
+
+            return retorno;
+        }      
+        public async Task<bool> GerarCertificadoAsync(int idEvento_Pessoa, int idPessoa, string textoOriginal, IFormFile imagem)
         {
-            string textoAntesPessoa = string.Empty;
-            string textoLocalData = string.Empty;
-            string textoCertificado = string.Empty;
-            string nomePessoa = string.Empty;
-            string cpf = string.Empty;
+            string textoAutenticidade = string.Empty;
+            string codigoCertificado = string.Empty;
+            string caminhoQRCode = string.Empty;
+            bool retorno = false;
 
             try
             {
-                if (!string.IsNullOrEmpty(texto))
+                // Gerar código do certificado e texto de autenticidade
+                codigoCertificado = await GerarCodigo(idPessoa);
+                textoAutenticidade = RetornarTextoAutenticidade(codigoCertificado);
+                caminhoQRCode = System.IO.Path.Combine("wwwroot", "QRCodeEmescam.png");
+
+                // Buscar informações do participante
+                string nomePessoa = await _pessoaService.ObterNomePorIdPessoaAsync(idPessoa);
+                string cpfPessoa = await _pessoaService.ObterCPFPorIdPessoaAsync(idPessoa);
+
+                // Substituir marcadores por valores reais
+                textoOriginal = textoOriginal.Replace("NOME_PESSOA", nomePessoa).Replace("CPF_PESSOA", cpfPessoa);
+
+                // Criar stream separado para o PDF
+                using (var pdfStream = new MemoryStream())
                 {
-                    // Se o texto não contiver as tags esperadas, atribuir o texto diretamente à variável textoCertificado
-                    if (!texto.Contains("NOME_PESSOA") && !texto.Contains("CPF_PESSOA") && !texto.Contains("<br>"))
+                    // Inicializar o PDF em memória
+                    using (var imageStream = new MemoryStream())
                     {
-                        // Ajuste para garantir que o texto original sem tags seja retornado corretamente
-                        textoCertificado = texto;
-                    }
-                    else
-                    {
-                        int posNomePessoa = -1;
-                        int posBR = -1;
+                        // Copiar a arte do certificado
+                        await imagem.CopyToAsync(imageStream);
+                        imageStream.Position = 0;
 
-                        if (texto.Contains("NOME_PESSOA"))
+                        // Criar o documento PDF
+                        using (var pdfWriter = new PdfWriter(pdfStream))
+                        using (var pdfDocument = new PdfDocument(pdfWriter))
                         {
-                            nomePessoa = await _pessoaService.ObterNomePorIdPessoaAsync(idPessoa);
-                            posNomePessoa = texto.IndexOf("NOME_PESSOA");
-                        }
+                            // Definir tamanho da página como A4 e orientação Paisagem
+                            pdfDocument.SetDefaultPageSize(PageSize.A4.Rotate());
 
-                        posBR = texto.IndexOf("<br>", StringComparison.OrdinalIgnoreCase);
+                            // Criar um documento sem margens padrão
+                            var document = new Document(pdfDocument, PageSize.A4.Rotate(), false);
+                            document.SetMargins(0, 0, 0, 0); // Remove qualquer margem extra
 
-                        if (posNomePessoa != -1)
-                        {
-                            textoAntesPessoa = texto.Substring(0, posNomePessoa) + " ";
-                        }
+                            // Criar imagem corretamente a partir do novo stream, ocupando toda a página
+                            var imageData = ImageDataFactory.Create(imageStream.ToArray());
+                            var image = new iText.Layout.Element.Image(imageData)
+                                .ScaleToFit(pdfDocument.GetDefaultPageSize().GetWidth(), pdfDocument.GetDefaultPageSize().GetHeight()) // Ajusta para ocupar todo o espaço
+                                .SetFixedPosition(0, 0); // Posiciona no canto inferior esquerdo (0,0)
+                            document.Add(image);
 
-                        if (posBR != -1)
-                        {
-                            textoLocalData = texto.Substring(posBR + "<br>".Length);
-                        }
+                            // *** TEXTO CERTIFICADO -- INICIO ***
+                            //// Posição e largura do texto
+                            //float posicaoX = 100; // distância a partir da margem esquerda
+                            //float posicaoY = 165; // distância a partir da margem inferior
+                            //float largura = 650; // largura máxima do parágrafo
 
-                        if (posNomePessoa != -1 && posBR != -1 && posBR > posNomePessoa)
-                        {
-                            textoCertificado = texto.Substring(posNomePessoa + "NOME_PESSOA".Length, posBR - (posNomePessoa + "NOME_PESSOA".Length));
+                            //// Criar o parágrafo e definir tamanho da fonte
+                            //var paragraph = new Paragraph().SetFontSize(14);
 
-                            if (textoCertificado.Contains("CPF_PESSOA"))
+                            //// Fonte normal e fonte em negrito
+                            //var font = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
+                            //var fontBold = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
+
+                            //// Alinhamento padrão do texto
+                            //TextAlignment ultimoAlinhamento = TextAlignment.CENTER;
+
+                            //// Processar o texto e aplicar formatação
+                            //var regex = new Regex(@"<b>(.*?)<\/b>", RegexOptions.Singleline);
+                            //var equivalencias = regex.Matches(textoOriginal);
+                            //int ultimoIndex = 0;
+
+                            //foreach (Match equivalencia in equivalencias)
+                            //{
+                            //    // Adicionar o texto antes da marcação <b>, se houver
+                            //    if (equivalencia.Index > ultimoIndex)
+                            //    {
+                            //        var textoAntes = textoOriginal.Substring(ultimoIndex, equivalencia.Index - ultimoIndex);
+                            //        paragraph.Add(new Text(textoAntes).SetFont(font).SetFontColor(new DeviceRgb(50, 50, 50)));
+                            //    }
+
+                            //    // Adicionar o texto dentro da marcação <b> com negrito
+                            //    var textoNegrito = equivalencia.Groups[1].Value;
+                            //    paragraph.Add(new Text(textoNegrito).SetFont(fontBold).SetFontColor(new DeviceRgb(50, 50, 50)));
+                            //    ultimoIndex = equivalencia.Index + equivalencia.Length;
+                            //}
+
+                            //// Adicionar qualquer texto restante após a última marcação <b>
+                            //if (ultimoIndex < textoOriginal.Length)
+                            //{
+                            //    var textoRestante = textoOriginal.Substring(ultimoIndex);
+                            //    paragraph.Add(new Text(textoRestante).SetFont(font).SetFontColor(new DeviceRgb(50, 50, 50)));
+                            //}
+
+                            //// Definir posição e alinhamento do parágrafo
+                            //paragraph.SetFixedPosition(posicaoX, posicaoY, largura);
+                            //paragraph.SetTextAlignment(ultimoAlinhamento);
+                            //document.Add(paragraph);
+                            float posicaoX = 100; // distância a partir da margem esquerda
+                            float posicaoY = 165; // distância a partir da margem inferior
+                            float largura = 650; // largura máxima do parágrafo
+
+                            // Criar a fonte normal e fonte em negrito
+                            var font = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
+                            var fontBold = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
+
+                            // Alinhamento padrão do texto
+                            TextAlignment alinhamentoAtual = TextAlignment.CENTER;
+
+                            // Expressões regulares para detectar marcações de alinhamento e negrito
+                            var regexAlinhamento = new Regex(@"<(center|left|right|justify)>(.*?)<\/\1>", RegexOptions.Singleline);
+                            var regexNegrito = new Regex(@"<b>(.*?)<\/b>", RegexOptions.Singleline);
+
+                            int ultimoIndex = 0;
+                            var paragrafoAtual = new Paragraph().SetFontSize(14);
+
+                            // Processar o texto identificando trechos alinhados e sem marcação
+                            var matches = regexAlinhamento.Matches(textoOriginal);
+                            List<(string texto, TextAlignment alinhamento)> blocos = new();
+
+                            foreach (Match match in matches)
                             {
-                                cpf = await RetornarCPFAsync(idPessoa);
-                                textoCertificado = textoCertificado.Replace("CPF_PESSOA", cpf);
+                                // Adicionar o trecho sem marcação de alinhamento antes do atual
+                                if (match.Index > ultimoIndex)
+                                {
+                                    string textoSemAlinhamento = textoOriginal.Substring(ultimoIndex, match.Index - ultimoIndex);
+                                    blocos.Add((textoSemAlinhamento, TextAlignment.CENTER)); // Padrão centralizado
+                                }
+
+                                // Determinar o alinhamento do bloco atual
+                                TextAlignment alinhamento = match.Groups[1].Value switch
+                                {
+                                    "left" => TextAlignment.LEFT,
+                                    "right" => TextAlignment.RIGHT,
+                                    "justify" => TextAlignment.JUSTIFIED,
+                                    _ => TextAlignment.CENTER
+                                };
+
+                                string textoAlinhado = match.Groups[2].Value;
+                                blocos.Add((textoAlinhado, alinhamento));
+                                ultimoIndex = match.Index + match.Length;
                             }
+
+                            // Adicionar qualquer texto restante após o último bloco identificado
+                            if (ultimoIndex < textoOriginal.Length)
+                            {
+                                string textoRestante = textoOriginal.Substring(ultimoIndex);
+                                blocos.Add((textoRestante, TextAlignment.CENTER)); // Padrão centralizado
+                            }
+
+                            // Processar cada bloco identificado
+                            foreach (var (texto, alinhamento) in blocos)
+                            {
+                                var paragrafo = new Paragraph().SetFontSize(14).SetTextAlignment(alinhamento);
+
+                                int indexNegrito = 0;
+                                var negritos = regexNegrito.Matches(texto);
+
+                                foreach (Match negrito in negritos)
+                                {
+                                    // Adicionar texto antes da marcação <b>, se houver
+                                    if (negrito.Index > indexNegrito)
+                                    {
+                                        string textoAntes = texto.Substring(indexNegrito, negrito.Index - indexNegrito);
+                                        paragrafo.Add(new Text(textoAntes).SetFont(font).SetFontColor(new DeviceRgb(50, 50, 50)));
+                                    }
+
+                                    // Adicionar texto em negrito
+                                    string textoNegrito = negrito.Groups[1].Value;
+                                    paragrafo.Add(new Text(textoNegrito).SetFont(fontBold).SetFontColor(new DeviceRgb(50, 50, 50)));
+
+                                    indexNegrito = negrito.Index + negrito.Length;
+                                }
+
+                                // Adicionar qualquer texto restante após a última marcação <b>
+                                if (indexNegrito < texto.Length)
+                                {
+                                    string textoRestante = texto.Substring(indexNegrito);
+                                    paragrafo.Add(new Text(textoRestante).SetFont(font).SetFontColor(new DeviceRgb(50, 50, 50)));
+                                }
+
+                                // Adicionar o parágrafo ao documento
+                                paragrafo.SetFixedPosition(posicaoX, posicaoY, largura);
+                                document.Add(paragrafo);
+
+                                // Ajustar a posição para o próximo bloco (exemplo: movendo para cima)
+                                posicaoY -= 20;
+                            }
+
+
+                            // *** TEXTO CERTIFICADO -- FIM ***
+
+                            // *** QRCODE -- INICIO ***
+                            //Definir tamanho do QrCode
+                            float tamanhoQrCode = 65;
+                            // Definir margens para posicionamento
+                            float margemDireita = 38;
+                            float margemInferior = 34;
+
+                            // Adicionar o QR Code: POSICIONADO NA PARTE INFERIOR DIREITA 'DENTRO' DA ARTE PROXIMOS AS BORDAS
+                            var qrCodeImage = ImageDataFactory.Create(caminhoQRCode);
+                            var qrCode = new Image(qrCodeImage)
+                                .ScaleToFit(tamanhoQrCode, tamanhoQrCode) // Define o tamanho do QR Code
+                                .SetFixedPosition(
+                                    pdfDocument.GetDefaultPageSize().GetWidth() - tamanhoQrCode - margemDireita, // Alinha à direita
+                                    margemInferior // Posiciona no rodapé
+                                );
+
+                            document.Add(qrCode);
+                            // *** QRCODE -- FIM ***
+
+                            // *** TEXTO AUTENTICIDADE RODAPÉ -- INICIO ***
+                            // Adicionar texto de autenticidade: POSICIONADO NA PARTE INFERIOR ESQUERDA ABAIXO DA BORDA DA ARTE
+                            var autenticidadeParagraph = new Paragraph(textoAutenticidade)
+                                .SetFont(font)
+                                .SetFontSize(8)
+                                .SetFixedPosition(35, 15, 600); // Ajuste a posição conforme necessário
+                            document.Add(autenticidadeParagraph);
+                            // *** TEXTO AUTENTICIDADE RODAPÉ -- FIM ***
+
+                            // Fechar o documento PDF
+                            document.Close();
                         }
+
+                        // Salvar o arquivo PDF gerado
+                        byte[] certificadoBytes = pdfStream.ToArray();
+                        await InserirAsync(idEvento_Pessoa, certificadoBytes, codigoCertificado);
+
+                        // Salvar o arquivo localmente
+                        string caminhoDiretorio = @"C:\Temp";
+                        if (!Directory.Exists(caminhoDiretorio))
+                        {
+                            Directory.CreateDirectory(caminhoDiretorio);
+                        }
+
+                        string caminhoArquivo = System.IO.Path.Combine(caminhoDiretorio, $"Certificado_{codigoCertificado}.pdf");
+                        await File.WriteAllBytesAsync(caminhoArquivo, certificadoBytes);
+
+                        retorno = true;
                     }
                 }
-
-                // Aplicar o estilo de negrito para as tags <negrito>
-                textoCertificado = textoCertificado.Replace("<negrito>", "<strong>")
-                                                   .Replace("</negrito>", "</strong>");
-
-                // Gerar o HTML do certificado
-                string htmlCertificado = $@"
-                     <html>
-                         <head>
-                             <style>
-                                 .certificado {{
-                                     font-family: Arial, sans-serif;
-                                     font-size: 20px;
-                                 }}
-                                 .certificado strong {{
-                                     font-weight: bold;
-                                     color: #333; /* Cor mais escura */
-                                 }}
-                             </style>
-                         </head>
-                         <body>
-                             <div class='certificado'>
-                                 {textoAntesPessoa}
-                                 <h2>{nomePessoa}</h2>
-                                 <p>{textoCertificado}</p>
-                                 <p>{textoLocalData}</p>
-                             </div>
-                         </body>
-                     </html>";
-
-                return (textoAntesPessoa, nomePessoa, textoCertificado, textoLocalData, htmlCertificado); // Retorna o HTML completo
             }
             catch (Exception ex)
             {
-                throw new Exception($"Erro em [CertificadoEditor.ProcessarTextoCertificadoAsync]", ex);
+                throw new Exception($"Erro em [CertificadosService.GerarCertificadoAsync]: {ex.Message}");
             }
+
+            return retorno;
         }
+        private async Task<List<(string texto, PdfFont estilo, iText.Layout.Properties.TextAlignment alinhamento)>> ProcessarTextoEstilizadoAsync(string texto, int idPessoa)
+        {
 
+            try
+            {
+                var partes = new List<(string texto, PdfFont estilo, iText.Layout.Properties.TextAlignment alinhamento)>();
+                var builder = new StringBuilder();
+                PdfFont estiloAtual = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
+                iText.Layout.Properties.TextAlignment alinhamentoAtual = iText.Layout.Properties.TextAlignment.CENTER;
 
+                // Buscar informações do participante
+                string nomePessoa = await _pessoaService.ObterNomePorIdPessoaAsync(idPessoa);
+                string cpfPessoa = await _pessoaService.ObterCPFPorIdPessoaAsync(idPessoa);
 
+                // Substituir marcadores por valores reais
+                texto = texto.Replace("NOME_PESSOA", nomePessoa);
+                texto = texto.Replace("CPF_PESSOA", cpfPessoa);
+
+                // Dividir o texto em parágrafos usando a marcação <p>
+                var paragrafos = texto.Split(new[] { "<p>", "</p>" }, StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (var paragrafo in paragrafos)
+                {
+                    if (string.IsNullOrWhiteSpace(paragrafo))
+                    {
+                        // Adiciona um espaço extra para separar parágrafos
+                        partes.Add(("\n", estiloAtual, alinhamentoAtual));
+                        continue;
+                    }
+
+                    for (int i = 0; i < paragrafo.Length; i++)
+                    {
+                        if (paragrafo.Substring(i).StartsWith("<b>"))
+                        {
+                            if (builder.Length > 0)
+                            {
+                                partes.Add((builder.ToString(), estiloAtual, alinhamentoAtual));
+                                builder.Clear();
+                            }
+                            estiloAtual = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
+                            i += 2; // Avança o índice para ignorar "<b>"
+                        }
+                        else if (paragrafo.Substring(i).StartsWith("</b>"))
+                        {
+                            if (builder.Length > 0)
+                            {
+                                partes.Add((builder.ToString(), estiloAtual, alinhamentoAtual));
+                                builder.Clear();
+                            }
+                            estiloAtual = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
+                            i += 3; // Avança o índice para ignorar "</b>"
+                        }
+                        else if (paragrafo.Substring(i).StartsWith("<i>"))
+                        {
+                            if (builder.Length > 0)
+                            {
+                                partes.Add((builder.ToString(), estiloAtual, alinhamentoAtual));
+                                builder.Clear();
+                            }
+                            estiloAtual = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_OBLIQUE);
+                            i += 2; // Avança o índice para ignorar "<i>"
+                        }
+                        else if (paragrafo.Substring(i).StartsWith("</i>"))
+                        {
+                            if (builder.Length > 0)
+                            {
+                                partes.Add((builder.ToString(), estiloAtual, alinhamentoAtual));
+                                builder.Clear();
+                            }
+                            estiloAtual = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
+                            i += 3; // Avança o índice para ignorar "</i>"
+                        }
+                        else
+                        {
+                            builder.Append(paragrafo[i]);
+                        }
+                    }
+
+                    if (builder.Length > 0)
+                    {
+                        partes.Add((builder.ToString(), estiloAtual, alinhamentoAtual));
+                        builder.Clear();
+                    }
+
+                    // Não adicionar quebras de linha extras entre segmentos de um mesmo parágrafo
+                }
+
+                // Unificar texto dentro de um parágrafo
+                var paragrafoUnificado = new List<(string texto, PdfFont estilo, iText.Layout.Properties.TextAlignment alinhamento)>();
+                foreach (var parte in partes)
+                {
+                    if (paragrafoUnificado.Count > 0 &&
+                        paragrafoUnificado[^1].alinhamento == parte.alinhamento &&
+                        paragrafoUnificado[^1].estilo == parte.estilo)
+                    {
+                        // Concatenar texto com o mesmo estilo e alinhamento
+                        var ultimaParte = paragrafoUnificado[^1];
+                        paragrafoUnificado[^1] = (ultimaParte.texto + parte.texto, ultimaParte.estilo, ultimaParte.alinhamento);
+                    }
+                    else
+                    {
+                        paragrafoUnificado.Add(parte);
+                    }
+                }
+
+                // Retornar o resultado unificado
+                return paragrafoUnificado;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em CertificadosService.ProcessarTextoEstilizadoAsync: {ex.Message}");
+            }
+            
+        }                
         private string RetornarTextoAutenticidade(string codigo)
         {
             string texto = string.Empty;
@@ -307,17 +535,21 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             }
             catch (Exception ex)
             {
-                throw new Exception($"Erro em CertificadoEditor.RetornarTextoAutenticidade: {ex.Message}");
+                throw new Exception($"Erro em CertificadosService.RetornarTextoAutenticidade: {ex.Message}");
             }
         }
-        private string GerarCodigo(string cpf)
+        private async Task<string> GerarCodigo(int idPessoa)
         {
             string chave = string.Empty;
+            string cpf = string.Empty;
             try
             {
+                cpf = await _pessoaService.ObterCPFPorIdPessoaAsync(idPessoa);
+
                 //Defini data e hora atual como parte da chave
                 chave = DateTime.Now.ToString("g");
                 chave = chave.Replace("/", "").Replace(":", "").Replace(" ", "");
+                
                 //Concatena com CPF
                 chave += cpf;
 
@@ -346,19 +578,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
             {
                 throw new Exception($"Erro em CertificadoEditor.GerarCodigo: {ex.Message}");
             }
-        }
-        private async Task<string> RetornarCPFAsync(int idPessoa)
-        {
-            try
-            {                
-                string cpf = await _pessoaService.ObterCPFPorIdPessoaAsync(idPessoa);
-                return cpf;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Erro em [CertificadoEditor.RetornarCPFAsync]: {ex.Message}");
-            }
-        }       
+        }        
         private async Task InserirAsync(int idEventoPessoa, byte[] certificadoBytes, string codigoCertificado)
         {
             try

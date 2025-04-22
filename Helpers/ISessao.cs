@@ -10,5 +10,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Helpers
         int ObterUsuarioId();
         string ObterUsuarioLogin();
         string ObterUsuarioPassword();
+        string ObterUsuarioSetor();
     }
 }

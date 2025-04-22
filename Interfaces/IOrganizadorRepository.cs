@@ -1,5 +1,4 @@
 ﻿using System.Data;
-using System.Threading.Tasks; // Certifique-se de que este namespace está incluído.
 
 namespace EMISSOR_DE_CERTIFICADOS.Interfaces
 {
@@ -11,9 +10,11 @@ namespace EMISSOR_DE_CERTIFICADOS.Interfaces
         Task<int?> InserirEventoAsync(string nome, byte[] imagemCertificado, int idUsuario);
         Task InserirEventoPessoaAsync(int idEvento, int idPessoa, string texto);
         Task AtualizarTextoFrenteEventoPessoaAsync(int idEvento, int idPessoa, string texto);
-        Task<byte[]> BuscarBytesDaImagemNoBDAsync(int id);
+        Task<byte[]> BuscarArteCertificadoEmBytesNoBDAsync(int id);
+        Task<byte[]> BuscarCertificadoParticipanteEmBytesNoBDAsync(int idEventoPessoa);
         Task<DataTable> ObterEmailConfigAsync();
         Task<DataTable> BuscarPessoasEventoAsync(int eventoId, string idPessoas);
         Task AtualizarCertificadoEmitidoAsync(int idEventoPessoa, bool certificadoEmitido, string mensagemRetorno);
+        Task<int> ObterIdUsuarioAdministrativo(int idEvento);
     }
 }

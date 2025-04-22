@@ -143,10 +143,33 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
         public async Task AtualizarPessoasEventoAsync(int id, List<TabelaData>? dadosTabela)
         {
             int idUsuario = 0;
+            string setor = string.Empty;
 
             try
-            {                
-                idUsuario = _sessao.ObterUsuarioId();
+            {
+                setor = _sessao.ObterUsuarioSetor();
+
+                //===============================================================================================================================================
+                // T.I. e SECRETARIA: Esses setores podem ver todos registros
+                // Uma regra que é usada por usuarios organizadores é que todo registro inserido no banco fica relacionado ao ID do usuario que realizou a ação
+                // A regra acima não pode ser usada para usuarios dos setores abaixo
+                // TI usa o sistema para manutenção e suporte dessa forma não pode ter registro vinculado a usuario desse setor
+                // SECRETARIA é o setor que emite o certificado para os eventos que os organizadores cadastraram
+                // Caso a SECRETARIA precise atualizar pessoas em eventos, esses registros não podem ficar vinculados a eles
+                // Motivo da regra acima: Para que o organizador do evento cadastrado possa visualizar esses registros caso precise
+                //===============================================================================================================================================
+
+                if (setor == "TI" || setor == "SECRETARIA")
+                {
+                    //Busca o ID de usuario que criou o envento para vincular os registros da variavel dadosTabela 
+                    idUsuario = await _organizadorRepository.ObterIdUsuarioAdministrativo(id);
+                }
+                else 
+                {
+                    //Fluxo mais comum, busca o ID do usuario logado que fica armazanenado na sessão
+                    idUsuario = _sessao.ObterUsuarioId();
+                }
+                
                 if (idUsuario == null || idUsuario == 0)
                 {
                     throw new Exception("ID do usuário não encontrado na sessão.");
@@ -179,17 +202,31 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 throw new Exception($"Erro em [OrganizadorService.AtualizarPessoasEventoAsync]: {ex.Message}");
             }
         }
-        public async Task<byte[]> BuscarBytesDaImagemNoBDAsync(int id)
+        public async Task<byte[]> BuscarArteCertificadoEmBytesNoBDAsync(int id)
         {
             try
             {
-                return await _organizadorRepository.BuscarBytesDaImagemNoBDAsync(id);
+                return await _organizadorRepository.BuscarArteCertificadoEmBytesNoBDAsync(id);
             }
             catch (Exception ex)
             {
                 throw new Exception($"Erro em [OrganizadorService.BuscarBytesDaImagemNoBDAsync]: {ex.Message}");
             }
         }
+
+        public async Task<byte[]> BuscarCertificadoParticipanteEmBytesNoBDAsync(int idEventoPessoa) 
+        {
+            try
+            {
+                return await _organizadorRepository.BuscarCertificadoParticipanteEmBytesNoBDAsync(idEventoPessoa);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [OrganizadorService.BuscarCertificadoParticipanteEmBytesNoBDAsync]: {ex.Message}");
+            }
+
+        }
+
         public async Task<Evento> ObterEventoPessoas(int idEvento, bool emitirCertificado)
         {            
             try

@@ -145,8 +145,17 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 throw new Exception($"Erro em [UsuariosService.ObterUsuarioESenhaAsync]: {ex.Message}");
             }
         }
-
-
+        public async Task<string> RetornarSetorUsuarioAsync(int id)
+        {
+            try
+            {
+                return await _usuarioRepository.ObterSetorUsuarioAsync(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [UsuariosService.RetornarSetorUsuarioAsync]: {ex.Message}");
+            }
+        }
         public async Task<bool> CriarNovoUsuarioAsync(string login)
         {
             try

@@ -61,7 +61,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                 throw new Exception($"Erro em [OrganizadorRepository.BuscarTodosEventosAsync]: {ex.Message}");
             }
         }
-
         public async Task<DataTable> BuscarEventoPorIdAsync(int id)
         {
             try
@@ -129,7 +128,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                 throw new Exception($"Erro em [OrganizadorRepository.AtualizarTextoFrenteEventoPessoaAsync]: {ex.Message}");
             }            
         }
-        public async Task<byte[]> BuscarBytesDaImagemNoBDAsync(int id)
+        public async Task<byte[]> BuscarArteCertificadoEmBytesNoBDAsync(int id)
         {
             try
             {
@@ -140,7 +139,19 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
             {
                 throw new Exception($"Erro em [OrganizadorRepository.BuscarBytesDaImagemNoBDAsync]: {ex.Message}");
             }            
-        }        
+        }
+        public async Task<byte[]> BuscarCertificadoParticipanteEmBytesNoBDAsync(int idEventoPessoa)
+        {
+            try
+            {
+                string sql = "SELECT IMAGEM_CERTIFICADO FROM EVENTO_PESSOA WHERE ID = @id";
+                return await _dbHelper.ExecuteQueryArrayBytesAsync(sql, idEventoPessoa);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [OrganizadorRepository.BuscarCertificadoParticipanteEmBytesNoBDAsync]: {ex.Message}");
+            }
+        }
         public async Task<DataTable> ObterEmailConfigAsync()
         {
             try
@@ -196,6 +207,18 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
             {
                 throw new Exception($"Erro em [OrganizadorRepository.AtualizarCertificadoEmitidoAsync]: {ex.Message}");
             }
+        }
+        public async Task<int> ObterIdUsuarioAdministrativo(int idEvento)
+        {
+            try
+            {
+                var sSQL = $"SELECT ID_USUARIO_ADMINISTRATIVO FROM EVENTO WHERE ID = {idEvento}";
+                return await _dbHelper.ExecuteScalarAsync<int>(sSQL);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [OrganizadorRepository.ObterIdUsuarioAdministrativo]: {ex.Message}");
+            }               
         }
     }
 }

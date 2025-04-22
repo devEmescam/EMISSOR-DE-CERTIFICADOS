@@ -112,9 +112,6 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                 throw new Exception($"Erro em [UsuarioRepository.ObterUsuarioESenhaAsync]: {ex.Message}");
             }
         }
-
-
-
         public async Task<int> CriarNovoUsuarioAsync(string login)
         {
             int idUsuario = -1;
@@ -126,9 +123,9 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                        "SELECT SCOPE_IDENTITY();"; // Obtem o ID do usuário inserido
 
                 var parameters = new Dictionary<string, object>
-        {
-            { "@Login", login }
-        };
+                {
+                    { "@Login", login }
+                };
 
                 // Executa o comando e retorna o ID do usuário inserido
                 idUsuario = await _dbHelpers.ExecuteScalarAsync<int>(sSQL, parameters);
@@ -140,10 +137,20 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                 throw new Exception($"Erro em [UsuarioRepository.CriarNovoUsuarioAsync]: {ex.Message}");
             }
         }
+        public async Task<string> ObterSetorUsuarioAsync(int id) 
+        {
+            try
+            {
+                var query = $"SELECT SETOR FROM USUARIO WHERE ID = {id}";
+                var result = await _dbHelpers.ExecuteScalarAsync<int>(query);
 
-
-
-
+                return result != null ? Convert.ToString(result) : string.Empty;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [UsuarioRepository.ObterSetorUsuarioAsync]: {ex.Message}");
+            }
+        }
     }
 }
 public class UsuarioSenha

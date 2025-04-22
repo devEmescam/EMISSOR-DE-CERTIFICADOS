@@ -66,6 +66,9 @@ builder.Services.AddSession(o =>
 
 var app = builder.Build();
 
+// Lista de IPs autorizados a ver detalhes do erro
+var ipsAutorizados = new[] { "192.168.105.69", "192.168.105.71" }; // Maquinas DEV
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -73,6 +76,17 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
+    // Middleware para exibir DeveloperExceptionPage somente para IPs autorizados
+    app.UseWhen(context =>
+    {
+        var remoteIp = context.Connection.RemoteIpAddress?.ToString();
+        return ipsAutorizados.Contains(remoteIp);
+    },
+    appBuilder =>
+    {
+        appBuilder.UseDeveloperExceptionPage();
+    });
+
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();

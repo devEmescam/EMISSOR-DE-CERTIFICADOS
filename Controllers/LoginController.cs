@@ -43,12 +43,13 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 {
                     // Tenta buscar o ID do usuário
                     loginModel.Id = await RetornarIdUsuarioAsync(loginModel.Login, "", true);
+                    loginModel.Setor = await RetornarSetorUsuarioAsync(loginModel.Id);
 
                     // Valida se retornou algo
                     if (loginModel.Id > 0)
                     {
                         // Usuário encontrado no banco de dados da aplicação, agora verificar login e senha no AD
-                        if (_adHelper.VerificaUsuario(loginModel.Login, loginModel.Senha)) // Assuma que VerificaUsuario também deve ser assíncrono se necessário
+                        if (_adHelper.VerificaUsuario(loginModel.Login, loginModel.Senha)) 
                         {
                             _sessao.CriarSessaoDoUsuario(loginModel);                           
                             return RedirectToAction("Index", "Home_Organizador");
@@ -136,6 +137,21 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             catch (Exception ex)
             {
                 throw new Exception($"Ocorreu um erro em [LoginController.RetornarIdUsuarioAsync] Erro: {ex.Message}");
+            }
+        }
+
+        private async Task<string> RetornarSetorUsuarioAsync(int id) 
+        {
+            try
+            {
+                var query = $"SELECT SETOR FROM USUARIO WHERE ID = {id}";
+                var result = await _dbHelper.ExecuteScalarAsync<string>(query);
+
+                return result != null ? Convert.ToString(result) : string.Empty;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ocorreu um erro em [LoginController.RetornarSetorUsuarioAsync] Erro: {ex.Message}");
             }
         }
         #endregion

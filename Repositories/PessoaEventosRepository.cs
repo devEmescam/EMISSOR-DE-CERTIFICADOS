@@ -17,20 +17,25 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
             {
                 var sSQL = @"SELECT * FROM PESSOA 
                      WHERE 1=1
-                     AND (Nome LIKE @Termo OR CPF LIKE @Termo OR Email LIKE @Termo) 
-                     AND ID_USUARIO_ADMINISTRATIVO = @ID_USUARIO_ADMINISTRATIVO";
+                     AND (Nome LIKE @Termo OR CPF LIKE @Termo OR Email LIKE @Termo)";
+
+
+                if (!visaoOrganizador) 
+                {
+                sSQL += "AND ID_USUARIO_ADMINISTRATIVO = @ID_USUARIO_ADMINISTRATIVO";
+                }                     
 
                 var parameters = new Dictionary<string, object>
-        {
-            { "@Termo", "%" + termo + "%" },
-            { "@ID_USUARIO_ADMINISTRATIVO", idUsuario }
-        };
-
-                var oDT = await _dbHelper.ExecuteQueryAsync(sSQL, parameters);
-                if (oDT.Rows.Count == 0)
                 {
-                    throw new Exception("Pessoa não encontrada.");
+                    { "@Termo", "%" + termo.Trim() + "%" }                                        
+                };
+
+                if (!visaoOrganizador)
+                {
+                    parameters.Add("@ID_USUARIO_ADMINISTRATIVO", idUsuario);
                 }
+
+                var oDT = await _dbHelper.ExecuteQueryAsync(sSQL, parameters);                
 
                 var pessoas = new List<Pessoa>();
                 foreach (DataRow row in oDT.Rows)
@@ -66,17 +71,17 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                     WHERE EP.CERTIFICADO_EMITIDO = 1
                     AND EP.ID_PESSOA = @idPessoa";
 
-                if (visaoOrganizador)
+                if (!visaoOrganizador)
                 {
                     sSQL += " AND E.ID_USUARIO_ADMINISTRATIVO = @idUsuario";
                 }
 
                 var parameters = new Dictionary<string, object>
-        {
-            { "@idPessoa", idPessoa }
-        };
+                {
+                    { "@idPessoa", idPessoa }
+                };
 
-                if (visaoOrganizador)
+                if (!visaoOrganizador)
                 {
                     parameters.Add("@idUsuario", idUsuario);
                 }
@@ -91,7 +96,18 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
                 foreach (DataRow row in oDT.Rows)
                 {
                     byte[] imagemBytes = row["IMAGEM_CERTIFICADO"] as byte[];
-                    string imagemCertificadoBase64 = imagemBytes != null ? Convert.ToBase64String(imagemBytes) : null;
+                    //string imagemCertificadoBase64 = imagemBytes != null ? Convert.ToBase64String(imagemBytes) : null;
+
+                    // Adicionar o prefixo data:image/...;base64
+                    string imagemCertificadoBase64 = null;
+                    if (imagemBytes != null)
+                    {
+                        string tipoImagem = IdentificarTipoImagem(imagemBytes); // Identifica o tipo de imagem
+                        if (!string.IsNullOrEmpty(tipoImagem))
+                        {
+                            imagemCertificadoBase64 = $"data:image/{tipoImagem};base64,{Convert.ToBase64String(imagemBytes)}";
+                        }
+                    }
 
                     eventos.Add(new EventoPessoa
                     {
@@ -110,6 +126,34 @@ namespace EMISSOR_DE_CERTIFICADOS.Repositories
             }
         }
 
+        private string IdentificarTipoImagem(byte[] imagemBytes)
+        {
+
+            try
+            {
+                if (imagemBytes.Length >= 4)
+                {
+                    // Verifica os cabeçalhos conhecidos de arquivos de imagem
+                    if (imagemBytes[0] == 0x89 && imagemBytes[1] == 0x50 && imagemBytes[2] == 0x4E && imagemBytes[3] == 0x47)
+                    {
+                        return "png"; // PNG
+                    }
+                    if (imagemBytes[0] == 0xFF && imagemBytes[1] == 0xD8 && imagemBytes[2] == 0xFF)
+                    {
+                        return "jpeg"; // JPEG
+                    }
+                    if (imagemBytes[0] == 0x47 && imagemBytes[1] == 0x49 && imagemBytes[2] == 0x46)
+                    {
+                        return "gif"; // GIF
+                    }
+                }
+                return null; // Tipo desconhecido
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro em [PessoaEventosRepository.IdentificarTipoImagem]: {ex.Message}");
+            }           
+        }
     }
 }
 public class Pessoa
