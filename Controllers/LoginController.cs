@@ -85,6 +85,9 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                     // Tenta buscar o ID do usuário
                     loginModel.Id = await RetornarIdUsuarioAsync(loginModel.Login, loginModel.Senha, false);
 
+                    //Participante não possui setor
+                    loginModel.Setor = string.Empty;
+
                     // Valida se retornou algo
                     if (loginModel.Id > 0)
                     {

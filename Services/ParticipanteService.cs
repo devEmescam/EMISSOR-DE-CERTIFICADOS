@@ -32,7 +32,9 @@ namespace EMISSOR_DE_CERTIFICADOS.Services
                 //Cria uma instancia de pessoaController para chamar os metodos contidos nessa classe                
                 idPessoa = await _pessoaRepository.ObterIdPessoaPorCPFAsync(cpf);
                 var eventos = await _pessoaEventosRepository.CarregarEventosPessoaAsync(idPessoa, -1, false);
-                return eventos;
+
+                // Garante que nunca retorne null
+                return eventos ?? new List<EventoPessoa>();
             }
             catch (Exception ex)
             {
