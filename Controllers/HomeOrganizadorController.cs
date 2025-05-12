@@ -7,223 +7,183 @@ using EMISSOR_DE_CERTIFICADOS.Interfaces;
 
 namespace EMISSOR_DE_CERTIFICADOS.Controllers
 {
-    // CONTROLLER QUE TRATA OS EVENTOS
-    public class Home_OrganizadorController : Controller
+    [ApiController]
+    [Route("api/home-organizador")]
+    public class HomeOrganizadorController : ControllerBase
     {
         private readonly ISessao _sessao;
         private readonly IOrganizadorService _organizadorService;
         private readonly IUsuarioService _usuarioService;
 
-        // Construtor unificado
-        public Home_OrganizadorController(ISessao sessao, IOrganizadorService organizadorService, IUsuarioService usuarioService)
+        public HomeOrganizadorController(ISessao sessao, IOrganizadorService organizadorService, IUsuarioService usuarioService)
         {
             _organizadorService = organizadorService ?? throw new ArgumentNullException(nameof(organizadorService), "O IOrganizadorService não pode ser nulo.");
             _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");
             _usuarioService = usuarioService ?? throw new ArgumentNullException(nameof(usuarioService), "O IUsuarioService não pode ser nulo.");
         }
 
-        #region *** IActionResults ***        
-        [HttpGet]
+        [HttpGet("Index")]
         public async Task<IActionResult> Index()
         {
             try
             {
-                // Recupera todos os eventos do banco de dados
                 var eventos = await _organizadorService.BuscarTodosEventosAsync();
-
-                // Passa o login para a view através do modelo
-                ViewBag.Login = HttpContext.Session.GetString("Login");
-
-                return View(eventos);
+                return Ok(eventos);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.Index] Erro: {ex.Message}");
+                return StatusCode(500, $"Ocorreu um erro em [HomeOrganizadorController.Index] Erro: {ex.Message}");
             }
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPost("NovoEvento")]
         public async Task<IActionResult> NovoEvento(string nomeEvento, IFormFile arteCertificadoFile, string tableData)
         {
-            EventoModel evento = new EventoModel();
-
             try
             {
-                evento = new EventoModel
-                {
-                    Nome = nomeEvento,
-                    ImagemCertificado = arteCertificadoFile
-                };
-
-                if (!string.IsNullOrEmpty(tableData))
-                {
-                    var tabelaDataList = JsonConvert.DeserializeObject<List<TabelaData>>(tableData);
-
-                    // Registra o evento no banco de dados
-                    await _organizadorService.InserirEventoAsync(evento, tabelaDataList);
-                }
-                else
-                {
-                    throw new Exception("Não foi possível identificar os registros de participantes.");
-                }
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.NovoEvento]. Erro: {ex.Message}");
-            }
-        }
-
-        [HttpGet]
-        // Usado para carregar dados no card que adicionará novas pessoas ao evento registrado em banco de dados
-        public async Task<IActionResult> ObterPessoasEvento(int id)
-        {
-            try
-            {
-                if (id <= 0)
-                {
-                    return StatusCode(500, new { success = false, message = "Não foi possível identificar o evento." });
-                }
-                var eventoPessoas = await _organizadorService.ObterEventoPessoas(id, false);
-                return Json(eventoPessoas);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Ocorreu um erro em [Home_OrganizadorController.ObterPessoasEvento]");
-            }
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        // Adiciona novas pessoas ao evento registrado em banco de dados        
-        public async Task<IActionResult> AtualizarPessoasEvento(int id, string tableData)
-        {
-            try
-            {
-                if (id <= 0)
-                {
-                    throw new Exception("Não foi possível identificar o evento.");
-                }
-
                 if (string.IsNullOrEmpty(tableData))
                 {
                     throw new Exception("Não foi possível identificar os registros de participantes.");
                 }
 
                 var tabelaDataList = JsonConvert.DeserializeObject<List<TabelaData>>(tableData);
-                await _organizadorService.AtualizarPessoasEventoAsync(id, tabelaDataList);
+                var evento = new EventoModel
+                {
+                    Nome = nomeEvento,
+                    ImagemCertificado = arteCertificadoFile
+                };
 
-                // Certifique-se de que o retorno é um JSON válido
-                return Json(new { redirectUrl = Url.Action(nameof(Index)) });
+                await _organizadorService.InserirEventoAsync(evento, tabelaDataList);
+                return Ok(new { success = true, message = "Evento criado com sucesso!" });
             }
             catch (Exception ex)
             {
-                // Mesmo em caso de erro, retorne uma resposta JSON
-                return Json(new { success = false, message = ex.Message });
+                return StatusCode(500, $"Ocorreu um erro em [HomeOrganizadorController.NovoEvento]. Erro: {ex.Message}");
             }
         }
 
+        [HttpGet("ObterPessoasEvento/{id}")]
+        public async Task<IActionResult> ObterPessoasEvento(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    return BadRequest(new { success = false, message = "Não foi possível identificar o evento." });
+                }
 
+                var eventoPessoas = await _organizadorService.ObterEventoPessoas(id, false);
+                return Ok(eventoPessoas);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Ocorreu um erro em [HomeOrganizadorController.ObterPessoasEvento]. Erro: {ex.Message}");
+            }
+        }
+
+        [HttpPost("AtualizarPessoasEvento/{id}")]
+        public async Task<IActionResult> AtualizarPessoasEvento(int id, string tableData)
+        {
+            try
+            {
+                if (id <= 0 || string.IsNullOrEmpty(tableData))
+                {
+                    throw new Exception("Dados inválidos para atualização.");
+                }
+
+                var tabelaDataList = JsonConvert.DeserializeObject<List<TabelaData>>(tableData);
+                await _organizadorService.AtualizarPessoasEventoAsync(id, tabelaDataList);
+
+                return Ok(new { success = true, message = "Pessoas atualizadas com sucesso!" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet("VisualizarImagem/{id}")]
         public async Task<IActionResult> VisualizarImagem(int id)
         {
             try
             {
                 byte[] imagemBytes = await _organizadorService.BuscarBytesDaImagemNoBDAsync(id);
-
-                // Retorna a imagem como um arquivo para o navegador
                 return File(imagemBytes, "image/jpeg");
             }
             catch (Exception ex)
             {
-                // Se ocorrer algum erro, retorna um status 500 (Internal Server Error)                
-                return StatusCode(500, $"Erro em [Home_OrganizadorController.VisualizarImagem]. Erro: {ex.Message}");
+                return StatusCode(500, $"Erro em [HomeOrganizadorController.VisualizarImagem]. Erro: {ex.Message}");
             }
         }
 
-        // Chamado pela ação de tela referente a emissão dos certificados das pessoas do evento        
+        [HttpGet("DetalhesEventoPessoas/{idEvento}")]
         public async Task<IActionResult> DetalhesEventoPessoas(int idEvento)
         {
             try
             {
-                // Obter os detalhes do evento e das pessoas
                 var evento = await _organizadorService.ObterEventoPessoas(idEvento, true);
-
-                // Validação do retorno
                 if (evento == null)
                 {
                     return NotFound(new { message = "Evento não encontrado." });
                 }
 
-                // Retornar os detalhes como JSON
-                return Json(evento);
+                return Ok(evento);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = $"Ocorreu um erro em [Home_OrganizadorController.DetalhesEventoPessoas]. Erro: {ex.Message}" });
+                return StatusCode(500, new { message = $"Ocorreu um erro em [HomeOrganizadorController.DetalhesEventoPessoas]. Erro: {ex.Message}" });
             }
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        // Rotina de Emissão de certificados                
+        [HttpPost("EmitirCertificado/{id}")]
         public async Task<IActionResult> EmitirCertificado(int id, List<int> idPessoas)
         {
             try
             {
                 if (idPessoas.Count == 0)
                 {
-                    return StatusCode(500, new { success = false, message = "Nenhuma pessoa selecionada para emissão de certificado." });
+                    return BadRequest(new { success = false, message = "Nenhuma pessoa selecionada para emissão de certificado." });
                 }
 
-                EventoModel evento = await _organizadorService.BuscarEventoPorIdAsync(id);
-
-                if (ModelState.IsValid)
-                {
-                    await _organizadorService.EmitirCertificadoAsync(evento, idPessoas);
-                }
-                else
+                var evento = await _organizadorService.BuscarEventoPorIdAsync(id);
+                if (evento == null)
                 {
                     return NotFound(new { success = false, message = "Evento não encontrado." });
                 }
 
-                // Obter um objeto atualizado com os dados do processo de emissão que foi realizado
+                await _organizadorService.EmitirCertificadoAsync(evento, idPessoas);
                 var eventoPessoas = await _organizadorService.ObterEventoPessoas(id, true);
 
-                // Return JSON objeto com status de sucesso
-                return Json(new { success = true, data = eventoPessoas });
+                return Ok(new { success = true, data = eventoPessoas });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { success = false, message = $"Ocorreu um erro em Home_OrganizadorController.EmitirCertificado. Erro: {ex.Message}" });
+                return StatusCode(500, new { success = false, message = $"Ocorreu um erro em HomeOrganizadorController.EmitirCertificado. Erro: {ex.Message}" });
             }
         }
 
+        [HttpGet("ObterEmailConfig")]
         public async Task<IActionResult> ObterEmailConfig()
         {
             try
             {
                 var emailConfig = await _organizadorService.ObterEmailConfigAsync();
-                return View(emailConfig);
+                return Ok(emailConfig);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { success = false, message = $"Ocorreu um erro em Home_OrganizadorController.ObterEmailConfig. Erro: {ex.Message}" });
+                return StatusCode(500, new { success = false, message = $"Ocorreu um erro em HomeOrganizadorController.ObterEmailConfig. Erro: {ex.Message}" });
             }
         }
 
-        [HttpPost]
+        [HttpPost("Logout")]
         public IActionResult Logout()
         {
             try
             {
-                // Limpe os dados da sessão para desconectar o usuário
                 HttpContext.Session.Clear();
                 _sessao.RemoverSessaoUsuario();
-
-                // Redirecionar para a página de login do organizador                
-                return View("~/Views/Login_Organizador/Login_organizador.cshtml");
+                return Ok(new { success = true, message = "Logout realizado com sucesso!" });
             }
             catch (Exception ex)
             {
@@ -231,7 +191,7 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpGet("CheckSession")]
         public IActionResult CheckSession()
         {
             var user = _sessao.BuscarSessaodoUsuario();
@@ -242,21 +202,19 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             return Ok();
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPost("CadastrarUsuario")]
         public async Task<IActionResult> CadastrarUsuario(string login, string senha)
         {
             try
             {
                 var result = await _usuarioService.CriarNovoUsuarioAsync(login);
-
                 if (result)
                 {
-                    return Json(new { success = true, message = "Usuário cadastrado com sucesso!" });
+                    return Ok(new { success = true, message = "Usuário cadastrado com sucesso!" });
                 }
                 else
                 {
-                    return Json(new { success = false, message = "Erro ao cadastrar o usuário." });
+                    return BadRequest(new { success = false, message = "Erro ao cadastrar o usuário." });
                 }
             }
             catch (Exception ex)
@@ -264,7 +222,5 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
                 return StatusCode(500, $"Ocorreu um erro ao cadastrar o usuário: {ex.Message}");
             }
         }
-
-        #endregion
     }
 }

@@ -2,12 +2,15 @@
 
 namespace EMISSOR_DE_CERTIFICADOS.Controllers
 {
-    public class ParticipanteController : Controller
+    [ApiController]
+    [Route("api/participante-controller")]
+    public class ParticipanteController : ControllerBase
     {
-        public IActionResult Login()
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] object loginData)
         {
-            return View("~/Views/Login_Participante/Login_participante.cshtml");
+            // Substitua a lógica abaixo pela validação e autenticação real
+            return Ok(new { Message = "Login realizado com sucesso", Data = loginData });
         }
-
     }
 }

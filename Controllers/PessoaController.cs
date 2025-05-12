@@ -3,139 +3,148 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using EMISSOR_DE_CERTIFICADOS.Models;
 using EMISSOR_DE_CERTIFICADOS.Interfaces;
-using EMISSOR_DE_CERTIFICADOS.Helpers; // Adicione o namespace onde o IPessoaService está localizado
+using EMISSOR_DE_CERTIFICADOS.Helpers;
+using System;
 
 namespace EMISSOR_DE_CERTIFICADOS.Controllers
 {
-    public class PessoaController : Controller
+    [ApiController]
+    [Route("api/pessoa-controller")]
+    public class PessoaController : ControllerBase
     {
         private readonly ISessao _sessao;
         private readonly IPessoaService _pessoaService;
+
         public PessoaController(IPessoaService pessoaService, ISessao sessao)
         {
             _pessoaService = pessoaService ?? throw new ArgumentNullException(nameof(pessoaService), "O IPessoaService não pode ser nulo.");
             _sessao = sessao ?? throw new ArgumentNullException(nameof(sessao), "O ISessao não pode ser nulo.");
         }
 
-        #region *** IActionResults ***        
+        [HttpGet("Index")]
         public async Task<IActionResult> Index()
         {
             try
             {
-                // Recupera todas as pessoas do banco de dados
                 var pessoas = await _pessoaService.BuscarTodasPessoasAsync();
-                return View(pessoas);
+                return Ok(pessoas);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Ocorreu um erro em [PessoaController.Index] Erro: {ex.Message}");
-            }            
-        }        
-        [HttpGet]
+                return StatusCode(500, $"Erro: {ex.Message}");
+            }
+        }
+
+        [HttpGet("BuscarPessoas")]
         public async Task<IActionResult> BuscarPessoas(string termo)
         {
             try
             {
                 var pessoas = await _pessoaService.BuscarPorNomeCpfEmailAsync(termo);
-                return Json(pessoas);
+                return Ok(pessoas);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Ocorreu um erro em [PessoaController.BuscarPessoas] Erro: {ex.Message}");
-            }            
+                return StatusCode(500, $"Erro: {ex.Message}");
+            }
         }
-        [HttpGet]
+
+        [HttpGet("BuscarEventosPessoa/{id}")]
         public async Task<IActionResult> BuscarEventosPessoa(int id)
         {
             try
             {
                 var eventos = await _pessoaService.BuscarEventosPessoaAsync(id);
-                return Json(eventos);
+                return Ok(eventos);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Ocorreu um erro em [PessoaController.BuscarEventosPessoa] Erro: {ex.Message}");
-            }           
+                return StatusCode(500, $"Erro: {ex.Message}");
+            }
         }
 
-        [HttpPost]
+        [HttpPost("ReenviarInstrucoes")]
         public async Task<IActionResult> ReenviarInstrucoes([FromBody] int idEventoPessoa)
         {
             try
             {
                 bool retorno = await _pessoaService.ReenviarInstrucoesAsync(idEventoPessoa);
-                return Ok(); // Retorna um status de sucesso
+                return Ok(retorno);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Ocorreu um erro em [PessoaController.ReenviarInstrucoes] Erro: {ex.Message}");
+                return StatusCode(500, $"Erro: {ex.Message}");
             }
         }
 
-        [HttpGet]
+        [HttpGet("ObterIdPessoaPorCPF")]
         public async Task<IActionResult> ObterIdPessoaPorCPF(string cpf)
         {
-            int id = 0;
             try
             {
-                id = await _pessoaService.ObterIdPessoaPorCPFAsync(cpf);
-                return Json(id);
+                int id = await _pessoaService.ObterIdPessoaPorCPFAsync(cpf);
+                return Ok(id);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Ocorreu um erro em [PessoaController.ObterIdPessoaPorCPF]. Erro: {ex.Message}");
+                return StatusCode(500, $"Erro: {ex.Message}");
             }
-        }                
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, PessoaModel pessoa)
+        }
+
+        [HttpPut("Edit/{id}")]
+        public async Task<IActionResult> Edit(int id, [FromBody] PessoaModel pessoa)
         {
             if (id != pessoa.Id)
             {
-                return BadRequest();
+                return BadRequest("O ID fornecido não corresponde ao ID da pessoa.");
             }
 
-            if (ModelState.IsValid)
+            try
             {
-                // Atualiza a pessoa no banco de dados
                 await _pessoaService.AtualizarPessoaAsync(pessoa);
-                return RedirectToAction(nameof(Index));
+                return NoContent();
             }
-            return View(pessoa);
-        }       
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro: {ex.Message}");
+            }
+        }
+
+        [HttpPut("AtualizarEmail")]
         public async Task<IActionResult> AtualizarEmail(int idPessoa, string email)
         {
             try
             {
                 await _pessoaService.AtualizarEmailAsync(idPessoa, email);
-                return RedirectToAction(nameof(Index));
+                return NoContent();
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Ocorreu um erro em [PessoaController.AtualizarEmail] Erro: {ex.Message}");
-            }            
+                return StatusCode(500, $"Erro: {ex.Message}");
+            }
         }
+
+        [HttpDelete("Delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            // Recupera a pessoa do banco de dados para exclusão
-            var pessoa = await _pessoaService.BuscarPessoaPorIdAsync(id);
-            if (pessoa == null)
+            try
             {
-                return NotFound();
+                var pessoa = await _pessoaService.BuscarPessoaPorIdAsync(id);
+                if (pessoa == null)
+                {
+                    return NotFound("Pessoa não encontrada.");
+                }
+
+                await _pessoaService.DeletarPessoaAsync(id);
+                return NoContent();
             }
-            return View(pessoa);
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro: {ex.Message}");
+            }
         }
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            // Exclui a pessoa do banco de dados
-            await _pessoaService.DeletarPessoaAsync(id);
-            return RedirectToAction(nameof(Index));
-        }
-        [HttpGet]
+
+        [HttpGet("CheckSession")]
         public IActionResult CheckSession()
         {
             var user = _sessao.BuscarSessaodoUsuario();
@@ -145,6 +154,5 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             }
             return Ok();
         }
-        #endregion
     }
 }

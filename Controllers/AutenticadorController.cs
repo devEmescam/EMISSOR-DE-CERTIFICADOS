@@ -3,51 +3,64 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Autenticador.Controllers
 {
-    public class AutenticadorController : Controller
+    [ApiController]
+    [Route("api/autenticador")]
+    public class AutenticadorController : ControllerBase
     {
         private readonly IValidarCertificadoService _validarCertificadoService;
 
-        public AutenticadorController(IValidarCertificadoService validarCertificadoService) 
+        public AutenticadorController(IValidarCertificadoService validarCertificadoService)
         {
-            _validarCertificadoService = validarCertificadoService;
-        }        
-        public IActionResult Index()
-        {
-            return View();
+            _validarCertificadoService = validarCertificadoService ?? throw new ArgumentNullException(nameof(validarCertificadoService));
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ValidarCertificado(string codigo)
+        /// <summary>
+        /// Verifica a autenticidade de um certificado com base no código fornecido.
+        /// Retorna uma mensagem de validação e a URL para acessar a imagem do certificado, caso seja válido.
+        /// </summary>
+        /// <param name="codigo">Código único do certificado a ser validado</param>
+        [HttpGet("validar")]
+        public async Task<IActionResult> ValidarCertificado([FromQuery] string codigo)
         {
+            if (string.IsNullOrWhiteSpace(codigo))
+                return BadRequest(new { mensagem = "Código não informado." });
+
             try
             {
-                if (!string.IsNullOrEmpty(codigo))
+                bool certificadoValido = await _validarCertificadoService.Validar(codigo);
+                if (certificadoValido)
                 {
-                    if (await _validarCertificadoService.Validar(codigo))
+                    string imagemUrl = Url.Action(nameof(RenderCertificadoImage), new { codigo });
+                    return Ok(new
                     {
-                        var imagemCertificado = await _validarCertificadoService.ObterImagemCertificadoPorCodigo(codigo);
-                        string imagemUrl = Url.Action("RenderCertificadoImage", new { codigo });
-                        return Json(new { validacao = "Certificado Autêntico!", imagemCertificado = imagemUrl });
-                    }
-                    else
-                    {
-                        return Json(new { validacao = "Certificado não encontrado para o código fornecido", imagemCertificado = (string)null });
-                    }
+                        validacao = "Certificado Autêntico!",
+                        imagemCertificado = imagemUrl
+                    });
                 }
 
-                return StatusCode(500, "Não foi possível identificar o código. Verifique.");
-
+                return NotFound(new
+                {
+                    validacao = "Certificado não encontrado para o código fornecido.",
+                    imagemCertificado = (string?)null
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Ocorreu um erro em [AutenticadorController.ValidarCertificado] Erro: {ex.Message}");
+                return StatusCode(500, new { mensagem = $"Erro interno em [ValidarCertificado]: {ex.Message}" });
             }
         }
 
-
-
-        public async Task<IActionResult> RenderCertificadoImage(string codigo)
+        /// <summary>
+        /// Obtém a imagem do certificado correspondente ao código fornecido.
+        /// Retorna a imagem em formato binário, caso encontrada.
+        /// </summary>
+        /// <param name="codigo">Código único do certificado cuja imagem será retornada</param>
+        [HttpGet("imagem")]
+        public async Task<IActionResult> RenderCertificadoImage([FromQuery] string codigo)
         {
+            if (string.IsNullOrWhiteSpace(codigo))
+                return BadRequest(new { mensagem = "Código não informado." });
+
             try
             {
                 var imagemCertificado = await _validarCertificadoService.ObterImagemCertificadoPorCodigo(codigo);
@@ -56,14 +69,12 @@ namespace Autenticador.Controllers
                     return File(imagemCertificado.OpenReadStream(), imagemCertificado.ContentType);
                 }
 
-                return NotFound();
+                return NotFound(new { mensagem = "Imagem não encontrada para o certificado." });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Erro ao renderizar a imagem do certificado. Erro: {ex.Message}");
+                return StatusCode(500, new { mensagem = $"Erro ao renderizar a imagem do certificado: {ex.Message}" });
             }
         }
-
-
     }
 }

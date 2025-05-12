@@ -3,11 +3,24 @@ using EMISSOR_DE_CERTIFICADOS.Helpers;
 using EMISSOR_DE_CERTIFICADOS.Interfaces;
 using EMISSOR_DE_CERTIFICADOS.Repositories;
 using EMISSOR_DE_CERTIFICADOS.Services;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllers(); // Alterado para API
+
+// Configurar Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "EMISSOR DE CERTIFICADOS API",
+        Version = "v1",
+        Description = "API para gerenciamento de certificados",
+    });
+});
 
 // Registrando injeções de dependências no container 
 var connectionStrings = new Dictionary<string, string>
@@ -70,11 +83,16 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "EMISSOR DE CERTIFICADOS API v1");
+        c.RoutePrefix = string.Empty; // Deixa o Swagger na raiz do aplicativo
+    });
 }
 else
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -85,10 +103,6 @@ app.UseSession();
 
 app.UseRouting();
 app.UseAuthorization();
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapControllers();
 app.Run();

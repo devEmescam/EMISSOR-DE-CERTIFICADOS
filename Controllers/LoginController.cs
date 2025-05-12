@@ -6,103 +6,96 @@ using System.Data;
 
 namespace EMISSOR_DE_CERTIFICADOS.Controllers
 {
-    public class LoginController : Controller
+    [ApiController]
+    [Route("api/login")]
+    public class LoginController : ControllerBase
     {
         private readonly IDBHelpers _dbHelper;
         private readonly ISessao _sessao;
-        private readonly ADHelper _adHelper = new ADHelper();                
+        private readonly ADHelper _adHelper = new ADHelper();
 
         public LoginController(IDBHelpers databaseHelper, ISessao sessao)
         {
             _dbHelper = databaseHelper;
-            _sessao = sessao;            
+            _sessao = sessao;
         }
-        public IActionResult Index()
-        {
-            //Se usuario estiver logado, redirecionar para home
-            if (_sessao.BuscarSessaodoUsuario() != null) return RedirectToAction("Index", "Home");
 
-            return View();
+        [HttpGet("status")]
+        public IActionResult Status()
+        {
+            var usuario = _sessao.BuscarSessaodoUsuario();
+            if (usuario != null)
+            {
+                return Ok(new { message = "Usuário logado", usuario });
+            }
+            return Unauthorized(new { message = "Usuário não está logado" });
         }
+
+        [HttpPost("logout")]
         public IActionResult Sair()
         {
-            // Limpe os dados da sessão para desconectar o usuário
-            //HttpContext.Session.Clear();
-            _sessao.RemoverSessaoUsuario();            
-            // Redirecionar para a página de login do organizador
-            return RedirectToAction("Index", "Home");
-            
-        }        
+            _sessao.RemoverSessaoUsuario();
+            return Ok(new { message = "Usuário desconectado com sucesso" });
+        }
 
-        [HttpPost]
-        public async Task<IActionResult> LoginOrganizador(LoginModel loginModel)
+        [HttpPost("login-organizador")]
+        public async Task<IActionResult> LoginOrganizador([FromBody] LoginModel loginModel)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    // Tenta buscar o ID do usuário
                     loginModel.Id = await RetornarIdUsuarioAsync(loginModel.Login, "", true);
 
-                    // Valida se retornou algo
                     if (loginModel.Id > 0)
                     {
-                        // Usuário encontrado no banco de dados da aplicação, agora verificar login e senha no AD
-                        if (_adHelper.VerificaUsuario(loginModel.Login, loginModel.Senha)) // Assuma que VerificaUsuario também deve ser assíncrono se necessário
+                        if (_adHelper.VerificaUsuario(loginModel.Login, loginModel.Senha))
                         {
-                            _sessao.CriarSessaoDoUsuario(loginModel);                           
-                            return RedirectToAction("Index", "Home_Organizador");
+                            _sessao.CriarSessaoDoUsuario(loginModel);
+                            return Ok(new { message = "Login realizado com sucesso", usuario = loginModel });
                         }
                         else
                         {
-                            // Adicionar mensagem de erro ao ModelState
-                            ModelState.AddModelError(string.Empty, "Usuário ou senha inválidos.");
+                            return Unauthorized(new { message = "Usuário ou senha inválidos" });
                         }
                     }
                     else
                     {
-                        // Adicionar mensagem de erro ao ModelState
-                        ModelState.AddModelError(string.Empty, "Usuário não localizado.");
+                        return NotFound(new { message = "Usuário não localizado" });
                     }
                 }
-                // Se chegar aqui não foi possível buscar o Usuário, volta para tela de login para nova tentativa
-                return View("~/Views/Login_Organizador/Login_organizador.cshtml", loginModel);
+                return BadRequest(new { message = "Dados inválidos" });
             }
             catch (Exception ex)
             {
-                throw new Exception($"Ocorreu um erro em [LoginController.LoginOrganizador] Erro: {ex.Message}");
+                return StatusCode(500, new { message = $"Erro interno: {ex.Message}" });
             }
-        }       
+        }
 
-        [HttpPost]
-        public async Task<IActionResult> LoginParticipante(LoginModel loginModel)
+        [HttpPost("login-participante")]
+        public async Task<IActionResult> LoginParticipante([FromBody] LoginModel loginModel)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    // Tenta buscar o ID do usuário
                     loginModel.Id = await RetornarIdUsuarioAsync(loginModel.Login, loginModel.Senha, false);
 
-                    // Valida se retornou algo
                     if (loginModel.Id > 0)
                     {
-                        _sessao.CriarSessaoDoUsuario(loginModel);                        
-                        return RedirectToAction("Index", "Home_Participante");
+                        _sessao.CriarSessaoDoUsuario(loginModel);
+                        return Ok(new { message = "Login realizado com sucesso", usuario = loginModel });
                     }
                     else
                     {
-                        // Adicionar mensagem de erro ao ModelState
-                        ModelState.AddModelError(string.Empty, "Usuário ou senha inválidos.");
+                        return Unauthorized(new { message = "Usuário ou senha inválidos" });
                     }
                 }
-
-                // Se chegar aqui não foi possível buscar o Usuário, volta para tela de login para nova tentativa
-                return View("~/Views/Login_Participante/Login_participante.cshtml", loginModel);
+                return BadRequest(new { message = "Dados inválidos" });
             }
             catch (Exception ex)
             {
-                throw new Exception($"Ocorreu um erro em [LoginController.LoginParticipante] Erro: {ex.Message}");
+                return StatusCode(500, new { message = $"Erro interno: {ex.Message}" });
             }
         }
 

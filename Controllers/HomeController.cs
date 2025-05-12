@@ -4,7 +4,9 @@ using System.Diagnostics;
 
 namespace EMISSOR_DE_CERTIFICADOS.Controllers
 {
-    public class HomeController : Controller
+    [ApiController]
+    [Route("api/home-controller")]
+    public class HomeController : ControllerBase
     {
         private readonly ILogger<HomeController> _logger;
 
@@ -13,15 +15,17 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             _logger = logger;
         }
 
+        [HttpGet("index")]
         public IActionResult Index()
         {
-            return View();
+            return Ok(new { Message = "Welcome to the API!" });
         }
 
+        [HttpGet("error")]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return Problem(detail: "An error occurred.", instance: Activity.Current?.Id ?? HttpContext.TraceIdentifier);
         }
     }
 }

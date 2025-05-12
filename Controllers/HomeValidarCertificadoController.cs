@@ -2,11 +2,14 @@
 
 namespace EMISSOR_DE_CERTIFICADOS.Controllers
 {
-    public class HomeValidarCertificadoController : Controller
+    [ApiController]
+    [Route("api/home-validar-certificado")]
+    public class HomeValidarCertificadoController : ControllerBase
     {
-        public IActionResult Index()
+        [HttpGet]
+        public IActionResult Get()
         {
-            return View();
+            return Ok(new { Message = "API funcionando corretamente" });
         }
     }
 }
