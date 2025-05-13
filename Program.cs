@@ -7,102 +7,114 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllers(); // Alterado para API
+// Configuração de serviços
+ConfigureServices(builder.Services, builder.Configuration);
 
-// Configurar Swagger
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "EMISSOR DE CERTIFICADOS API",
-        Version = "v1",
-        Description = "API para gerenciamento de certificados",
-    });
-});
-
-// Registrando injeções de dependências no container 
-var connectionStrings = new Dictionary<string, string>
-{
-    { "CertificadoConnection", builder.Configuration.GetConnectionString("CertificadoConnection") },
-};
-builder.Services.AddSingleton<IDBHelpers>(provider => new DBHelpers(connectionStrings));
-
-builder.Services.AddScoped<IPessoaEventosRepository, PessoaEventosRepository>();
-builder.Services.AddScoped<IEventoPessoasRepository, EventoPessoasRepository>();
-
-builder.Services.AddScoped<IPessoaService, PessoaService>();
-builder.Services.AddScoped<IPessoaRepository, PessoaRepository>();
-
-builder.Services.AddScoped<IOrganizadorService, OrganizadorService>();
-builder.Services.AddScoped<IOrganizadorRepository, OrganizadorRepository>();
-
-builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-builder.Services.AddScoped<IUsuarioService, UsuariosService>();
-
-builder.Services.AddScoped<ICertificadosService, CertificadosService>();
-builder.Services.AddScoped<ICertificadosRepository, CertificadosRepository>();
-
-builder.Services.AddScoped<IParticipanteRepository, ParticipanteRepository>();
-builder.Services.AddScoped<IParticipanteService, ParticipanteService>();
-
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IEmailRepository, EmailRepository>();
-
-builder.Services.AddScoped<IEmailConfigRepository, EmailConfigRepository>();
-builder.Services.AddScoped<IEmailConfigService, EmailConfigService>();
-
-builder.Services.AddScoped<IValidarCertificadoRepository, ValidarCertificadoRepository>();
-builder.Services.AddScoped<IValidarCertificadoService, ValidarCertificadoService>();
-
-builder.Logging.AddConsole();
-// Configura o nível mínimo de logging para Debug
-builder.Logging.SetMinimumLevel(LogLevel.Debug);
-// Add IHttpContextAccessor to the services
-builder.Services.AddHttpContextAccessor();
-
-//===========================================================================================
-//Injetar dependencia do "HttpContext" e "Sessao" para usar o controle de sessão da aplicacao
-builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-builder.Services.AddScoped<ISessao, Sessao>();
-// Configurar serviços de sessão
-builder.Services.AddDistributedMemoryCache(); // Usar cache em memória para armazenar sessões
-//Configurar os Cookies da Sessão
-builder.Services.AddSession(o =>
-{
-    o.IdleTimeout = TimeSpan.FromMinutes(60);
-    o.Cookie.HttpOnly = true;
-    o.Cookie.IsEssential = true;
-});
-//===========================================================================================
+// Configuração de logging
+ConfigureLogging(builder.Logging);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Configuração do pipeline de requisição HTTP
+ConfigureMiddleware(app);
+
+app.Run();
+
+void ConfigureServices(IServiceCollection services, IConfiguration configuration)
 {
-    app.UseDeveloperExceptionPage();
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
+    // Adicionar controladores
+    services.AddControllers();
+
+    // Configurar Swagger
+    services.AddEndpointsApiExplorer();
+    services.AddSwaggerGen(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "EMISSOR DE CERTIFICADOS API v1");
-        c.RoutePrefix = string.Empty; // Deixa o Swagger na raiz do aplicativo
+        c.SwaggerDoc("v1", new OpenApiInfo
+        {
+            Title = "EMISSOR DE CERTIFICADOS API",
+            Version = "v1",
+            Description = "API para gerenciamento de certificados",
+        });
+    });
+
+    // Configurar conexões de banco de dados
+    var connectionStrings = new Dictionary<string, string>
+    {
+        { "CertificadoConnection", configuration.GetConnectionString("CertificadoConnection") },
+    };
+    services.AddSingleton<IDBHelpers>(provider => new DBHelpers(connectionStrings));
+
+    // Registrar dependências
+    RegisterRepositories(services);
+    RegisterServices(services);
+
+    // Configurar sessão
+    services.AddHttpContextAccessor();
+    services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+    services.AddScoped<ISessao, Sessao>();
+    services.AddDistributedMemoryCache();
+    services.AddSession(o =>
+    {
+        o.IdleTimeout = TimeSpan.FromMinutes(60);
+        o.Cookie.HttpOnly = true;
+        o.Cookie.IsEssential = true;
     });
 }
-else
+
+void RegisterRepositories(IServiceCollection services)
 {
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
+    services.AddScoped<IPessoaEventosRepository, PessoaEventosRepository>();
+    services.AddScoped<IEventoPessoasRepository, EventoPessoasRepository>();
+    services.AddScoped<IPessoaRepository, PessoaRepository>();
+    services.AddScoped<IOrganizadorRepository, OrganizadorRepository>();
+    services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+    services.AddScoped<ICertificadosRepository, CertificadosRepository>();
+    services.AddScoped<IParticipanteRepository, ParticipanteRepository>();
+    services.AddScoped<IEmailRepository, EmailRepository>();
+    services.AddScoped<IEmailConfigRepository, EmailConfigRepository>();
+    services.AddScoped<IValidarCertificadoRepository, ValidarCertificadoRepository>();
 }
 
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-//Configurar o uso da Sessao
-app.UseSession();
+void RegisterServices(IServiceCollection services)
+{
+    services.AddScoped<IPessoaService, PessoaService>();
+    services.AddScoped<IOrganizadorService, OrganizadorService>();
+    services.AddScoped<IUsuarioService, UsuariosService>();
+    services.AddScoped<ICertificadosService, CertificadosService>();
+    services.AddScoped<IParticipanteService, ParticipanteService>();
+    services.AddScoped<IEmailService, EmailService>();
+    services.AddScoped<IEmailConfigService, EmailConfigService>();
+    services.AddScoped<IValidarCertificadoService, ValidarCertificadoService>();
+}
 
-app.UseRouting();
-app.UseAuthorization();
+void ConfigureLogging(ILoggingBuilder logging)
+{
+    logging.AddConsole();
+    logging.SetMinimumLevel(LogLevel.Debug);
+}
 
-app.MapControllers();
-app.Run();
+void ConfigureMiddleware(WebApplication app)
+{
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+        app.UseSwagger();
+        app.UseSwaggerUI(c =>
+        {
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "EMISSOR DE CERTIFICADOS API v1");
+            c.RoutePrefix = string.Empty;
+        });
+    }
+    else
+    {
+        app.UseExceptionHandler("/Home/Error");
+        app.UseHsts();
+    }
+
+    app.UseHttpsRedirection();
+    app.UseStaticFiles();
+    app.UseSession();
+    app.UseRouting();
+    app.UseAuthorization();
+    app.MapControllers();
+}
