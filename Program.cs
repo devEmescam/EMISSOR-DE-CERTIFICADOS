@@ -7,25 +7,35 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configuração de serviços
-ConfigureServices(builder.Services, builder.Configuration);
+// ✅ Configurar Kestrel para escutar na rede local (porta 5113)
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(5113); // Permite acessos via IP local, ex: 192.168.x.x:5113
+});
 
-// Configuração de logging
+// ✅ Adicionar política de CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
+
+ConfigureServices(builder.Services, builder.Configuration);
 ConfigureLogging(builder.Logging);
 
 var app = builder.Build();
-
-// Configuração do pipeline de requisição HTTP
 ConfigureMiddleware(app);
 
 app.Run();
 
 void ConfigureServices(IServiceCollection services, IConfiguration configuration)
 {
-    // Adicionar controladores
     services.AddControllers();
 
-    // Configurar Swagger
     services.AddEndpointsApiExplorer();
     services.AddSwaggerGen(c =>
     {
@@ -37,18 +47,15 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
         });
     });
 
-    // Configurar conexões de banco de dados
     var connectionStrings = new Dictionary<string, string>
     {
         { "CertificadoConnection", configuration.GetConnectionString("CertificadoConnection") },
     };
     services.AddSingleton<IDBHelpers>(provider => new DBHelpers(connectionStrings));
 
-    // Registrar dependências
     RegisterRepositories(services);
     RegisterServices(services);
 
-    // Configurar sessão
     services.AddHttpContextAccessor();
     services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
     services.AddScoped<ISessao, Sessao>();
@@ -114,7 +121,12 @@ void ConfigureMiddleware(WebApplication app)
     app.UseHttpsRedirection();
     app.UseStaticFiles();
     app.UseSession();
+
     app.UseRouting();
+
+    // ✅ Aplicar política de CORS
+    app.UseCors("AllowAll");
+
     app.UseAuthorization();
     app.MapControllers();
 }

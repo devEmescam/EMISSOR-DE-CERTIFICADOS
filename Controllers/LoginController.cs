@@ -20,55 +20,42 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
             _sessao = sessao;
         }
 
-        [HttpGet("status")]
-        public IActionResult Status()
-        {
-            var usuario = _sessao.BuscarSessaodoUsuario();
-            if (usuario != null)
-            {
-                return Ok(new { message = "Usuário logado", usuario });
-            }
-            return Unauthorized(new { message = "Usuário não está logado" });
-        }
-
-        [HttpPost("logout")]
-        public IActionResult Sair()
-        {
-            _sessao.RemoverSessaoUsuario();
-            return Ok(new { message = "Usuário desconectado com sucesso" });
-        }
-
         [HttpPost("login-organizador")]
         public async Task<IActionResult> LoginOrganizador([FromBody] LoginModel loginModel)
         {
             try
             {
-                if (ModelState.IsValid)
-                {
-                    loginModel.Id = await RetornarIdUsuarioAsync(loginModel.Login, "", true);
+                if (!ModelState.IsValid)
+                    return BadRequest(new { status = "error", message = "Requisição inválida", etapa = "validação inicial" });
 
-                    if (loginModel.Id > 0)
+                Console.WriteLine($"🔍 Iniciando login de ORGANIZADOR: {loginModel.Login}");
+
+                loginModel.Id = await RetornarIdUsuarioAsync(loginModel.Login, "", true);
+
+                if (loginModel.Id > 0)
+                {
+                    Console.WriteLine($"✅ Usuário localizado no banco de dados. ID = {loginModel.Id}");
+
+                    if (_adHelper.VerificaUsuario(loginModel.Login, loginModel.Senha))
                     {
-                        if (_adHelper.VerificaUsuario(loginModel.Login, loginModel.Senha))
-                        {
-                            _sessao.CriarSessaoDoUsuario(loginModel);
-                            return Ok(new { message = "Login realizado com sucesso", usuario = loginModel });
-                        }
-                        else
-                        {
-                            return Unauthorized(new { message = "Usuário ou senha inválidos" });
-                        }
+                        Console.WriteLine("🔐 Login no AD bem-sucedido");
+                        _sessao.CriarSessaoDoUsuario(loginModel);
+                        return Ok(new { status = "success", userId = loginModel.Id });
                     }
                     else
                     {
-                        return NotFound(new { message = "Usuário não localizado" });
+                        Console.WriteLine("❌ Falha na autenticação do AD");
+                        return Unauthorized(new { status = "error", message = "Usuário ou senha inválidos (AD)", etapa = "verificação AD" });
                     }
                 }
-                return BadRequest(new { message = "Dados inválidos" });
+
+                Console.WriteLine("❌ Usuário não encontrado no banco de dados");
+                return NotFound(new { status = "error", message = "Usuário não localizado no sistema", etapa = "busca no banco" });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = $"Erro interno: {ex.Message}" });
+                Console.WriteLine($"🔥 ERRO LoginOrganizador: {ex}");
+                return StatusCode(500, new { status = "error", message = ex.Message, etapa = "erro interno" });
             }
         }
 
@@ -77,60 +64,59 @@ namespace EMISSOR_DE_CERTIFICADOS.Controllers
         {
             try
             {
-                if (ModelState.IsValid)
-                {
-                    loginModel.Id = await RetornarIdUsuarioAsync(loginModel.Login, loginModel.Senha, false);
+                if (!ModelState.IsValid)
+                    return BadRequest(new { status = "error", message = "Requisição inválida", etapa = "validação inicial" });
 
-                    if (loginModel.Id > 0)
-                    {
-                        _sessao.CriarSessaoDoUsuario(loginModel);
-                        return Ok(new { message = "Login realizado com sucesso", usuario = loginModel });
-                    }
-                    else
-                    {
-                        return Unauthorized(new { message = "Usuário ou senha inválidos" });
-                    }
+                Console.WriteLine($"🔍 Iniciando login de PARTICIPANTE: {loginModel.Login}");
+
+                loginModel.Id = await RetornarIdUsuarioAsync(loginModel.Login, loginModel.Senha, false);
+
+                if (loginModel.Id > 0)
+                {
+                    Console.WriteLine($"✅ Participante localizado. ID = {loginModel.Id}");
+                    _sessao.CriarSessaoDoUsuario(loginModel);
+                    return Ok(new { status = "success", userId = loginModel.Id });
                 }
-                return BadRequest(new { message = "Dados inválidos" });
+
+                Console.WriteLine("❌ Usuário ou senha inválidos para participante");
+                return Unauthorized(new { status = "error", message = "Usuário ou senha inválidos", etapa = "busca no banco" });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = $"Erro interno: {ex.Message}" });
+                Console.WriteLine($"🔥 ERRO LoginParticipante: {ex}");
+                return StatusCode(500, new { status = "error", message = ex.Message, etapa = "erro interno" });
             }
         }
 
-        #region *** METODOS ***
+        #region *** MÉTODO COM LOG DE SQL ***
         private async Task<int> RetornarIdUsuarioAsync(string usuario, string senha, bool administrativo)
         {
-            string sSQL = "";
-            Int32 Id = 0;
-            DataTable oDT = new DataTable();
+            string sSQL = administrativo
+                ? $"SELECT ID FROM USUARIO WHERE USUARIO = '{usuario}' AND ADMINISTRATIVO = '{administrativo}'"
+                : $"SELECT ID FROM USUARIO WHERE USUARIO = '{usuario}' AND SENHA = '{senha}' AND ADMINISTRATIVO = '{administrativo}'";
 
             try
             {
-                if (administrativo)
-                {
-                    sSQL = $"SELECT ID FROM USUARIO WHERE USUARIO = '{usuario}' AND ADMINISTRATIVO = '{administrativo}'";
-                }
-                else
-                {
-                    sSQL = $"SELECT ID FROM USUARIO WHERE USUARIO = '{usuario}' AND SENHA = '{senha}' AND ADMINISTRATIVO = '{administrativo}'";
-                }
+                Console.WriteLine($"📄 Executando SQL: {sSQL}");
 
-                oDT = await _dbHelper.ExecuteQueryAsync(sSQL);
+                var oDT = await _dbHelper.ExecuteQueryAsync(sSQL);
 
                 if (oDT != null && oDT.Rows.Count > 0)
                 {
-                    Id = oDT.Rows[0].Field<int>("ID");
+                    Console.WriteLine("📊 Resultado encontrado no banco");
+                    return oDT.Rows[0].Field<int>("ID");
                 }
 
-                return Id;
+                Console.WriteLine("⚠️ Nenhum registro retornado do banco");
+                return 0;
             }
             catch (Exception ex)
             {
-                throw new Exception($"Ocorreu um erro em [LoginController.RetornarIdUsuarioAsync] Erro: {ex.Message}");
+                Console.WriteLine($"🔥 ERRO SQL: {ex.Message}");
+                throw new Exception($"Erro em RetornarIdUsuarioAsync: {ex.Message}");
             }
         }
         #endregion
+
     }
 }
